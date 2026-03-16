@@ -32,6 +32,13 @@ Monorepo starter for the NaRPISA natural resources value-addition prototype.
 ## Docker
 - `docker compose up --build`
 
+## Hosted setup
+- `docs/cloud-project-setup.md`: how to create the Vercel, Render, and Supabase projects
+- `render.yaml`: Render Blueprint for the backend worker
+
+## Team onboarding
+- `docs/team-onboarding.md`: beginner-friendly guide to the architecture, workflow, and repo layout
+
 ## Repository map
 - `CLAUDE.md`: project-wide AI guidance
 - `.cursor/rules/*`: focused Cursor rules
