@@ -15,11 +15,13 @@ Monorepo starter for the NaRPISA natural resources value-addition prototype.
 
 ## Quick start
 1. Copy `.env.example` to `.env` and fill in Supabase values.
-2. Install workspace dependencies with `pnpm install`.
-3. Create a Python virtual environment and install backend deps:
+2. Install pnpm with `npm install -g pnpm`.
+3. Install workspace dependencies with `pnpm install`.
+4. Create a Python virtual environment and install backend deps:
    - Windows PowerShell: `python -m venv .venv` then `.\\.venv\\Scripts\\python -m pip install -e .\\apps\\backend[dev]`
    - macOS/Linux: `python -m venv .venv` then `./.venv/bin/python -m pip install -e ./apps/backend[dev]`
-4. Run the apps:
+5. 
+. Run the apps:
    - Web: `pnpm dev:web`
    - Backend: `pnpm dev:backend`
 
