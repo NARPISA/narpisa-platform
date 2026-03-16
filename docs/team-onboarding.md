@@ -367,7 +367,7 @@ cd narpisa-platform
 pnpm install
 ```
 
-### Step 3: create a Python virtual environment
+### Step 3: create a Python virtual environment, test
 
 Windows PowerShell:
 
