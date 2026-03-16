@@ -9,6 +9,7 @@
     "dev:web": "pnpm --filter @narpisa/web dev",
     "dev:backend": "pnpm --filter @narpisa/pdf-worker dev",
     "lint": "turbo run lint",
+    "typecheck:ts": "pnpm --filter @narpisa/config typecheck && pnpm --filter @narpisa/types typecheck && pnpm --filter @narpisa/ui typecheck && pnpm --filter @narpisa/web typecheck",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:e2e": "pnpm --filter @narpisa/web test:e2e",

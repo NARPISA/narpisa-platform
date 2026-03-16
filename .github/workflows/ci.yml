@@ -29,7 +29,7 @@ jobs:
         run: pnpm --filter @narpisa/web lint
 
       - name: Typecheck web app and shared packages
-        run: pnpm typecheck
+        run: pnpm typecheck:ts
 
       - name: Run unit tests
         run: pnpm --filter @narpisa/web test
