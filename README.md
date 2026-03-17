@@ -3,7 +3,7 @@
 Monorepo starter for the NaRPISA natural resources value-addition prototype.
 
 ## Stack
-- `apps/web`: Next.js, React, Tailwind CSS, Vercel-ready frontend
+- `apps/web`: Next.js, React, Material UI-first frontend with Tailwind still available, Vercel-ready
 - `apps/backend`: FastAPI worker for transient PDF fetching and parsing on Render
 - `supabase`: Postgres schema, auth roles, and extracted-record contracts
 - `packages/*`: shared TypeScript config, contracts, and UI
@@ -20,8 +20,7 @@ Monorepo starter for the NaRPISA natural resources value-addition prototype.
 4. Create a Python virtual environment and install backend deps:
    - Windows PowerShell: `python -m venv .venv` then `.\\.venv\\Scripts\\python -m pip install -e .\\apps\\backend[dev]`
    - macOS/Linux: `python -m venv .venv` then `./.venv/bin/python -m pip install -e ./apps/backend[dev]`
-5. 
-. Run the apps:
+5. Run the apps:
    - Web: `pnpm dev:web`
    - Backend: `pnpm dev:backend`
 

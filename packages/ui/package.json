@@ -9,6 +9,9 @@
     ".": "./src/index.tsx"
   },
   "peerDependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/material": "^7.3.9",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -16,6 +19,11 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "devDependencies": {
+    "@emotion/cache": "^11.14.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.9",
+    "@mui/material": "^7.3.9",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "react": "19.2.3",

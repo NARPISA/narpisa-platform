@@ -1,6 +1,15 @@
 import { appConfig, teamPrinciples } from "@narpisa/config";
 import { createSourceDocumentInputSchema } from "@narpisa/types";
 import { SectionCard } from "@narpisa/ui";
+import ArrowOutwardRoundedIcon from "@mui/icons-material/ArrowOutwardRounded";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import Container from "@mui/material/Container";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 const deploymentCards = [
   {
@@ -32,101 +41,219 @@ const sampleSource = createSourceDocumentInputSchema.safeParse({
 
 export default function Home() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 py-12 sm:px-10">
-      <section className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(280px,0.9fr)]">
-        <div className="rounded-[2rem] bg-slate-950 px-8 py-10 text-white shadow-xl">
-          <p className="text-sm font-medium uppercase tracking-[0.28em] text-sky-300">
-            {appConfig.name}
-          </p>
-          <h1 className="mt-5 max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl">
-            Source-led document intelligence for mineral value addition.
-          </h1>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-            Register source links, parse PDFs on demand, and retain only the
-            structured records needed for research, policymaking, and trading
-            workflows across Namibia and future African market expansion.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <a
-              className="rounded-full bg-sky-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-300"
-              href="https://vercel.com"
-              target="_blank"
-              rel="noreferrer"
+    <Box
+      component="main"
+      sx={{
+        minHeight: "100vh",
+        py: { xs: 6, md: 9 },
+      }}
+    >
+      <Container maxWidth="lg">
+        <Stack spacing={4}>
+          <Box
+            sx={{
+              display: "grid",
+              gap: 3,
+              gridTemplateColumns: {
+                xs: "1fr",
+                lg: "minmax(0,1.6fr) minmax(300px,0.9fr)",
+              },
+            }}
+          >
+            <Paper
+              sx={{
+                borderRadius: 8,
+                bgcolor: "secondary.main",
+                color: "common.white",
+                px: { xs: 3, md: 5 },
+                py: { xs: 4, md: 5 },
+              }}
             >
-              Connect web to Vercel
-            </a>
-            <a
-              className="rounded-full border border-slate-700 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:border-slate-500 hover:bg-slate-900"
-              href="https://render.com"
-              target="_blank"
-              rel="noreferrer"
+              <Stack spacing={3}>
+                <Stack direction="row" spacing={1.5} flexWrap="wrap">
+                  <Chip
+                    label={appConfig.name}
+                    color="primary"
+                    sx={{ color: "secondary.main", fontWeight: 700 }}
+                  />
+                  <Chip
+                    label="Material UI frontend"
+                    variant="outlined"
+                    sx={{ borderColor: "rgba(255,255,255,0.2)", color: "white" }}
+                  />
+                </Stack>
+
+                <Box>
+                  <Typography
+                    component="h1"
+                    variant="h2"
+                    sx={{ maxWidth: 720, fontSize: { xs: "2.6rem", md: "4rem" } }}
+                  >
+                    Source-led document intelligence for mineral value addition.
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    color="rgba(255,255,255,0.78)"
+                    sx={{ mt: 2, maxWidth: 720, fontWeight: 400, lineHeight: 1.65 }}
+                  >
+                    Register source links, parse PDFs on demand, and retain only
+                    the structured records needed for research, policymaking, and
+                    trading workflows across Namibia and future African market
+                    expansion.
+                  </Typography>
+                </Box>
+
+                <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                  <Button
+                    component="a"
+                    href="https://vercel.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    variant="contained"
+                    color="primary"
+                    endIcon={<ArrowOutwardRoundedIcon />}
+                  >
+                    Connect web to Vercel
+                  </Button>
+                  <Button
+                    component="a"
+                    href="https://render.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    variant="outlined"
+                    color="inherit"
+                    endIcon={<ArrowOutwardRoundedIcon />}
+                    sx={{
+                      borderColor: "rgba(255,255,255,0.25)",
+                      color: "white",
+                    }}
+                  >
+                    Deploy worker on Render
+                  </Button>
+                </Stack>
+              </Stack>
+            </Paper>
+
+            <SectionCard
+              eyebrow="Validated input"
+              title="Source registration contract"
+              description="The frontend already validates the core source payload shape shared across the monorepo."
+              footer={
+                sampleSource.success
+                  ? "Schema validation passes for the reference source."
+                  : "Schema validation failed for the reference source."
+              }
             >
-              Deploy worker on Render
-            </a>
-          </div>
-        </div>
+              <Box
+                component="dl"
+                sx={{
+                  display: "grid",
+                  gap: 2,
+                  m: 0,
+                }}
+              >
+                <Box component="div">
+                  <Typography component="dt" fontWeight={700} color="text.primary">
+                    Reference title
+                  </Typography>
+                  <Typography component="dd" sx={{ m: 0 }} color="text.secondary">
+                    Haib Copper PEA
+                  </Typography>
+                </Box>
+                <Box component="div">
+                  <Typography component="dt" fontWeight={700} color="text.primary">
+                    Storage model
+                  </Typography>
+                  <Typography component="dd" sx={{ m: 0 }} color="text.secondary">
+                    Source URL plus attribution, no persistent PDF binaries.
+                  </Typography>
+                </Box>
+                <Box component="div">
+                  <Typography component="dt" fontWeight={700} color="text.primary">
+                    Team default
+                  </Typography>
+                  <Typography component="dd" sx={{ m: 0 }} color="text.secondary">
+                    Typed contracts, explicit reviews, and CI-first changes.
+                  </Typography>
+                </Box>
+              </Box>
+            </SectionCard>
+          </Box>
 
-        <SectionCard
-          eyebrow="Validated input"
-          title="Source registration contract"
-          description="The frontend already validates the core source payload shape shared across the monorepo."
-          footer={
-            sampleSource.success
-              ? "Schema validation passes for the reference source."
-              : "Schema validation failed for the reference source."
-          }
-        >
-          <dl className="grid gap-3 text-sm text-slate-700">
-            <div>
-              <dt className="font-semibold text-slate-900">Reference title</dt>
-              <dd>Haib Copper PEA</dd>
-            </div>
-            <div>
-              <dt className="font-semibold text-slate-900">Storage model</dt>
-              <dd>Source URL plus attribution, no persistent PDF binaries.</dd>
-            </div>
-            <div>
-              <dt className="font-semibold text-slate-900">Team default</dt>
-              <dd>Typed contracts, explicit reviews, and CI-first changes.</dd>
-            </div>
-          </dl>
-        </SectionCard>
-      </section>
-
-      <section className="grid gap-6 lg:grid-cols-3">
-        {deploymentCards.map((card) => (
-          <SectionCard key={card.title} {...card} />
-        ))}
-      </section>
-
-      <section className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-        <SectionCard
-          eyebrow="Operating principles"
-          title="How the team should build"
-          description={appConfig.tagline}
-        >
-          <ul className="space-y-3 text-sm leading-6 text-slate-700">
-            {teamPrinciples.map((principle) => (
-              <li key={principle} className="rounded-2xl bg-slate-50 px-4 py-3">
-                {principle}
-              </li>
+          <Box
+            sx={{
+              display: "grid",
+              gap: 3,
+              gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" },
+            }}
+          >
+            {deploymentCards.map((card) => (
+              <SectionCard key={card.title} {...card} />
             ))}
-          </ul>
-        </SectionCard>
+          </Box>
 
-        <SectionCard
-          eyebrow="Next milestones"
-          title="Immediate product slices"
-          description="The starter repo is structured for a feature-first roadmap that a four-person team can divide cleanly."
-        >
-          <ol className="space-y-3 text-sm leading-6 text-slate-700">
-            <li>Build authenticated source registration and review queues.</li>
-            <li>Persist parsing results into Supabase with job history.</li>
-            <li>Add a query and analytics surface for extracted records.</li>
-            <li>Introduce trading and investment hub modules behind feature flags.</li>
-          </ol>
-        </SectionCard>
-      </section>
-    </main>
+          <Box
+            sx={{
+              display: "grid",
+              gap: 3,
+              gridTemplateColumns: {
+                xs: "1fr",
+                lg: "minmax(0,1.2fr) minmax(0,1fr)",
+              },
+            }}
+          >
+            <SectionCard
+              eyebrow="Operating principles"
+              title="How the team should build"
+              description={appConfig.tagline}
+            >
+              <Stack spacing={1.5}>
+                {teamPrinciples.map((principle) => (
+                  <Paper
+                    key={principle}
+                    variant="outlined"
+                    sx={{
+                      borderRadius: 4,
+                      px: 2,
+                      py: 1.5,
+                      bgcolor: "background.default",
+                    }}
+                  >
+                    <Stack direction="row" spacing={1.5} alignItems="flex-start">
+                      <CheckCircleRoundedIcon color="primary" fontSize="small" />
+                      <Typography variant="body2" color="text.secondary">
+                        {principle}
+                      </Typography>
+                    </Stack>
+                  </Paper>
+                ))}
+              </Stack>
+            </SectionCard>
+
+            <SectionCard
+              eyebrow="Next milestones"
+              title="Immediate product slices"
+              description="The starter repo is structured for a feature-first roadmap that a four-person team can divide cleanly."
+            >
+              <Box component="ol" sx={{ m: 0, pl: 2.75, color: "text.secondary" }}>
+                <Typography component="li" variant="body2" sx={{ mb: 1.25 }}>
+                  Build authenticated source registration and review queues.
+                </Typography>
+                <Typography component="li" variant="body2" sx={{ mb: 1.25 }}>
+                  Persist parsing results into Supabase with job history.
+                </Typography>
+                <Typography component="li" variant="body2" sx={{ mb: 1.25 }}>
+                  Add a query and analytics surface for extracted records.
+                </Typography>
+                <Typography component="li" variant="body2">
+                  Introduce trading and investment hub modules behind feature
+                  flags.
+                </Typography>
+              </Box>
+            </SectionCard>
+          </Box>
+        </Stack>
+      </Container>
+    </Box>
   );
 }

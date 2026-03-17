@@ -5,6 +5,7 @@ coverage/
 .turbo/
 playwright-report/
 test-results/
+*.tsbuildinfo
 
 # Supabase
 .tmp-supabase-init/

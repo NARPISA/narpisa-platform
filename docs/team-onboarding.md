@@ -111,7 +111,7 @@ This section explains what each major folder is for and when to edit it.
 
 ### `apps/web`
 
-This is the frontend application built with Next.js, React, and Tailwind CSS.
+This is the frontend application built with Next.js and React, using Material UI as the primary component system while keeping Tailwind available for optional utility styling.
 
 Work here when you are changing:
 
@@ -235,14 +235,24 @@ You will mostly use React to:
 
 ### Tailwind CSS
 
-Tailwind is a utility-first CSS framework.
+Tailwind is still installed in this project, but it is no longer the primary UI system.
 
-Instead of writing lots of custom CSS files, you often style things directly in class names like:
+In this repo, Tailwind should be treated as:
 
-- `flex`
-- `rounded-2xl`
-- `text-sm`
-- `bg-slate-900`
+- an optional utility layer
+- something you use intentionally for edge cases
+- secondary to the shared Material UI theme and components
+
+### Material UI
+
+Material UI is the main frontend component library for this project.
+
+You will use it for:
+
+- layout primitives like containers, stacks, cards, and papers
+- typography and buttons
+- theme-driven spacing, colors, and shape
+- reusable shared UI patterns across the app
 
 ### FastAPI
 
@@ -738,7 +748,8 @@ Prefer:
 - clear prop names
 - shared components when reuse is obvious
 - frontend validation for form inputs
-- readable Tailwind class groupings
+- Material UI primitives before custom styling
+- Tailwind utilities only when Material UI theming or the `sx` prop is not the best fit
 
 ## 17. Database discipline
 
