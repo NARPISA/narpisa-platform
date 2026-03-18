@@ -407,10 +407,23 @@ Backend:
 pnpm dev:backend
 ```
 
+Backend worker:
+
+```powershell
+pnpm dev:backend-worker
+```
+
+Redis broker:
+
+```powershell
+docker compose up redis -d
+```
+
 ### Step 6: open the apps
 
 - frontend: `http://localhost:3000`
 - backend docs: `http://localhost:8000/docs`
+- queue test page: `http://localhost:3000/data_input`
 
 ## 10. Local setup troubleshooting
 
@@ -428,6 +441,13 @@ pnpm dev:backend
 - check `.env`
 - verify the `.venv` install succeeded
 - open `http://localhost:8000/docs` to see whether FastAPI is running
+
+### If queue jobs stay stuck in `queued`
+
+- make sure Redis is running locally
+- make sure `pnpm dev:backend-worker` is running in a second terminal
+- check that `CELERY_BROKER_URL` points to your local Redis or Render Key Value instance
+- check the backend worker terminal for download or Supabase errors
 
 ### If the frontend cannot start
 
@@ -472,6 +492,7 @@ pnpm install
 python -m venv .venv
 .\.venv\Scripts\python -m pip install -e .\apps\backend[dev]
 Copy-Item .env.example .env
+docker compose up redis -d
 ```
 
 What these do:
@@ -480,6 +501,7 @@ What these do:
 - `python -m venv .venv`: creates the backend Python virtual environment
 - `.\.venv\Scripts\python -m pip install -e .\apps\backend[dev]`: installs backend dependencies and dev tools
 - `Copy-Item .env.example .env`: creates the local environment file from the example
+- `docker compose up redis -d`: starts the local Redis broker used by Celery
 
 ### Frontend and workspace commands
 
@@ -516,6 +538,7 @@ What these do:
 
 ```powershell
 pnpm dev:backend
+pnpm dev:backend-worker
 .\.venv\Scripts\python -m ruff check apps/backend/app apps/backend/tests
 .\.venv\Scripts\python -m black --check apps/backend/app apps/backend/tests
 .\.venv\Scripts\python -m black apps/backend/app apps/backend/tests
@@ -527,6 +550,7 @@ pnpm dev:backend
 What these do:
 
 - `pnpm dev:backend`: starts the backend using the repo script
+- `pnpm dev:backend-worker`: starts the Celery worker that processes one queued PDF at a time
 - `ruff check`: lints the backend Python code
 - `black --check`: checks backend formatting without changing files
 - `black`: formats backend Python files
@@ -539,22 +563,26 @@ What these do:
 ```powershell
 docker compose up --build
 docker compose up
+docker compose up redis -d
 docker compose down
 docker compose ps
 docker compose logs
 docker compose logs web
 docker compose logs backend
+docker compose logs backend-worker
 ```
 
 What these do:
 
 - `docker compose up --build`: builds and starts the containers
 - `docker compose up`: starts the containers without rebuilding
+- `docker compose up redis -d`: starts only the local Redis broker
 - `docker compose down`: stops and removes containers
 - `docker compose ps`: shows running containers
 - `docker compose logs`: shows logs for all containers
 - `docker compose logs web`: shows frontend container logs
 - `docker compose logs backend`: shows backend container logs
+- `docker compose logs backend-worker`: shows Celery worker logs
 
 ### Supabase commands
 
@@ -633,6 +661,8 @@ If you want to...
 `pnpm dev:web`
 - start the backend only:
 `pnpm dev:backend`
+- start the backend worker only:
+`pnpm dev:backend-worker`
 - run all core checks before opening a pull request:
 `pnpm check`
 - run just backend tests:

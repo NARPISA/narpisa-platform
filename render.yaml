@@ -1,4 +1,10 @@
 services:
+  - type: keyvalue
+    name: narpisa-pdf-broker
+    plan: starter
+    maxmemoryPolicy: noeviction
+    ipAllowList: []
+
   - type: web
     name: narpisa-pdf-worker
     runtime: docker
@@ -17,8 +23,51 @@ services:
         value: "20"
       - key: PDF_WORKER_FETCH_MAX_BYTES
         value: "10485760"
+      - key: PDF_WORKER_FETCH_CHUNK_SIZE_BYTES
+        value: "1048576"
       - key: PDF_WORKER_FETCH_ALLOWED_DOMAINS
         sync: false
+      - key: PDF_WORKER_DOWNLOAD_DIR
+        value: /tmp/narpisa-pdf-worker
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: keyvalue
+          name: narpisa-pdf-broker
+          property: connectionString
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_SCHEMA
+        value: public
+
+  - type: bserv
+    name: narpisa-pdf-worker-jobs
+    runtime: docker
+    rootDir: apps/backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    autoDeploy: true
+    dockerCommand: celery --app app.worker.celery_app worker --loglevel info --concurrency 1
+    envVars:
+      - key: PDF_WORKER_LOG_LEVEL
+        value: INFO
+      - key: PDF_WORKER_FETCH_TIMEOUT_SECONDS
+        value: "20"
+      - key: PDF_WORKER_FETCH_MAX_BYTES
+        value: "10485760"
+      - key: PDF_WORKER_FETCH_CHUNK_SIZE_BYTES
+        value: "1048576"
+      - key: PDF_WORKER_FETCH_ALLOWED_DOMAINS
+        sync: false
+      - key: PDF_WORKER_DOWNLOAD_DIR
+        value: /tmp/narpisa-pdf-worker
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: keyvalue
+          name: narpisa-pdf-broker
+          property: connectionString
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY

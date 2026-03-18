@@ -23,17 +23,24 @@ Monorepo starter for the NaRPISA natural resources value-addition prototype.
 4. Create a Python virtual environment and install backend deps:
   - Windows PowerShell: `python -m venv .venv` then `.\\.venv\\Scripts\\python -m pip install -e .\\apps\\backend[dev]`
   - macOS/Linux: `python -m venv .venv` then `./.venv/bin/python -m pip install -e ./apps/backend[dev]`
-5. Run the apps:
+5. Start Redis for the Celery broker:
+  - Docker: `docker compose up redis -d`
+  - Local Redis: use `redis://localhost:6379/0`
+6. Run the apps:
   - Web: `pnpm dev:web`
-  - Backend:
+  - Backend API:
 ```python
 python -m venv .venv
 .venv\Scripts\python -m pip install -e .\apps\backend[dev]
 pnpm dev:backend
 ```
+  - Backend worker:
+```python
+pnpm dev:backend-worker
+```
 Then open:
-`http://localhost:8000/docs`
-That lets you hit the FastAPI endpoints directly.
+- `http://localhost:3000/data_input`
+- `http://localhost:8000/docs`
 
   - Local Supabase:
 ```
@@ -68,11 +75,12 @@ pnpm test
 ## Docker
 
 - `docker compose up --build`
+- This now starts `web`, `backend`, `backend-worker`, and `redis` so queue jobs can be dispatched and processed locally.
 
 ## Hosted setup
 
 - `docs/cloud-project-setup.md`: how to create the Vercel, Render, and Supabase projects
-- `render.yaml`: Render Blueprint for the backend worker
+- `render.yaml`: Render Blueprint for the FastAPI API service, Render Key Value broker, and Celery background worker
 
 ## Team onboarding
 

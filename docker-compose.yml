@@ -18,3 +18,20 @@ services:
       - .env
     ports:
       - "8000:8000"
+    depends_on:
+      - redis
+
+  backend-worker:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    command: celery --app app.worker.celery_app worker --loglevel info --concurrency 1
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"

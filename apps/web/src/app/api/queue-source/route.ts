@@ -3,6 +3,26 @@ import { NextResponse } from "next/server";
 import { getPdfWorkerUrl } from "@/lib/env";
 import { createSourceDocumentInputSchema } from "@/lib/source-documents";
 
+type BackendQueuedSourceDocument = {
+  id: string;
+  document_id: string;
+  title: string;
+  source_url: string;
+  source_domain: string;
+  attribution: string;
+  notes?: string | null;
+  mime_type?: string;
+  status: string;
+  content_hash?: string | null;
+  page_count?: number | null;
+  source_http_status?: number | null;
+  error_message?: string | null;
+  queued_at: string;
+  started_at?: string | null;
+  completed_at?: string | null;
+  updated_at?: string | null;
+};
+
 async function forwardQueueRequest(init?: RequestInit) {
   try {
     const pdfWorkerUrl = getPdfWorkerUrl();
@@ -11,7 +31,7 @@ async function forwardQueueRequest(init?: RequestInit) {
       ...init,
     });
 
-    const responseBody = (await backendResponse.json()) as unknown;
+    const responseBody = normalizeQueueResponse(await backendResponse.json());
 
     return NextResponse.json(responseBody, { status: backendResponse.status });
   } catch {
@@ -53,4 +73,48 @@ export async function POST(request: Request) {
       notes: parsedPayload.data.notes,
     }),
   });
+}
+
+function normalizeQueueResponse(payload: unknown) {
+  if (Array.isArray(payload)) {
+    return payload.map((item) => normalizeQueuedDocument(item as BackendQueuedSourceDocument));
+  }
+
+  if (isQueuedDocument(payload)) {
+    return normalizeQueuedDocument(payload);
+  }
+
+  return payload;
+}
+
+function normalizeQueuedDocument(payload: BackendQueuedSourceDocument) {
+  return {
+    id: payload.id,
+    documentId: payload.document_id,
+    title: payload.title,
+    sourceUrl: payload.source_url,
+    sourceDomain: payload.source_domain,
+    attribution: payload.attribution,
+    notes: payload.notes ?? null,
+    mimeType: payload.mime_type ?? "application/pdf",
+    status: payload.status,
+    contentHash: payload.content_hash ?? null,
+    pageCount: payload.page_count ?? null,
+    sourceHttpStatus: payload.source_http_status ?? null,
+    errorMessage: payload.error_message ?? null,
+    queuedAt: payload.queued_at,
+    startedAt: payload.started_at ?? null,
+    completedAt: payload.completed_at ?? null,
+    updatedAt: payload.updated_at ?? null,
+  };
+}
+
+function isQueuedDocument(payload: unknown): payload is BackendQueuedSourceDocument {
+  return (
+    typeof payload === "object" &&
+    payload !== null &&
+    "id" in payload &&
+    "document_id" in payload &&
+    "source_url" in payload
+  );
 }

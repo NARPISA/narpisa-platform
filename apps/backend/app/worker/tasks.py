@@ -1,0 +1,13 @@
+# mypy: disable-error-code=untyped-decorator
+
+import asyncio
+
+from app.services.job_processor import QueuedDocumentProcessor
+from app.worker.celery_app import celery_app
+
+
+# Celery's decorator is intentionally untyped.
+@celery_app.task(name="app.worker.tasks.process_queued_document")
+def process_queued_document(job_id: str) -> None:
+    processor = QueuedDocumentProcessor()
+    asyncio.run(processor.process(job_id))

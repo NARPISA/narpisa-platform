@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
 import Container from "@mui/material/Container";
 import CircularProgress from "@mui/material/CircularProgress";
 import List from "@mui/material/List";
@@ -14,26 +15,18 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Link from "next/link";
 
-import { createSourceDocumentInputSchema } from "@/lib/source-documents";
-type SavedLink = {
-  id: string;
-  title: string;
-  url: string;
-  attribution: string;
-};
-
-type QueuedLinkResponse = {
-  id: string;
-  title: string;
-  source_url: string;
-  attribution: string;
-};
+import {
+  createSourceDocumentInputSchema,
+  queuedSourceDocumentSchema,
+  type ProcessingJobStatus,
+  type QueuedSourceDocument,
+} from "@/lib/source-documents";
 
 export default function DataInputPage() {
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [attribution, setAttribution] = useState("");
-  const [links, setLinks] = useState<SavedLink[]>([]);
+  const [links, setLinks] = useState<QueuedSourceDocument[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,14 +55,11 @@ export default function DataInputPage() {
         );
       }
 
-      const queuedLinks = (await response.json()) as QueuedLinkResponse[];
+      const queuedLinks = queuedSourceDocumentSchema
+        .array()
+        .parse(await response.json());
       setLinks(
-        queuedLinks.map((queuedLink) => ({
-          id: queuedLink.id,
-          title: queuedLink.title,
-          url: queuedLink.source_url,
-          attribution: queuedLink.attribution,
-        })),
+        queuedLinks,
       );
     } catch (error) {
       setErrorMessage(
@@ -85,6 +75,23 @@ export default function DataInputPage() {
   useEffect(() => {
     void loadQueuedLinks();
   }, [loadQueuedLinks]);
+
+  useEffect(() => {
+    const hasActiveJobs = links.some((link) =>
+      ["queued", "fetching", "parsing"].includes(link.status),
+    );
+    if (!hasActiveJobs) {
+      return undefined;
+    }
+
+    const pollingTimer = window.setInterval(() => {
+      void loadQueuedLinks();
+    }, 3000);
+
+    return () => {
+      window.clearInterval(pollingTimer);
+    };
+  }, [links, loadQueuedLinks]);
 
   async function handleAddLink() {
     const parsedPayload = draftPayload;
@@ -120,12 +127,7 @@ export default function DataInputPage() {
         );
       }
 
-      const queuedLink = (await response.json()) as {
-        id: string;
-        title: string;
-        source_url: string;
-        attribution: string;
-      };
+      queuedSourceDocumentSchema.parse(await response.json());
 
       await loadQueuedLinks();
       setTitle("");
@@ -210,8 +212,23 @@ export default function DataInputPage() {
                 <ListItem key={link.id} disableGutters divider>
                   <ListItemText
                     primary={link.title}
-                    secondary={`${link.url} | ${link.attribution}`}
+                    secondary={`${link.sourceUrl} | ${link.attribution}`}
                   />
+                  <Stack alignItems="flex-end" spacing={1}>
+                    <Chip
+                      color={getStatusColor(link.status)}
+                      label={getStatusLabel(link.status)}
+                      size="small"
+                    />
+                    {link.status === "fetching" || link.status === "parsing" ? (
+                      <CircularProgress size={18} />
+                    ) : null}
+                    {link.errorMessage ? (
+                      <Typography color="error" variant="body2">
+                        {link.errorMessage}
+                      </Typography>
+                    ) : null}
+                  </Stack>
                 </ListItem>
               ))}
             </List>
@@ -220,4 +237,33 @@ export default function DataInputPage() {
       </Stack>
     </Container>
   );
+}
+
+function getStatusColor(status: ProcessingJobStatus) {
+  switch (status) {
+    case "completed":
+      return "success";
+    case "failed":
+      return "error";
+    case "fetching":
+    case "parsing":
+      return "warning";
+    default:
+      return "default";
+  }
+}
+
+function getStatusLabel(status: ProcessingJobStatus) {
+  switch (status) {
+    case "queued":
+      return "Queued";
+    case "fetching":
+      return "Fetching PDF";
+    case "parsing":
+      return "Parsing PDF";
+    case "completed":
+      return "Completed";
+    case "failed":
+      return "Failed";
+  }
 }

@@ -9,6 +9,7 @@ description = "FastAPI worker for transient PDF fetching and parsing."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+  "celery[redis]",
   "fastapi",
   "httpx",
   "pydantic-settings",
@@ -48,3 +49,7 @@ python_version = "3.11"
 strict = true
 warn_unused_configs = true
 exclude = ["tests"]
+
+[[tool.mypy.overrides]]
+module = ["celery", "celery.*"]
+ignore_missing_imports = true

@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -7,6 +8,7 @@ from app.models.document import ParsedDocument, QueuedSourceDocument, SourcePars
 from app.services.document_queue import document_queue
 from app.services.pdf_parser import PdfParser
 from app.services.source_fetcher import SourceFetcher
+from app.worker.tasks import process_queued_document
 
 router = APIRouter()
 
@@ -24,9 +26,14 @@ async def process_source(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> ParsedDocument:
     fetcher = SourceFetcher(settings=settings)
-    fetch_result = await fetcher.fetch_pdf(str(payload.source_url))
+    download_path = settings.download_directory / "process-source-debug.pdf"
+    download_path.parent.mkdir(parents=True, exist_ok=True)
+    fetch_result = await fetcher.fetch_pdf(str(payload.source_url), download_path)
     parser = PdfParser()
-    return parser.parse(payload, fetch_result)
+    try:
+        return parser.parse(payload, fetch_result)
+    finally:
+        _cleanup_download(download_path)
 
 
 @router.post(
@@ -37,7 +44,9 @@ async def process_source(
 )
 async def queue_source(payload: SourceParseRequest) -> QueuedSourceDocument:
     try:
-        return document_queue.enqueue(payload)
+        queued_document = await document_queue.enqueue(payload)
+        process_queued_document.delay(queued_document.id)
+        return queued_document
     except ValueError as error:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -51,4 +60,9 @@ async def queue_source(payload: SourceParseRequest) -> QueuedSourceDocument:
     tags=["processing"],
 )
 async def list_queued_sources() -> list[QueuedSourceDocument]:
-    return list(document_queue.list_items())
+    return await document_queue.list_items()
+
+
+def _cleanup_download(download_path: Path) -> None:
+    if download_path.exists():
+        download_path.unlink()
