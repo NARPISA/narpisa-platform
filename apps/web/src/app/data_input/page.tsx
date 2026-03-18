@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -22,6 +22,13 @@ type SavedLink = {
   attribution: string;
 };
 
+type QueuedLinkResponse = {
+  id: string;
+  title: string;
+  source_url: string;
+  attribution: string;
+};
+
 export default function DataInputPage() {
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
@@ -30,6 +37,7 @@ export default function DataInputPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingLinks, setIsLoadingLinks] = useState(true);
 
   const draftPayload = createSourceDocumentInputSchema.safeParse({
     title,
@@ -37,6 +45,46 @@ export default function DataInputPage() {
     attribution,
   });
   const canAdd = draftPayload.success && !isSubmitting;
+
+  const loadQueuedLinks = useCallback(async () => {
+    setIsLoadingLinks(true);
+
+    try {
+      const response = await fetch("/api/queue-source", {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        const errorBody = (await response.json()) as { detail?: string };
+        throw new Error(
+          errorBody.detail ?? "Unable to load queued source links right now.",
+        );
+      }
+
+      const queuedLinks = (await response.json()) as QueuedLinkResponse[];
+      setLinks(
+        queuedLinks.map((queuedLink) => ({
+          id: queuedLink.id,
+          title: queuedLink.title,
+          url: queuedLink.source_url,
+          attribution: queuedLink.attribution,
+        })),
+      );
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to load queued source links right now.",
+      );
+    } finally {
+      setIsLoadingLinks(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadQueuedLinks();
+  }, [loadQueuedLinks]);
 
   async function handleAddLink() {
     const parsedPayload = draftPayload;
@@ -79,15 +127,7 @@ export default function DataInputPage() {
         attribution: string;
       };
 
-      setLinks((currentLinks) => [
-        {
-          id: queuedLink.id,
-          title: queuedLink.title,
-          url: queuedLink.source_url,
-          attribution: queuedLink.attribution,
-        },
-        ...currentLinks,
-      ]);
+      await loadQueuedLinks();
       setTitle("");
       setUrl("");
       setAttribution("");
@@ -158,7 +198,9 @@ export default function DataInputPage() {
           <Typography variant="h6" gutterBottom>
             Queued links
           </Typography>
-          {links.length === 0 ? (
+          {isLoadingLinks ? (
+            <Typography color="text.secondary">Loading queued links...</Typography>
+          ) : links.length === 0 ? (
             <Typography color="text.secondary">
               No queued links yet.
             </Typography>

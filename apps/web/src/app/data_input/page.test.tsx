@@ -11,6 +11,13 @@ afterEach(() => {
 
 describe("Data input page", () => {
   it("renders the page heading and home link", () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => [],
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+
     render(<DataInputPage />);
 
     expect(
@@ -28,6 +35,12 @@ describe("Data input page", () => {
 
   it("blocks submission for an invalid payload", async () => {
     const user = userEvent.setup();
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => [],
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
 
     render(<DataInputPage />);
 
@@ -53,15 +66,32 @@ describe("Data input page", () => {
 
   it("queues a valid link and resets the form", async () => {
     const user = userEvent.setup();
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        id: "queued-link-1",
-        title: "Haib Copper PEA",
-        source_url: "https://example.org/report.pdf",
-        attribution: "NaRPISA research team",
-      }),
-    });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          id: "queued-link-1",
+          title: "Haib Copper PEA",
+          source_url: "https://example.org/report.pdf",
+          attribution: "NaRPISA research team",
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [
+          {
+            id: "queued-link-1",
+            title: "Haib Copper PEA",
+            source_url: "https://example.org/report.pdf",
+            attribution: "NaRPISA research team",
+          },
+        ],
+      });
 
     vi.stubGlobal("fetch", fetchMock);
 
@@ -77,8 +107,9 @@ describe("Data input page", () => {
     await user.type(attributionInput, "NaRPISA research team");
     await user.click(addButton);
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith(
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
       "/api/queue-source",
       expect.objectContaining({
         method: "POST",
