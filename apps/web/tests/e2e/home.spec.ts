@@ -9,5 +9,5 @@ test("homepage highlights the source-led workflow", async ({ page }) => {
     }),
   ).toBeVisible();
 
-  await expect(page.getByText(/render-backed fastapi worker/i)).toBeVisible();
+  await expect(page.getByText(/cloud run worker with cloud tasks/i)).toBeVisible();
 });

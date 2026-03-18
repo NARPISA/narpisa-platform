@@ -20,9 +20,9 @@ const deploymentCards = [
   },
   {
     eyebrow: "Parsing",
-    title: "Render-backed FastAPI worker",
+    title: "Cloud Run worker with Cloud Tasks",
     description:
-      "The worker fetches source PDFs on demand, extracts structured content, and discards binary files after parsing to keep storage costs low.",
+      "The worker uses Cloud Tasks for asynchronous processing and Cloud Run for burst-friendly PDF fetching, parsing, and persistence.",
   },
   {
     eyebrow: "Data",
@@ -117,7 +117,7 @@ export default function Home() {
                   </Button>
                   <Button
                     component="a"
-                    href="https://render.com"
+                    href="https://cloud.google.com/run"
                     target="_blank"
                     rel="noreferrer"
                     variant="outlined"
@@ -128,7 +128,7 @@ export default function Home() {
                       color: "white",
                     }}
                   >
-                    Deploy worker on Render
+                    Deploy worker on Cloud Run
                   </Button>
                 </Stack>
               </Stack>

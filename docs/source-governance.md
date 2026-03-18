@@ -20,6 +20,7 @@ The platform stores source links and structured parsed output. It does not persi
 - Default max file size: 10 MB
 - Validate `content-type` before parsing
 - Record HTTP status, fetch time, and content hash after processing attempts
+- Let transient failures retry through Cloud Tasks, but mark permanent validation failures as non-retryable
 
 ## Retention policy
 - Keep only source metadata, job history, extracted records, and derived analytics in the database.

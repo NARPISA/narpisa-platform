@@ -1,3 +1,3 @@
 # NaRPISA PDF Worker
 
-This service fetches PDF documents from approved source URLs, parses them transiently, and returns structured metadata without persisting file binaries.
+This service accepts source-processing requests, creates queued jobs, and processes PDFs transiently without persisting file binaries. In production it runs on Google Cloud Run with Cloud Tasks handling asynchronous retries and delivery.

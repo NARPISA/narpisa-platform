@@ -4,15 +4,19 @@ build-backend = "hatchling.build"
 
 [project]
 name = "narpisa-pdf-worker"
-version = "0.1.0"
+version = "0.2.0"
 description = "FastAPI worker for transient PDF fetching and parsing."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
   "fastapi",
+  "google-auth",
+  "google-cloud-tasks",
   "httpx",
   "pydantic-settings",
   "pypdf",
+  "requests",
+  "supabase",
   "uvicorn[standard]",
 ]
 
