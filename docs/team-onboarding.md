@@ -50,8 +50,7 @@ The intended workflow is:
 There are three main cloud parts:
 
 - `Vercel` runs the website users interact with
-- `Google Cloud Run` runs the backend worker service
-- `Google Cloud Tasks` queues asynchronous parsing jobs for the worker
+- `Render` runs the backend worker that fetches and parses PDFs
 - `Supabase` stores relational data and authentication data
 
 Think of the system in layers:
@@ -64,29 +63,19 @@ Think of the system in layers:
 
 1. A user registers a source link in the frontend.
 2. The frontend saves source metadata in Supabase.
-3. The backend creates a processing job and enqueues a Cloud Task.
-4. Cloud Tasks calls the internal worker endpoint on Cloud Run.
-5. The worker fetches the PDF from the external source URL.
-6. The worker parses the file in memory.
-7. The worker stores only derived information in Supabase.
-8. The frontend reads that structured data and displays it.
+3. The backend worker receives a processing request.
+4. The worker fetches the PDF from the external source URL.
+5. The worker parses the file in memory.
+6. The worker stores only derived information in Supabase.
+7. The frontend reads that structured data and displays it.
 
 ### Why this architecture was chosen
 
 - `Next.js` on Vercel is a strong default for fast frontend development.
 - `FastAPI` is a good fit for PDF processing and Python-based parsing libraries.
-- `Cloud Tasks` gives the team controlled retries and queue-based scaling for bursty jobs.
-- `Cloud Run` is a better cost fit than a dedicated always-on worker for this use case.
 - `Supabase` gives the team Postgres, auth, and a simple hosted developer experience.
 - Splitting frontend and backend lets each part scale independently.
 - The link-first ingestion model reduces storage cost and lowers legal/operational risk.
-
-### What retries and idempotency mean here
-
-- `Cloud Tasks` can retry a job if the worker returns a temporary failure.
-- Because of that, the worker must be `idempotent`, which means rerunning the same job should not create duplicate extracted records.
-- Permanent validation failures, such as blocked domains or non-PDF files, should be recorded and stopped cleanly instead of retrying forever.
-- Temporary failures, such as upstream network issues, should surface as retryable so the queue can try again later.
 
 ## 4. What a monorepo means
 
@@ -334,7 +323,7 @@ This project only makes sense if everyone understands what is and is not persist
 - docs
 - source governance rules
 - environment config
-- Cloud Run and Cloud Tasks configuration
+- Render service configuration
 
 ## 8. Vocabulary for beginners
 
@@ -355,9 +344,7 @@ These are the terms you will see most often.
 - `lint`: automated code quality/style checks
 - `typecheck`: automated checks that verify code matches expected data types
 - `fixture`: stable test data used for deterministic automated tests
-- `Cloud Run`: Google service for running containerized HTTP applications without managing servers directly
-- `Cloud Tasks`: Google service for durable background job queues with retries
-- `idempotent`: safe to run the same job more than once without creating duplicate output
+- `blueprint`: infrastructure-as-code configuration for a cloud platform like Render
 - `monorepo`: one repository containing multiple apps and shared packages
 
 ## 9. Local setup from scratch
@@ -682,9 +669,8 @@ The frontend is the public-facing web app.
 Flow:
 
 - GitHub repository
-- container build
-- Cloud Run worker service
-- Cloud Tasks queue callbacks into the worker
+- Render Blueprint
+- backend service on Render
 
 The backend is a separate service because PDF fetching and parsing belong on the server side.
 
