@@ -7,7 +7,7 @@ settings = get_settings()
 
 app = FastAPI(
     title=settings.app_name,
-    version=settings.worker_version,
+    version="0.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
