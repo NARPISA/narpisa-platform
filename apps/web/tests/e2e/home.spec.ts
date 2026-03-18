@@ -1,13 +1,9 @@
 import { expect, test } from "@playwright/test";
 
-test("homepage highlights the source-led workflow", async ({ page }) => {
+test("homepage links to the PDF queue testing page", async ({ page }) => {
   await page.goto("/");
 
-  await expect(
-    page.getByRole("heading", {
-      name: /source-led document intelligence for mineral value addition/i,
-    }),
-  ).toBeVisible();
-
-  await expect(page.getByText(/render-backed fastapi worker/i)).toBeVisible();
+  const testerLink = page.getByRole("link", { name: /open pdf link tester/i });
+  await expect(testerLink).toBeVisible();
+  await testerLink.click();
 });
