@@ -137,23 +137,24 @@ Work here when you are changing:
 - backend tests
 - worker config and environment handling
 
-### `packages/types`
+### `apps/web/src/components`
 
-Shared TypeScript contracts and schemas.
-
-Put code here when:
-
-- frontend code and shared utilities need the same type or schema
-- you want one source of truth for request/response shapes
-
-### `packages/ui`
-
-Reusable frontend UI components.
+Frontend-local reusable UI components.
 
 Put code here when:
 
-- a component is general enough to be reused
-- you want consistent styling or component APIs across the app
+- a component is reused within the web app
+- you want UI structure to stay close to the frontend that actually uses it
+
+### `apps/web/src/lib`
+
+Frontend-local helpers, contracts, browser clients, and utility functions.
+
+Put code here when:
+
+- the frontend needs typed helpers or schemas
+- the code is not visual UI
+- the code is specific to the single web app in this repo
 
 ### `supabase`
 
@@ -697,11 +698,11 @@ Use this as a quick decision guide.
 
 ### Change a shared contract or schema used by frontend code
 
-- go to `packages/types`
+- go to `apps/web/src/lib`
 
 ### Add a reusable UI card, button, or layout helper
 
-- go to `packages/ui`
+- go to `apps/web/src/components`
 
 ### Change a database table or policy
 

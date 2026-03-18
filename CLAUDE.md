@@ -1,14 +1,14 @@
 # NaRPISA Platform Guidance
 
 ## Project scope
-- This is a monorepo with `apps/web` for the Next.js frontend, `apps/backend` for the FastAPI PDF worker, `packages/*` for shared TypeScript code, and `supabase/*` for schema and data contracts.
+- This is a monorepo with `apps/web` for the Next.js frontend, `apps/backend` for the FastAPI PDF worker, and `supabase/*` for schema and data contracts.
 - The product stores source links, attribution, job history, and parsed records. Do not add persistent PDF storage without explicit approval.
 
 ## Working style
 - Make the smallest change that satisfies the request.
 - Plan before broad refactors or multi-file feature work.
 - Prefer typed contracts, explicit validation, and tests over hidden assumptions.
-- Keep feature boundaries clean: web UI in `apps/web`, parsing logic in `apps/backend`, shared TS code in `packages/*`.
+- Keep feature boundaries clean: web UI in `apps/web`, parsing logic in `apps/backend`, and schema/data work in `supabase/*`.
 
 ## Quality bar
 - Run relevant checks after changes.

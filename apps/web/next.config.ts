@@ -1,7 +1,5 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  transpilePackages: ["@narpisa/types", "@narpisa/ui"],
-};
+const nextConfig: NextConfig = {};
 
 export default nextConfig;

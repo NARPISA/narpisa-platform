@@ -5,6 +5,7 @@ import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import Link from "next/link";
 
 
 export default function Home() {
@@ -30,7 +31,6 @@ export default function Home() {
           >
             <Paper
               sx={{
-                borderRadius: 8,
                 bgcolor: "secondary.main",
                 color: "common.white",
                 px: { xs: 3, md: 5 },
@@ -44,17 +44,14 @@ export default function Home() {
                     variant="h2"
                     sx={{ maxWidth: 720, fontSize: { xs: "2.6rem", md: "4rem" } }}
                   >
-                    Source-led document intelligence for mineral value addition.
+                    Peter is Pregnant and wants to have a baby
                   </Typography>
                   <Typography
                     variant="h6"
                     color="rgba(255,255,255,0.78)"
                     sx={{ mt: 2, maxWidth: 720, fontWeight: 400, lineHeight: 1.65 }}
                   >
-                    Register source links, parse PDFs on demand, and retain only
-                    the structured records needed for research, policymaking, and
-                    trading workflows across Namibia and future African market
-                    expansion.
+                    It was sagan&apos;s fault
                   </Typography>
                 </Box>
 
@@ -68,22 +65,7 @@ export default function Home() {
                     color="primary"
                     endIcon={<ArrowOutwardRoundedIcon />}
                   >
-                    Connect web to Vercel
-                  </Button>
-                  <Button
-                    component="a"
-                    href="https://render.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    variant="outlined"
-                    color="inherit"
-                    endIcon={<ArrowOutwardRoundedIcon />}
-                    sx={{
-                      borderColor: "rgba(255,255,255,0.25)",
-                      color: "white",
-                    }}
-                  >
-                    Deploy worker on Render
+                    Video Here
                   </Button>
                 </Stack>
             </Paper>
@@ -93,12 +75,27 @@ export default function Home() {
             sx={{
               display: "grid",
               gap: 3,
-              gridTemplateColumns: {
-                xs: "1fr",
-                lg: "minmax(0,1.2fr) minmax(0,1fr)",
-              },
             }}
           >
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 3,
+              }}
+            >
+              <Stack spacing={2}>
+                <Typography variant="h5">Quick testing ground</Typography>
+                <Typography color="text.secondary">
+                  Use the temporary data input page to try PDF source links and
+                  test input flows before wiring the full ingestion pipeline.
+                </Typography>
+                <Box>
+                  <Link href="/data_input">
+                    <Button variant="contained">Open PDF link tester</Button>
+                  </Link>
+                </Box>
+              </Stack>
+            </Paper>
           </Box>
         </Stack>
       </Container>

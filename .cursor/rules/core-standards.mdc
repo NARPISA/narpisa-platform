@@ -6,7 +6,7 @@ alwaysApply: true
 # Core Standards
 
 - Keep changes scoped to the request and avoid speculative large builds.
-- Respect monorepo boundaries: `apps/web`, `apps/backend`, `packages/*`, and `supabase/*`.
+- Respect monorepo boundaries: `apps/web`, `apps/backend`, and `supabase/*`.
 - Preserve the source-link ingestion model. Store URLs and parsed data, not PDF binaries.
 - Run the relevant lint, typecheck, and test commands after substantive edits.
 - Update docs, env examples, and tests when contracts or workflows change.

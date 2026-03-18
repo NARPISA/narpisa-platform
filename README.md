@@ -7,7 +7,7 @@ Monorepo starter for the NaRPISA natural resources value-addition prototype.
 - `apps/web`: Next.js, React, Material UI-first frontend with Tailwind still available, Vercel-ready
 - `apps/backend`: FastAPI worker for transient PDF fetching and parsing on Render
 - `supabase`: Postgres schema, auth roles, and extracted-record contracts
-- `packages/*`: shared TypeScript config, contracts, and UI
+- `apps/web/src/components` and `apps/web/src/lib`: frontend-local UI components, helpers, and typed browser-side contracts
 
 ## Product principles
 

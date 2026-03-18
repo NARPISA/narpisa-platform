@@ -17,8 +17,6 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.9",
     "@mui/material": "^7.3.9",
-    "@narpisa/types": "workspace:*",
-    "@narpisa/ui": "workspace:*",
     "@supabase/supabase-js": "^2.99.1",
     "next": "16.1.6",
     "react": "19.2.3",
