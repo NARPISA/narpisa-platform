@@ -6,7 +6,6 @@ The platform stores source links and structured parsed output. It does not persi
 ## Allowed sources
 - Prefer stable `https` links from public institutions, mining companies, research organizations, and approved data partners.
 - Reject local file uploads and ad hoc third-party mirrors unless the team explicitly approves them.
-- Keep an allowlist of trusted domains in `PDF_WORKER_FETCH_ALLOWED_DOMAINS`.
 
 ## Required metadata
 - `title`
@@ -26,4 +25,4 @@ The platform stores source links and structured parsed output. It does not persi
 - Never save source PDFs to Supabase Storage or backend disk outside transient processing.
 
 ## Review expectations
-- Every new ingestion feature must update tests, the worker contract, and the allowlist guidance when behavior changes.
+- Every new ingestion feature must update tests, the worker contract, and source-governance guidance when behavior changes.

@@ -1,29 +1,59 @@
-from collections.abc import Sequence
 from urllib.parse import urlparse
 
+from app.core.config import get_settings
 from app.models.document import QueuedSourceDocument, SourceParseRequest
+from app.services.job_store import JobStore
 
 
 class DocumentQueue:
-    def __init__(self) -> None:
-        self._items: list[QueuedSourceDocument] = []
-
-    def enqueue(self, request: SourceParseRequest) -> QueuedSourceDocument:
+    async def enqueue(self, request: SourceParseRequest) -> QueuedSourceDocument:
         self._validate_pdf_source_url(str(request.source_url))
-        queued_document = QueuedSourceDocument.from_request(request)
-        self._items.insert(0, queued_document)
-        return queued_document
+        settings = get_settings()
+        job_store = JobStore(settings=settings)
+        return await job_store.create_queued_job(request)
 
-    def list_items(self) -> Sequence[QueuedSourceDocument]:
-        return tuple(self._items)
+    async def list_items(self) -> list[QueuedSourceDocument]:
+        settings = get_settings()
+        job_store = JobStore(settings=settings)
+        return self._latest_jobs_by_document(await job_store.list_jobs())
 
-    def clear(self) -> None:
-        self._items.clear()
+    async def list_recoverable_items(self) -> list[QueuedSourceDocument]:
+        settings = get_settings()
+        job_store = JobStore(settings=settings)
+        return self._latest_jobs_by_document(
+            await job_store.list_jobs(statuses=["queued", "fetching", "parsing"])
+        )
+
+    async def get_item(self, job_id: str) -> QueuedSourceDocument | None:
+        settings = get_settings()
+        job_store = JobStore(settings=settings)
+        return await job_store.get_job(job_id)
+
+    async def delete_item(self, job_id: str) -> bool:
+        settings = get_settings()
+        job_store = JobStore(settings=settings)
+        return await job_store.delete_job(job_id)
 
     def _validate_pdf_source_url(self, source_url: str) -> None:
         parsed_url = urlparse(source_url)
         if not parsed_url.path.lower().endswith(".pdf"):
             raise ValueError("Source URL must point to a PDF document.")
+
+    def _latest_jobs_by_document(
+        self,
+        jobs: list[QueuedSourceDocument],
+    ) -> list[QueuedSourceDocument]:
+        latest_by_document: dict[str, QueuedSourceDocument] = {}
+        ordered_latest_jobs: list[QueuedSourceDocument] = []
+
+        for job in jobs:
+            if job.document_id in latest_by_document:
+                continue
+
+            latest_by_document[job.document_id] = job
+            ordered_latest_jobs.append(job)
+
+        return ordered_latest_jobs
 
 
 document_queue = DocumentQueue()

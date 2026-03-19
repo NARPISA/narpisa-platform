@@ -5,7 +5,7 @@ This document explains how to create the hosted projects for the NaRPISA monorep
 ## What gets deployed where
 
 - `Vercel`: hosts the frontend in `apps/web`
-- `Render`: hosts the PDF worker in `apps/backend`
+- `Render`: hosts the FastAPI API service, Render Key Value broker, and Celery background worker in `apps/backend`
 - `Supabase`: hosts Postgres, Auth, and project-level API credentials
 
 ## Before you start
@@ -94,24 +94,33 @@ Use the `render.yaml` file in the repo root.
 2. Choose `New + -> Blueprint`
 3. Select this GitHub repo
 4. Confirm that Render detects `render.yaml`
-5. Create the service named `narpisa-pdf-worker`
+5. Create the Blueprint instance so Render provisions:
+   - `narpisa-pdf-worker` web service
+   - `narpisa-pdf-worker-jobs` background worker
+   - `narpisa-pdf-broker` Key Value broker
 
 ### What the blueprint does
 
 - Deploys `apps/backend`
 - Uses the existing `Dockerfile`
 - Sets the health check to `/api/v1/health`
+- Provisions a Key Value instance and injects its private `connectionString` into `CELERY_BROKER_URL`
+- Runs the Celery worker with concurrency `1` so only one PDF is downloaded and processed at a time
 - Leaves secret values unsynced so you can enter them safely in the dashboard
 
 ### Required environment variables
 
-Set these in the Render service:
+Set these in both Render backend services:
 
-- `PDF_WORKER_FETCH_ALLOWED_DOMAINS`
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 
 These are already represented in `render.yaml`.
+
+Render also injects:
+
+- `CELERY_BROKER_URL` from the Key Value instance
+- `PDF_WORKER_DOWNLOAD_DIR=/tmp/narpisa-pdf-worker`
 
 ## 4. Wire the systems together
 
@@ -122,7 +131,8 @@ Copy `.env.example` to `.env` and fill in:
 - Supabase URL
 - Supabase anon key
 - Supabase service role key
-- Allowed PDF source domains
+- `CELERY_BROKER_URL` if you are not using the Docker Compose Redis service
+- Optional: `KEEP_DOWNLOADED_PDFS=true` when you want local worker runs to retain downloaded PDFs for inspection
 
 ### GitHub Actions secrets
 
@@ -132,7 +142,7 @@ Add secrets later if you enable deployment jobs from CI. For now, the included w
 
 - Supabase project exists and schema has been applied
 - Vercel project points to `apps/web`
-- Render service was created from `render.yaml`
+- Render Blueprint created all three services from `render.yaml`
 - Local `.env` file is filled in
 - `pnpm lint`
 - `pnpm typecheck`

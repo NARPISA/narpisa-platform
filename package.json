@@ -8,6 +8,8 @@
     "dev": "turbo run dev --parallel",
     "dev:web": "pnpm --filter @narpisa/web dev",
     "dev:backend": "pnpm --filter @narpisa/pdf-worker dev",
+    "dev:backend-worker": "pnpm --filter @narpisa/pdf-worker dev:worker",
+    "check:backend": "pnpm --filter @narpisa/pdf-worker lint && pnpm --filter @narpisa/pdf-worker typecheck && pnpm --filter @narpisa/pdf-worker test",
     "lint": "turbo run lint",
     "typecheck:ts": "pnpm --filter @narpisa/web typecheck",
     "typecheck": "turbo run typecheck",

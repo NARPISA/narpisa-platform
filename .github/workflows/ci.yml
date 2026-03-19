@@ -72,6 +72,17 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -83,14 +94,5 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e "./apps/backend[dev]"
 
-      - name: Lint backend
-        run: python -m ruff check apps/backend/app apps/backend/tests
-
-      - name: Check backend formatting
-        run: python -m black --check apps/backend/app apps/backend/tests
-
-      - name: Typecheck backend
-        run: python -m mypy apps/backend/app
-
-      - name: Run backend tests
-        run: python -m pytest -q apps/backend/tests
+      - name: Run backend checks
+        run: pnpm check:backend

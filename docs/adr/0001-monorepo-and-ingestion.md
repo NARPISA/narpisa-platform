@@ -15,4 +15,4 @@ The project needs a scalable starter architecture for a four-person student team
 ## Consequences
 - Hosting stays simple: Vercel for the web app and Render for the worker.
 - Researchers can trace extracted records back to their public sources without retaining raw files.
-- The worker must enforce URL allowlists, MIME validation, retry policies, and source attribution rules.
+- The worker must enforce MIME validation, retry policies, and source attribution rules.
