@@ -5,7 +5,22 @@ from urllib.parse import urlparse
 from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
+
+def _resolve_env_file() -> Path:
+    current_file = Path(__file__).resolve()
+
+    for parent in current_file.parents: #search upward for the monorepo root via turbo.json when running locally
+        if (parent / "turbo.json").exists():
+            return parent / ".env"
+ 
+    for parent in current_file.parents: # fall back to the backend app root via pyproject.toml inside Docker/Render
+        if (parent / "pyproject.toml").exists():
+            return parent / ".env"
+
+    return current_file.parent / ".env"
+
+
+ENV_FILE = _resolve_env_file()
 
 
 class Settings(BaseSettings):
@@ -39,7 +54,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         env_prefix="PDF_WORKER_",
-        env_file=REPO_ROOT / ".env",
+        env_file=ENV_FILE,
         populate_by_name=True,
         extra="ignore",
     )
