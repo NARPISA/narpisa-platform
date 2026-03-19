@@ -541,6 +541,7 @@ What these do:
 ```powershell
 pnpm dev:backend
 pnpm dev:backend-worker
+pnpm format:backend
 .\.venv\Scripts\python -m ruff check apps/backend/app apps/backend/tests
 .\.venv\Scripts\python -m black --check apps/backend/app apps/backend/tests
 .\.venv\Scripts\python -m black apps/backend/app apps/backend/tests
@@ -553,6 +554,7 @@ What these do:
 
 - `pnpm dev:backend`: starts the backend using the repo script
 - `pnpm dev:backend-worker`: starts the Celery worker that processes one queued PDF at a time
+- `pnpm format:backend`: auto-fixes backend lint issues Ruff can handle and then reformats backend Python files with Black
 - `ruff check`: lints the backend Python code
 - `black --check`: checks backend formatting without changing files
 - `black`: formats backend Python files

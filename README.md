@@ -54,6 +54,8 @@ And when done: `npx supabase stop`
 ## Quality checks
 ### Backend quality
 ```
+pnpm format:backend
+pnpm check:backend
 .\.venv\Scripts\python -m pytest -q apps/backend/tests
 .\.venv\Scripts\python -m mypy apps/backend/app
 .\.venv\Scripts\python -m ruff check apps/backend/app apps/backend/tests
