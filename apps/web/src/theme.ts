@@ -76,8 +76,8 @@ const theme = createTheme({
       700: "#1c1e1e",
     },
     background: {
-      default: "#434846",
-      main: "#434846",
+      default: "#252827",
+      main: "#252827",
       100: "#d0ddd9",
       200: "#abb5b2",
       300: "#868f8c",
@@ -155,27 +155,8 @@ const theme = createTheme({
     },
     button: {
       textTransform: "none",
-      fontWeight: 700,
-    },
-  },
-  components: {
-    MuiButton: {
-      defaultProps: {
-        disableElevation: true,
-      },
-      styleOverrides: {
-        root: {
-          borderRadius: 999,
-          paddingInline: 20,
-        },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          boxShadow: "0 12px 32px rgba(25, 24, 17, 0.12)",
-        },
-      },
+      fontWeight: 400,
+      fontSize: "3rem",
     },
   },
 });

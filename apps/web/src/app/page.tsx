@@ -1,4 +1,3 @@
-import ArrowOutwardRoundedIcon from "@mui/icons-material/ArrowOutwardRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
@@ -6,6 +5,9 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Link from "next/link";
+
+import GlassButtonLink from "@/components/glass-button-link";
+import GlassButton from "@/components/glass-button";
 
 
 export default function Home() {
@@ -17,6 +19,7 @@ export default function Home() {
         py: { xs: 6, md: 9 },
       }}
     >
+      <GlassButton>test</GlassButton>
       <Container maxWidth="lg">
         <Stack spacing={4}>
           <Box
@@ -56,17 +59,9 @@ export default function Home() {
                 </Box>
 
                 <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                  <Button
-                    component="a"
-                    href="https://vercel.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    variant="contained"
-                    color="primary"
-                    endIcon={<ArrowOutwardRoundedIcon />}
-                  >
-                    Video Here
-                  </Button>
+                  <GlassButtonLink href="/data_input">
+                    glass button
+                  </GlassButtonLink>
                 </Stack>
             </Paper>
           </Box>
