@@ -1,71 +1,83 @@
 "use client";
 
-import Button, { type ButtonProps } from "@mui/material/Button";
+import type { ReactNode } from "react";
+import Box from "@mui/material/Box";
+import type { SxProps, Theme } from "@mui/material/styles";
 import { alpha } from "@mui/material/styles";
 import Link from "next/link";
 
-type GlassButtonProps = ButtonProps & {
-  /** When provided, renders as a next/link anchor */
+import GlassSurface, { type GlassSurfaceProps } from "./glass-surface";
+
+interface GlassButtonProps {
+  children?: ReactNode;
   href?: string;
-};
+  onClick?: () => void;
+  sx?: SxProps<Theme>;
+  glass?: Partial<GlassSurfaceProps>;
+}
+
+const innerSx = [
+  (theme: Theme) => ({
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    textDecoration: "none",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    height: "100%",
+    paddingInline: "0.85em",
+    paddingBlock: "0.28em",
+    color: theme.palette.text.primary,
+    fontFamily: theme.typography.fontFamily,
+    fontSize: theme.typography.button.fontSize,
+    fontWeight: 400,
+    lineHeight: 1,
+    transition: theme.transitions.create(
+      ["background-color", "transform"],
+      { duration: theme.transitions.duration.short },
+    ),
+    "&:hover": {
+      bgcolor: alpha("#a1a1a1", 0.08),
+    },
+    "&:active": {
+      bgcolor: alpha(theme.palette.primary.main, 0.2),
+      transform: "scale(0.99)",
+    },
+    "&:focus-visible": {
+      outline: `2px solid ${alpha(theme.palette.primary.main, 0.55)}`,
+      outlineOffset: 3,
+    },
+  }),
+];
 
 export default function GlassButton({
   children = "glass button",
   href,
+  onClick,
   sx,
-  ...props
+  glass,
 }: GlassButtonProps) {
-  const linkProps = href ? { component: Link, href } : {};
+  const extra = sx === undefined || sx === null
+    ? []
+    : Array.isArray(sx)
+      ? sx
+      : [sx];
+
+  const merged = [...innerSx, ...extra];
 
   return (
-    <Button
-      disableRipple
-      variant="text"
-      {...linkProps}
-      sx={[
-        (theme) => ({
-          position: "relative",
-          display: "inline-flex",
-          width: "fit-content",
-          maxWidth: "100%",
-          boxSizing: "border-box",
-          borderRadius: "9999px",
-          paddingInline: "0.85em",
-          paddingBlock: "0.28em",
-          color: theme.palette.text.primary,
-          fontFamily: theme.typography.fontFamily,
-          fontSize: theme.typography.button.fontSize,
-          fontWeight: 400,
-          lineHeight: 1,
-          textDecoration: "none",
-          bgcolor: alpha("#a1a1a1", 0.2),
-          border: `1px solid ${alpha(theme.palette.common.white, 0.14)}`,
-          boxShadow: `inset 0 1px 0 0 ${alpha(theme.palette.common.white, 0.1)}, inset 0 -1px 0 0 ${alpha(theme.palette.common.white, 0.1)}`,
-          backdropFilter: "blur(14px)",
-          WebkitBackdropFilter: "blur(14px)",
-          transition: theme.transitions.create(
-            ["background-color", "box-shadow", "transform"],
-            { duration: theme.transitions.duration.short },
-          ),
-          "&:hover": {
-            bgcolor: alpha("#a1a1a1", 0.16),
-            borderColor: alpha(theme.palette.common.white, 0.4),
-            strokeWidth: 1,
-          },
-          "&:active": {
-            bgcolor: alpha(theme.palette.primary.main, 0.3),
-            transform: "scale(0.99)",
-          },
-          "&.Mui-focusVisible": {
-            outline: `2px solid ${alpha(theme.palette.primary.main, 0.55)}`,
-            outlineOffset: 3,
-          },
-        }),
-        ...(sx === undefined || sx === null ? [] : Array.isArray(sx) ? sx : [sx]),
-      ]}
-      {...props}
-    >
-      {children}
-    </Button>
+    <GlassSurface borderRadius={9999} {...glass}>
+      {href ? (
+        <Box component={Link} href={href} sx={merged}>
+          {children}
+        </Box>
+      ) : (
+        <Box component="button" onClick={onClick} sx={merged}>
+          {children}
+        </Box>
+      )}
+    </GlassSurface>
   );
 }

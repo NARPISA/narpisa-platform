@@ -119,7 +119,7 @@ export default function MineralHero() {
         src={ROCKS.titanite.src}
         alt={ROCKS.titanite.alt}
         width={{ xs: "35vw", md: "30vw" }}
-        top="10%"
+        top="15%"
         right="-8%"
         parallaxSpeed={0.25}
         floatX={5}
