@@ -1,9 +1,17 @@
 import { expect, test } from "@playwright/test";
 
-test("homepage links to the PDF queue testing page", async ({ page }) => {
+test("homepage renders the MINERAL DB hero", async ({ page }) => {
   await page.goto("/");
 
-  const testerLink = page.getByRole("link", { name: /open pdf link tester/i });
-  await expect(testerLink).toBeVisible();
-  await testerLink.click();
+  await expect(
+    page.getByRole("heading", { name: /mineral\s+db/i }),
+  ).toBeVisible();
+});
+
+test("homepage navigation links to the database page", async ({ page }) => {
+  await page.goto("/");
+
+  const dbLink = page.getByRole("link", { name: /database/i });
+  await expect(dbLink).toBeVisible();
+  await expect(dbLink).toHaveAttribute("href", "/data_input");
 });

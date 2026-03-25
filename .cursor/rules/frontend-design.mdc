@@ -1,0 +1,27 @@
+---
+description: Frontend design guidance for clear, consistent UI work
+alwaysApply: true
+---
+
+# Frontend Design
+
+- Design screens for clarity first: strong hierarchy, obvious primary actions, and enough spacing to scan quickly.
+- Prefer Material UI primitives and the shared theme before custom CSS or one-off utility stacks.
+- Reuse theme tokens for color, spacing, typography, radius, and shadows instead of hardcoding visual values.
+- Keep layouts simple and responsive: start with one clear desktop structure and ensure it collapses cleanly on smaller screens.
+- Every interactive view should handle loading, empty, success, and error states intentionally.
+- Default to accessible patterns: semantic structure, visible labels, keyboard support, focus visibility, and sufficient contrast.
+- Keep forms short, with helpful validation and clear submit outcomes near the action area.
+- Use accent color sparingly to highlight the most important action or status, not every element on the page.
+- Favor consistent card, list, and page-section patterns over inventing a new layout for each screen.
+- Use interesting components from component libraries such as shadcn and reactbits
+
+```tsx
+// Prefer theme-driven UI.
+<Card sx={{ p: 3, bgcolor: "background.paper" }}>
+  <Stack spacing={2}>
+    <Typography variant="h5">Queue status</Typography>
+    <Button variant="contained">Add source</Button>
+  </Stack>
+</Card>
+```

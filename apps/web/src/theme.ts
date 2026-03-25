@@ -1,4 +1,8 @@
+import type { CSSProperties } from "react";
 import { createTheme } from "@mui/material/styles";
+
+const fontMain = 'var(--font-chathura), "Helvetica Neue", Arial, sans-serif';
+const fontStyle = 'var(--font-bruno-ace), var(--font-chathura), sans-serif';
 
 type CustomScale = {
   100: string;
@@ -32,41 +36,55 @@ declare module "@mui/material/styles" {
     ternary?: CustomScale;
     accent?: CustomScale;
   }
+
+  interface TypographyVariants {
+    style: CSSProperties;
+  }
+
+  interface TypographyVariantsOptions {
+    style?: CSSProperties;
+  }
+}
+
+declare module "@mui/material/Typography" {
+  interface TypographyPropsVariantOverrides {
+    style: true;
+  }
 }
 
 const theme = createTheme({
   palette: {
-    mode: "light",
+    mode: "dark",
     primary: {
-      main: "#FFA102",
-      100: "#ffd6ba",
-      200: "#FFA102",
-      300: "#cb7f00",
-      400: "#995f00",
-      500: "#6a4000",
-      600: "#3e2400",
-      700: "#1c0e00",
+      main: "#71A89E",
+      100: "#c6f6ed",
+      200: "#8ed1c5",
+      300: "#71A89E",
+      400: "#568179",
+      500: "#3c5c56",
+      600: "#233935",
+      700: "#0d1917",
     },
     secondary: {
-      main: "#BC2D29",
-      100: "#fceded",
-      200: "#f8caca",
-      300: "#f39392",
-      400: "#ef4f4c",
-      500: "#BC2D29",
-      600: "#801c19",
-      700: "#490b0a",
+      main: "#C6D0CD",
+      100: "#edf2f0",
+      200: "#C6D0CD",
+      300: "#a0a9a6",
+      400: "#7c8381",
+      500: "#5a5f5d",
+      600: "#3a3d3c",
+      700: "#1c1e1e",
     },
     background: {
-      default: "#F4EED1",
-      main: "#F4EED1",
-      100: "#F4EED1",
-      200: "#cec69f",
-      300: "#a59f80",
-      400: "#7f7a61",
-      500: "#5a5744",
-      600: "#383629",
-      700: "#191811",
+      default: "#252827",
+      main: "#252827",
+      100: "#d0ddd9",
+      200: "#abb5b2",
+      300: "#868f8c",
+      400: "#646a68",
+      500: "#434846",
+      600: "#252827",
+      700: "#101111",
     },
     accent: {
       100: "#f2eff9",
@@ -79,53 +97,84 @@ const theme = createTheme({
       main: "#432E6F",
     },
     text: {
-      primary: "#181817",
-      secondary: "#575653",
-    },
-    grey: {
-      100: "#eeede9",
-      200: "#c6c5bf",
-      300: "#9f9e9a",
-      400: "#7a7976",
-      500: "#575653",
-      600: "#363534",
-      700: "#181817",
+      primary: "#C6D0CD",
+      secondary: "#71A89E",
     },
   },
   shape: {
     borderRadius: 20,
   },
   typography: {
-    fontFamily: "var(--font-geist-sans), Arial, Helvetica, sans-serif",
+    fontFamily: fontMain,
     h1: {
-      fontWeight: 700,
-      lineHeight: 1.1,
+      fontFamily: fontStyle,
+      fontWeight: 400,
+      fontSize: "9.7rem",
     },
     h2: {
-      fontWeight: 700,
-      lineHeight: 1.2,
+      fontFamily: fontStyle,
+      fontWeight: 400,
+      fontSize: "8rem",
+    },
+    h3: {
+      fontFamily: fontStyle,
+      fontWeight: 400,
+      fontSize: "6rem",
+    },
+    h4: {
+      fontFamily: fontStyle,
+      fontWeight: 400,
+      fontSize: "4rem",
+    },
+    h5: {
+      fontFamily: fontStyle,
+      fontWeight: 400,
+      fontSize: "2rem",
+    },
+    h6: {
+      fontFamily: fontStyle,
+      fontWeight: 400,
+      fontSize: "1.5rem",
+    },
+    body1: {
+      fontFamily: fontMain,
+      fontWeight: 400,
+      fontSize: "3rem",
+    },
+    body2: {
+      fontFamily: fontMain,
+      fontWeight: 400,
+      fontSize: "4rem",
+    },
+    style: {
+      fontFamily: fontStyle,
+      fontWeight: 400,
+      fontSize: "1.25rem",
+      lineHeight: 1.3,
+      letterSpacing: "0.04em",
     },
     button: {
       textTransform: "none",
-      fontWeight: 600,
+      fontWeight: 400,
+      fontSize: "2rem",
     },
   },
   components: {
-    MuiButton: {
-      defaultProps: {
-        disableElevation: true,
-      },
+    MuiCssBaseline: {
       styleOverrides: {
-        root: {
-          borderRadius: 999,
-          paddingInline: 20,
+        html: {
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          "&::-webkit-scrollbar": {
+            display: "none",
+          },
         },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          boxShadow: "0 12px 32px rgba(25, 24, 17, 0.12)",
+        body: {
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          "&::-webkit-scrollbar": {
+            display: "none",
+          },
         },
       },
     },

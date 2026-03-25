@@ -1,17 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import { Bruno_Ace, Chathura, Geist_Mono } from "next/font/google";
 
 import ThemeRegistry from "@/components/theme-registry";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+/** Primary UI copy: body, forms, dense UI text */
+const chathura = Chathura({
+  variable: "--font-chathura",
   subsets: ["latin"],
+  weight: ["100", "300", "400", "700", "800"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+/** Display / “style” headings and accent typography */
+const brunoAce = Bruno_Ace({
+  variable: "--font-bruno-ace",
   subsets: ["latin"],
+  weight: "400",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -28,7 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${chathura.variable} ${brunoAce.variable} antialiased`}
       >
         <ThemeRegistry>{children}</ThemeRegistry>
       </body>
