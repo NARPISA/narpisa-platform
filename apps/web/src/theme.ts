@@ -1,4 +1,8 @@
+import type { CSSProperties } from "react";
 import { createTheme } from "@mui/material/styles";
+
+const fontMain = 'var(--font-chathura), "Helvetica Neue", Arial, sans-serif';
+const fontStyle = 'var(--font-bruno-ace), var(--font-chathura), sans-serif';
 
 type CustomScale = {
   100: string;
@@ -31,6 +35,20 @@ declare module "@mui/material/styles" {
   interface PaletteOptions {
     ternary?: CustomScale;
     accent?: CustomScale;
+  }
+
+  interface TypographyVariants {
+    style: CSSProperties;
+  }
+
+  interface TypographyVariantsOptions {
+    style?: CSSProperties;
+  }
+}
+
+declare module "@mui/material/Typography" {
+  interface TypographyPropsVariantOverrides {
+    style: true;
   }
 }
 
@@ -87,18 +105,43 @@ const theme = createTheme({
     borderRadius: 20,
   },
   typography: {
-    fontFamily: "var(--font-geist-sans), Arial, Helvetica, sans-serif",
+    fontFamily: fontMain,
     h1: {
-      fontWeight: 700,
+      fontFamily: fontStyle,
+      fontWeight: 400,
       lineHeight: 1.1,
     },
     h2: {
-      fontWeight: 700,
+      fontFamily: fontStyle,
+      fontWeight: 400,
       lineHeight: 1.2,
+    },
+    h3: {
+      fontFamily: fontStyle,
+      fontWeight: 400,
+    },
+    h4: {
+      fontFamily: fontStyle,
+      fontWeight: 400,
+    },
+    h5: {
+      fontFamily: fontStyle,
+      fontWeight: 400,
+    },
+    h6: {
+      fontFamily: fontStyle,
+      fontWeight: 400,
+    },
+    style: {
+      fontFamily: fontStyle,
+      fontWeight: 400,
+      fontSize: "1.25rem",
+      lineHeight: 1.3,
+      letterSpacing: "0.04em",
     },
     button: {
       textTransform: "none",
-      fontWeight: 600,
+      fontWeight: 700,
     },
   },
   components: {
