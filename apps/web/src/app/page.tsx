@@ -1,8 +1,8 @@
 import Box from "@mui/material/Box";
 
-import AfricaMapFrame from "@/components/africa-map-frame";
+import AfricaMapFrame from "@/components/frames/africa-map-frame";
 import GlassNav from "@/components/glass-nav";
-import MineralHero from "@/components/mineral-hero";
+import MineralHero from "@/components/frames/mineral-hero";
 
 export default function Home() {
   return (

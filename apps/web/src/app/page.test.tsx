@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { afterEach, beforeAll, vi } from "vitest";
 
 import ThemeRegistry from "@/components/theme-registry";
+import { nextNavigationMock } from "@/test/next-navigation-mock";
 
 import Home from "./page";
 
@@ -63,6 +64,10 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
+beforeEach(() => {
+  nextNavigationMock.pathname = "/";
+});
+
 describe("Home page", () => {
   it("renders main landmark", () => {
     renderHome();
@@ -87,7 +92,7 @@ describe("Home page", () => {
     expect(brand).toHaveAttribute("href", "/");
   });
 
-  it("links to the database page from nav", () => {
+  it("links to the data input page from the Database nav item", () => {
     renderHome();
 
     expect(

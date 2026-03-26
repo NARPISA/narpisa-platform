@@ -12,6 +12,8 @@ interface GlassButtonProps {
   children?: ReactNode;
   href?: string;
   onClick?: () => void;
+  disabled?: boolean;
+  type?: "button" | "submit";
   sx?: SxProps<Theme>;
   glass?: Partial<GlassSurfaceProps>;
 }
@@ -49,6 +51,10 @@ const innerSx = [
       outline: `2px solid ${alpha(theme.palette.primary.main, 0.55)}`,
       outlineOffset: 3,
     },
+    "&:disabled": {
+      opacity: 0.45,
+      cursor: "not-allowed",
+    },
   }),
 ];
 
@@ -56,6 +62,8 @@ export default function GlassButton({
   children = "glass button",
   href,
   onClick,
+  disabled = false,
+  type = "button",
   sx,
   glass,
 }: GlassButtonProps) {
@@ -68,13 +76,23 @@ export default function GlassButton({
   const merged = [...innerSx, ...extra];
 
   return (
-    <GlassSurface borderRadius={9999} {...glass}>
-      {href ? (
+    <GlassSurface
+      borderRadius={9999}
+      {...glass}
+      style={disabled ? { pointerEvents: "none" } : undefined}
+    >
+      {href && !disabled ? (
         <Box component={Link} href={href} sx={merged}>
           {children}
         </Box>
       ) : (
-        <Box component="button" onClick={onClick} sx={merged}>
+        <Box
+          component="button"
+          type={type}
+          disabled={disabled}
+          onClick={onClick}
+          sx={merged}
+        >
           {children}
         </Box>
       )}

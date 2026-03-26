@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
-import { Bruno_Ace, Chathura, Geist_Mono } from "next/font/google";
+import { Bruno_Ace, Chathura } from "next/font/google";
 
 import ThemeRegistry from "@/components/theme-registry";
+
+import "./globals.css";
 
 /** Primary UI copy: body, forms, dense UI text */
 const chathura = Chathura({

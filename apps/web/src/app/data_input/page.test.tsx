@@ -1,17 +1,67 @@
+import type { ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, vi } from "vitest";
+import { afterEach, beforeAll, vi } from "vitest";
+
+import ThemeRegistry from "@/components/theme-registry";
+import { nextNavigationMock } from "@/test/next-navigation-mock";
 
 import DataInputPage from "./page";
 
+vi.mock("@/components/glass-surface", () => ({
+  default: function GlassSurfaceMock({ children }: { children?: ReactNode }) {
+    return <div data-testid="glass-surface">{children}</div>;
+  },
+}));
+
+beforeAll(() => {
+  globalThis.ResizeObserver = class {
+    observe(): void {}
+    unobserve(): void {}
+    disconnect(): void {}
+  } as unknown as typeof ResizeObserver;
+
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    configurable: true,
+    value: vi.fn().mockImplementation((query: string) => {
+      const minWidthMatch = query.match(/min-width:\s*(\d+)px/);
+      const minWidth = minWidthMatch ? Number(minWidthMatch[1]) : 0;
+      return {
+        matches: minWidth >= 600,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      };
+    }),
+  });
+});
+
 afterEach(() => {
+  nextNavigationMock.pathname = "/";
   vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
 
+beforeEach(() => {
+  nextNavigationMock.pathname = "/data_input";
+});
+
+function renderDataInput() {
+  return render(
+    <ThemeRegistry>
+      <DataInputPage />
+    </ThemeRegistry>,
+  );
+}
+
 describe("Data input page", () => {
-  it("renders the page heading and home link", () => {
+  it("renders Enter Data heading and nav", () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => [],
@@ -19,19 +69,16 @@ describe("Data input page", () => {
 
     vi.stubGlobal("fetch", fetchMock);
 
-    render(<DataInputPage />);
+    renderDataInput();
 
     expect(
       screen.getByRole("heading", {
-        name: /pdf link testing page/i,
+        name: /enter data/i,
       }),
     ).toBeInTheDocument();
 
-    expect(
-      screen.getByRole("link", {
-        name: /back to home/i,
-      }),
-    ).toHaveAttribute("href", "/");
+    expect(screen.getByRole("navigation", { name: /primary/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^MineralDB$/i })).toHaveAttribute("href", "/");
   });
 
   it("blocks submission for an invalid payload", async () => {
@@ -43,14 +90,14 @@ describe("Data input page", () => {
 
     vi.stubGlobal("fetch", fetchMock);
 
-    render(<DataInputPage />);
+    renderDataInput();
 
     await user.type(
       screen.getByRole("textbox", { name: /document title/i }),
       "Haib Copper PEA",
     );
     await user.type(
-      screen.getByRole("textbox", { name: /pdf source url/i }),
+      screen.getByRole("textbox", { name: /enter pdf address/i }),
       "not-a-valid-url",
     );
     await user.type(
@@ -60,7 +107,7 @@ describe("Data input page", () => {
 
     expect(
       screen.getByRole("button", {
-        name: /queue source link/i,
+        name: /parse/i,
       }),
     ).toBeDisabled();
   });
@@ -122,17 +169,17 @@ describe("Data input page", () => {
 
     vi.stubGlobal("fetch", fetchMock);
 
-    render(<DataInputPage />);
+    renderDataInput();
 
     const titleInput = screen.getByRole("textbox", { name: /document title/i });
-    const urlInput = screen.getByRole("textbox", { name: /pdf source url/i });
+    const urlInput = screen.getByRole("textbox", { name: /enter pdf address/i });
     const attributionInput = screen.getByRole("textbox", { name: /attribution/i });
-    const addButton = screen.getByRole("button", { name: /queue source link/i });
+    const parseButton = screen.getByRole("button", { name: /parse/i });
 
     await user.type(titleInput, "Haib Copper PEA");
     await user.type(urlInput, "https://example.org/report.pdf");
     await user.type(attributionInput, "NaRPISA research team");
-    await user.click(addButton);
+    await user.click(parseButton);
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/queue-source",
@@ -182,7 +229,7 @@ describe("Data input page", () => {
 
     vi.stubGlobal("fetch", fetchMock);
 
-    render(<DataInputPage />);
+    renderDataInput();
 
     expect(await screen.findByText(/fetching pdf/i)).toBeInTheDocument();
     expect(screen.getByText("Haib Copper PEA")).toBeInTheDocument();
@@ -228,7 +275,7 @@ describe("Data input page", () => {
 
     vi.stubGlobal("fetch", fetchMock);
 
-    render(<DataInputPage />);
+    renderDataInput();
 
     await user.click(await screen.findByLabelText(/delete haib copper pea/i));
 

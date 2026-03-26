@@ -4,7 +4,7 @@ import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-import AfricaMap from "./africa-map";
+import AfricaMap from "../africa-map";
 
 export default function AfricaMapFrame() {
   return (

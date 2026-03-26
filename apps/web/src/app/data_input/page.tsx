@@ -3,20 +3,19 @@
 import { useCallback, useEffect, useState } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
-import Container from "@mui/material/Container";
 import CircularProgress from "@mui/material/CircularProgress";
 import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
-import Link from "next/link";
 
+import GlassButton from "@/components/glass-button";
+import GlassNav from "@/components/glass-nav";
+import NarpisaTextField from "@/components/text-field";
 import {
   createSourceDocumentInputSchema,
   queuedSourceDocumentSchema,
@@ -68,9 +67,7 @@ export default function DataInputPage() {
       const queuedLinks = queuedSourceDocumentSchema
         .array()
         .parse(await response.json());
-      setLinks(
-        queuedLinks,
-      );
+      setLinks(queuedLinks);
     } catch (error) {
       setErrorMessage(
         error instanceof Error
@@ -192,75 +189,97 @@ export default function DataInputPage() {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 6 }}>
-      <Stack spacing={3}>
-        <Box>
-          <Link href="/">
-            <Button variant="text">Back to home</Button>
-          </Link>
-        </Box>
+    <Box
+      component="main"
+      sx={{
+        minHeight: "100vh",
+        bgcolor: "background.default",
+        overflowX: "hidden",
+      }}
+    >
+      <GlassNav />
 
-        <Box>
-          <Typography component="h1" variant="h4" gutterBottom>
-            PDF link testing page
-          </Typography>
-          <Typography color="text.secondary">
-            This page is a simple local playground for trying source-link input
-            before connecting the full ingestion workflow.
-          </Typography>
-        </Box>
+      <Stack
+        spacing={3}
+        sx={{
+          px: 3,
+          pt: { xs: 14, sm: 16 },
+          pb: 5,
+          maxWidth: "48rem",
+          mx: "auto",
+          width: 1,
+        }}
+      >
+        <Typography component="h1" variant="h4" color="secondary" align="center">
+          Enter Data
+        </Typography>
 
-        <Stack spacing={2}>
-          <TextField
-            label="Document title"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            placeholder="Example: Haib Copper PEA"
-            fullWidth
-          />
-          <TextField
-            label="PDF source URL"
+        <Stack spacing={2} sx={{ width: 1 }}>
+          <NarpisaTextField
+            fieldWidth="long"
+            label="Enter PDF Address"
             value={url}
             onChange={(event) => setUrl(event.target.value)}
             placeholder="https://example.org/report.pdf"
-            fullWidth
+            formControlSx={{ maxWidth: "none" }}
           />
-          <TextField
+          <NarpisaTextField
+            fieldWidth="long"
+            label="Document Title"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            placeholder="Example: Haib Copper PEA"
+            formControlSx={{ maxWidth: "none" }}
+          />
+          <NarpisaTextField
+            fieldWidth="long"
             label="Attribution"
             value={attribution}
             onChange={(event) => setAttribution(event.target.value)}
             placeholder="Example: Deep-South Resources public study"
-            fullWidth
+            formControlSx={{ maxWidth: "none" }}
           />
-          <Box>
-            <Button onClick={handleAddLink} disabled={!canAdd} variant="contained">
-              {isSubmitting ? <CircularProgress color="inherit" size={20} /> : "Queue source link"}
-            </Button>
+
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            <GlassButton onClick={() => void handleAddLink()} disabled={!canAdd}>
+              {isSubmitting ? (
+                <CircularProgress color="inherit" size={24} />
+              ) : (
+                "Parse"
+              )}
+            </GlassButton>
           </Box>
         </Stack>
 
         {errorMessage ? <Alert severity="warning">{errorMessage}</Alert> : null}
         {successMessage ? <Alert severity="success">{successMessage}</Alert> : null}
 
-        <Box>
-          <Typography variant="h6" gutterBottom>
+        <Stack spacing={1.5} sx={{ width: 1 }}>
+          <Typography variant="h6" color="secondary">
             Queued links
           </Typography>
           {isRefreshingLinks ? (
-            <Typography color="text.secondary" variant="body2">
+            <Typography variant="style" color="text.secondary">
               Refreshing queue status...
             </Typography>
           ) : null}
           {isLoadingLinks ? (
-            <Typography color="text.secondary">Loading queued links...</Typography>
+            <Typography variant="style" color="text.secondary">
+              Loading queued links...
+            </Typography>
           ) : links.length === 0 ? (
-            <Typography color="text.secondary">
+            <Typography variant="style" color="text.secondary">
               No queued links yet.
             </Typography>
           ) : (
             <List disablePadding>
               {links.map((link) => (
-                <ListItem key={link.id} disableGutters divider>
+                <ListItem
+                  key={link.id}
+                  disableGutters
+                  divider
+                  sx={{ borderColor: "divider" }}
+                >
                   <ListItemText
                     primary={link.title}
                     secondary={`${link.sourceUrl} | ${link.attribution}`}
@@ -285,7 +304,7 @@ export default function DataInputPage() {
                       </IconButton>
                     ) : null}
                     {link.errorMessage ? (
-                      <Typography color="error" variant="body2">
+                      <Typography color="error" variant="style">
                         {link.errorMessage}
                       </Typography>
                     ) : null}
@@ -294,9 +313,9 @@ export default function DataInputPage() {
               ))}
             </List>
           )}
-        </Box>
+        </Stack>
       </Stack>
-    </Container>
+    </Box>
   );
 }
 

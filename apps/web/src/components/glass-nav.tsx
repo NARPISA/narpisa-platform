@@ -4,26 +4,36 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import GlassButton from "./glass-button";
 
 interface NavLink {
   label: string;
   href: string;
-  active?: boolean;
 }
 
 const NAV_LINKS: NavLink[] = [
-  { label: "Home", href: "/", active: true },
+  { label: "Home", href: "/" },
   { label: "About", href: "/about" },
   { label: "Pricing", href: "/pricing" },
   { label: "Database", href: "/data_input" },
 ];
 
+function navLinkIsActive(pathname: string, href: string): boolean {
+  if (href === "/") {
+    return pathname === "/";
+  }
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export default function GlassNav() {
+  const pathname = usePathname() ?? "";
+
   return (
     <Box
       component="nav"
+      aria-label="Primary navigation"
       sx={{
         position: "fixed",
         top: 0,
@@ -58,7 +68,7 @@ export default function GlassNav() {
         sx={{ display: { xs: "none", sm: "flex" } }}
       >
         {NAV_LINKS.map((link) =>
-          link.active ? (
+          navLinkIsActive(pathname, link.href) ? (
             <GlassButton
               key={link.label}
               href={link.href}

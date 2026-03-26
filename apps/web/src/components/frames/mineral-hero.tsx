@@ -11,11 +11,11 @@ import {
   useSpring,
 } from "motion/react";
 
-import FloatingRock from "./floating-rock";
-import GlassLabel from "./glass-label";
+import FloatingRock from "../floating-rock";
+import GlassLabel from "../glass-label";
 
 /** Extra scroll distance through the hero (parallax + handoff to next section). */
-const HERO_SCROLL_VH = 1.5;
+const HERO_SCROLL_VH = 1.2;
 
 const ROCKS = {
   rutile: {
@@ -185,7 +185,7 @@ export default function MineralHero() {
             pb: { xs: 4, md: 6 },
           }}
         >
-          <motion.div style={{ y: titleY, opacity: titleOpacity }}>
+          <motion.div style={{ opacity: titleOpacity }}>
             <Box
               sx={{
                 width: "100%",
@@ -223,7 +223,7 @@ export default function MineralHero() {
               pointerEvents: "none",
             }}
           >
-            <motion.div style={{ y: titleY, opacity: titleOpacity }}>
+            <motion.div style={{opacity: titleOpacity }}>
               <Typography
                 variant="h1"
                 sx={{
@@ -242,7 +242,7 @@ export default function MineralHero() {
             </motion.div>
           </Box>
 
-          <motion.div style={{ y: titleY, opacity: titleOpacity }}>
+          <motion.div style={{ opacity: titleOpacity }}>
             <Box
               sx={{
                 width: "100%",
