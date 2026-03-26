@@ -100,6 +100,11 @@ const theme = createTheme({
       primary: "#C6D0CD",
       secondary: "#71A89E",
     },
+    error: {
+      main: "#8d3434",
+      light: "#b04a4a",
+      dark: "#6b2828",
+    },
   },
   shape: {
     borderRadius: 20,

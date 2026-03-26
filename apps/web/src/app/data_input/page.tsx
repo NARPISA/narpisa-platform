@@ -12,11 +12,12 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import Link from "next/link";
 
+import NarpisaPrimaryButton from "@/components/narpisa-primary-button";
+import NarpisaTextField from "@/components/narpisa-text-field";
 import {
   createSourceDocumentInputSchema,
   queuedSourceDocumentSchema,
@@ -211,31 +212,35 @@ export default function DataInputPage() {
         </Box>
 
         <Stack spacing={2}>
-          <TextField
+          <NarpisaTextField
+            fieldWidth="regular"
             label="Document title"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             placeholder="Example: Haib Copper PEA"
-            fullWidth
           />
-          <TextField
+          <NarpisaTextField
+            fieldWidth="long"
             label="PDF source URL"
             value={url}
             onChange={(event) => setUrl(event.target.value)}
             placeholder="https://example.org/report.pdf"
-            fullWidth
           />
-          <TextField
+          <NarpisaTextField
+            fieldWidth="regular"
             label="Attribution"
             value={attribution}
             onChange={(event) => setAttribution(event.target.value)}
             placeholder="Example: Deep-South Resources public study"
-            fullWidth
           />
           <Box>
-            <Button onClick={handleAddLink} disabled={!canAdd} variant="contained">
-              {isSubmitting ? <CircularProgress color="inherit" size={20} /> : "Queue source link"}
-            </Button>
+            <NarpisaPrimaryButton onClick={handleAddLink} disabled={!canAdd}>
+              {isSubmitting ? (
+                <CircularProgress color="inherit" size={20} />
+              ) : (
+                "queue source link"
+              )}
+            </NarpisaPrimaryButton>
           </Box>
         </Stack>
 

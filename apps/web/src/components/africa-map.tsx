@@ -1,10 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import { alpha, useTheme } from "@mui/material/styles";
 import type { SxProps, Theme } from "@mui/material/styles";
 import DottedMap from "dotted-map/without-countries";
+
+import { PinContainer } from "@/components/ui/3d-pin";
 
 import africaMapJson from "./africa-map-data";
 
@@ -12,6 +14,7 @@ interface Marker {
   lat: number;
   lng: number;
   label?: string;
+  href?: string;
 }
 
 export interface AfricaMapProps {
@@ -38,65 +41,151 @@ export default function AfricaMap(props: AfricaMapProps) {
     sx,
   } = props;
 
-  const svgMap = useMemo(() => {
+  const { svgMap, mapWidth, mapHeight, positionedMarkers } = useMemo(() => {
     const map = new DottedMap({
       map: JSON.parse(africaMapJson as string),
     });
 
-    for (const marker of markers) {
-      map.addPin({
-        lat: marker.lat,
-        lng: marker.lng,
-        svgOptions: {
-          color: markerColor,
-          radius: 0.45,
-        },
-        data: {
-          label: marker.label,
-        },
-      });
-    }
-
-    return map.getSVG({
+    const svg = map.getSVG({
       radius: 0.22,
       color: isDark ? dotColorDark : dotColorLight,
       shape: "circle",
       backgroundColor: isDark ? backgroundColorDark : backgroundColorLight,
     });
+
+    const positioned = [];
+    for (const marker of markers) {
+      const point = map.getPin({ lat: marker.lat, lng: marker.lng });
+      if (point) {
+        positioned.push({ marker, point });
+      }
+    }
+
+    return {
+      svgMap: svg,
+      mapWidth: map.image.width,
+      mapHeight: map.image.height,
+      positionedMarkers: positioned,
+    };
   }, [
     isDark,
     markers,
-    markerColor,
     dotColorLight,
     dotColorDark,
     backgroundColorLight,
     backgroundColorDark,
   ]);
 
+  const pinHoverDepth = useRef(0);
+  const [mapTilted, setMapTilted] = useState(false);
+
+  const handlePinHoverChange = useCallback((hovered: boolean) => {
+    pinHoverDepth.current += hovered ? 1 : -1;
+    if (pinHoverDepth.current < 0) {
+      pinHoverDepth.current = 0;
+    }
+    setMapTilted(pinHoverDepth.current > 0);
+  }, []);
+
   return (
     <Box
       sx={{
         width: "100%",
+        maxWidth: "100%",
         borderRadius: 2,
         position: "relative",
         overflow: "hidden",
+        py: 2,
+        px: 0.5,
         ...sx,
       }}
     >
       <Box
-        component="img"
-        src={`data:image/svg+xml;utf8,${encodeURIComponent(svgMap)}`}
-        alt="Africa dotted map"
-        draggable={false}
         sx={{
-          height: "100%",
+          perspective: "1000px",
+          perspectiveOrigin: "50% 45%",
+          position: "relative",
           width: "100%",
-          objectFit: "contain",
-          pointerEvents: "none",
-          userSelect: "none",
-          display: "block",
+          maxWidth: "100%",
         }}
-      />
+      >
+        <Box
+          sx={{
+            position: "relative",
+            width: "100%",
+            maxWidth: "100%",
+            aspectRatio: `${mapWidth} / ${mapHeight}`,
+            transformStyle: "preserve-3d",
+            transition:
+              "transform 0.65s cubic-bezier(0.22, 1, 0.36, 1)",
+            transform: mapTilted
+              ? "rotateX(40deg) translateZ(0)"
+              : "rotateX(0deg) translateZ(0)",
+            borderRadius: 2,
+          }}
+        >
+          <Box
+            component="img"
+            src={`data:image/svg+xml;utf8,${encodeURIComponent(svgMap)}`}
+            alt="Africa dotted map"
+            draggable={false}
+            sx={{
+              position: "absolute",
+              inset: 0,
+              height: "100%",
+              width: "100%",
+              objectFit: "fill",
+              pointerEvents: "none",
+              userSelect: "none",
+              display: "block",
+              borderRadius: 2,
+              transform: "translateZ(0)",
+            }}
+          />
+
+          <Box
+            sx={{
+              position: "absolute",
+              inset: 0,
+              pointerEvents: "none",
+              transformStyle: "preserve-3d",
+            }}
+          >
+            {positionedMarkers.map(({ marker, point }, index) => (
+              <Box
+                key={`${marker.lat}-${marker.lng}`}
+                sx={{
+                  position: "absolute",
+                  left: `${(point.x / mapWidth) * 100}%`,
+                  top: `${(point.y / mapHeight) * 100}%`,
+                  transform:
+                    "translate(-50%, -50%) translateZ(28px)",
+                  transformStyle: "preserve-3d",
+                  zIndex: 10 + index,
+                  pointerEvents: "auto",
+                }}
+              >
+                <PinContainer
+                  title={marker.label}
+                  href={marker.href}
+                  anchorOnly
+                  onHoverChange={handlePinHoverChange}
+                >
+                  <Box
+                    sx={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      bgcolor: markerColor,
+                      boxShadow: `0 0 0 2px ${alpha(markerColor, 0.35)}`,
+                    }}
+                  />
+                </PinContainer>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      </Box>
     </Box>
   );
 }
