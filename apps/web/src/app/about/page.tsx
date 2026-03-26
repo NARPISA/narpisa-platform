@@ -3,19 +3,21 @@ import Typography from "@mui/material/Typography";
 
 import GlassNav from "@/components/glass-nav";
 
+import { useTheme } from "@mui/material/styles";
 export default function AboutPage() {
+  const theme = useTheme();
   return (
     <Box
       component="main"
       sx={{ minHeight: "100vh", bgcolor: "background.default", overflowX: "hidden" }}
     >
-      <GlassNav activeHref="/about" />
+      <GlassNav/>
       <Box sx={{ px: 3, pt: { xs: 14, sm: 16 }, pb: 6, maxWidth: "48rem", mx: "auto" }}>
         <Typography
           component="h1"
           variant="h4"
           sx={{
-            fontFamily: (theme) => theme.typography.h2.fontFamily,
+            fontFamily: theme.typography.h2.fontFamily,
             color: "secondary.main",
             mb: 2,
           }}
