@@ -2,8 +2,7 @@
 
 import asyncio
 
-from app.services.document_queue import document_queue
-from app.services.job_processor import QueuedDocumentProcessor
+from app.adaptors.pdf.services import QueuedDocumentProcessor, document_queue
 from app.worker.celery_app import celery_app
 
 

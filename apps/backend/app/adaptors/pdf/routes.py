@@ -4,20 +4,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.config import Settings, get_settings
-from app.models.document import ParsedDocument, QueuedSourceDocument, SourceParseRequest
-from app.services.document_queue import document_queue
-from app.services.pdf_parser import PdfParser
-from app.services.source_fetcher import SourceFetcher
-from app.worker.tasks import process_queued_document
+from app.adaptors.pdf.models import ParsedDocument, QueuedSourceDocument, SourceParseRequest
+from app.adaptors.pdf.services import SourceFetcher, PdfParser, document_queue
+from app.adaptors.pdf.tasks import process_queued_document
+
 
 router = APIRouter()
-
-
-@router.get("/health", tags=["health"])
-async def healthcheck(
-    settings: Annotated[Settings, Depends(get_settings)],
-) -> dict[str, str]:
-    return {"status": "ok", "service": settings.app_name}
 
 
 @router.post("/process-source", response_model=ParsedDocument, tags=["processing"])
