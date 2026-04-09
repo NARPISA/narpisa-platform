@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node ../../scripts/run-backend-python.mjs -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
-    "dev:worker": "node ../../scripts/run-backend-python.mjs -m celery --app app.worker.celery_app worker --loglevel info --concurrency 1 --pool solo",
+    "dev:worker": "node ../../scripts/run-backend-python.mjs -m celery --app app.celery_main:celery_app worker --loglevel info --concurrency 1 --pool solo",
     "format": "node ../../scripts/run-backend-python.mjs -m ruff check --fix app tests && node ../../scripts/run-backend-python.mjs -m black app tests",
     "lint": "node ../../scripts/run-backend-python.mjs -m ruff check app tests && node ../../scripts/run-backend-python.mjs -m black --check app tests",
     "typecheck": "node ../../scripts/run-backend-python.mjs -m mypy app",

@@ -3,7 +3,7 @@
 import asyncio
 
 from app.adaptors.pdf.services import QueuedDocumentProcessor, document_queue
-from app.worker.celery_app import celery_app
+from app.celery_main import celery_app
 
 
 # Celery's decorator is intentionally untyped.
