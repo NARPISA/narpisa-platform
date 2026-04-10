@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { createTheme } from "@mui/material/styles";
 
-const fontMain = 'var(--font-chathura), "Helvetica Neue", Arial, sans-serif';
+const fontMain = 'var(--font-manrope), "Helvetica Neue", Arial, sans-serif';
 const fontStyle = 'var(--font-bruno-ace), var(--font-chathura), sans-serif';
 
 declare module "@mui/material/styles" {
@@ -142,6 +142,24 @@ const theme = createTheme({
     },
   },
   components: {
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          minHeight: 34,
+          fontSize: "0.82rem",
+          lineHeight: 1.25,
+          fontWeight: 500,
+        },
+      },
+    },
+    MuiListSubheader: {
+      styleOverrides: {
+        root: {
+          fontSize: "0.8rem",
+          lineHeight: 1.25,
+        },
+      },
+    },
     MuiAlert: {
       styleOverrides: {
         root: {
@@ -167,6 +185,14 @@ const theme = createTheme({
           "&::-webkit-scrollbar": {
             display: "none",
           },
+        },
+        "body .MuiDataGrid-panel .MuiDataGrid-filterForm": {
+          padding: "4px 8px !important",
+          gap: "4px !important",
+          minHeight: "auto !important",
+        },
+        "body .MuiDataGrid-panel .MuiDataGrid-filterForm .MuiInputBase-root": {
+          minHeight: "auto !important",
         },
       },
     },
