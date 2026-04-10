@@ -4,17 +4,6 @@ import { createTheme } from "@mui/material/styles";
 const fontMain = 'var(--font-chathura), "Helvetica Neue", Arial, sans-serif';
 const fontStyle = 'var(--font-bruno-ace), var(--font-chathura), sans-serif';
 
-type CustomScale = {
-  100: string;
-  200: string;
-  300: string;
-  400: string;
-  500: string;
-  600: string;
-  700: string;
-  main: string;
-};
-
 declare module "@mui/material/styles" {
   interface TypeBackground {
     100: string;
@@ -25,16 +14,6 @@ declare module "@mui/material/styles" {
     600: string;
     700: string;
     main: string;
-  }
-
-  interface Palette {
-    ternary: CustomScale;
-    accent: CustomScale;
-  }
-
-  interface PaletteOptions {
-    ternary?: CustomScale;
-    accent?: CustomScale;
   }
 
   interface TypographyVariants {
@@ -54,56 +33,54 @@ declare module "@mui/material/Typography" {
 
 const theme = createTheme({
   palette: {
-    mode: "dark",
+    mode: "light",
     primary: {
-      main: "#71A89E",
-      100: "#c6f6ed",
-      200: "#8ed1c5",
-      300: "#71A89E",
-      400: "#568179",
-      500: "#3c5c56",
-      600: "#233935",
-      700: "#0d1917",
+      main: "#F07213",
+      100: "#fff0e5",
+      200: "#ffd4b3",
+      300: "#F07213",
+      400: "#e06510",
+      500: "#be5510",
+      600: "#8f3f0c",
+      700: "#5c2808",
     },
     secondary: {
-      main: "#C6D0CD",
-      100: "#edf2f0",
-      200: "#C6D0CD",
-      300: "#a0a9a6",
-      400: "#7c8381",
-      500: "#5a5f5d",
-      600: "#3a3d3c",
-      700: "#1c1e1e",
+      main: "#5384B4",
+      100: "#e8eef5",
+      200: "#c5d4e6",
+      300: "#9fb8d4",
+      400: "#7699c0",
+      500: "#5384B4",
+      600: "#3d6489",
+      700: "#2a435c",
     },
     background: {
-      default: "#252827",
-      main: "#252827",
-      100: "#d0ddd9",
-      200: "#abb5b2",
-      300: "#868f8c",
-      400: "#646a68",
-      500: "#434846",
-      600: "#252827",
-      700: "#101111",
-    },
-    accent: {
-      100: "#f2eff9",
-      200: "#cfc7e8",
-      300: "#ab9cd7",
-      400: "#8971c5",
-      500: "#6849a8",
-      600: "#432E6F",
-      700: "#21153B",
-      main: "#432E6F",
+      default: "#F6F6F6",
+      paper: "#FFFFFF",
+      main: "#F6F6F6",
+      100: "#FFFFFF",
+      200: "#F6F6F6",
+      300: "#D6D6D6",
+      400: "#A3A3A3",
+      500: "#8C8C8C",
+      600: "#777777",
+      700: "#494949",
     },
     text: {
-      primary: "#C6D0CD",
-      secondary: "#71A89E",
+      primary: "#494949",
+      secondary: "#8C8C8C",
+    },
+    success: {
+      main: "#01A538",
+      light: "rgba(172, 255, 200, 0.5)",
+      dark: "#016e2a",
+      contrastText: "#FFFFFF",
     },
     error: {
-      main: "#8d3434",
-      light: "#b04a4a",
-      dark: "#6b2828",
+      main: "#C70000",
+      light: "rgba(255, 172, 172, 0.5)",
+      dark: "#9e0000",
+      contrastText: "#FFFFFF",
     },
   },
   shape: {
