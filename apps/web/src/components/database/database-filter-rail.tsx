@@ -14,8 +14,8 @@ import {
   type DatabaseCategory,
   type DatabaseFilterGroup,
 } from "@/app/database/database-types";
+import BrandHomeLink from "@/components/brand-home-link";
 import DatabaseHamburgerButton from "./database-hamburger-button";
-import DatabaseBrandLogo from "./database-brand-logo";
 
 type DatabaseFilterRailProps = {
   menuOpen: boolean;
@@ -84,12 +84,7 @@ export default function DatabaseFilterRail({
     >
       <Stack spacing={2.5}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Stack direction="row" spacing={1.5} alignItems="center">
-            <DatabaseBrandLogo size={70} />
-            <Typography sx={{ color: "background.700", fontSize: "2rem", fontWeight: 700 }}>
-              minerals
-            </Typography>
-          </Stack>
+          <BrandHomeLink size={70} color="background.700" title="MineralDB" subtitle="" />
           <DatabaseHamburgerButton open={menuOpen} onClick={onOpenMenu} />
         </Stack>
 

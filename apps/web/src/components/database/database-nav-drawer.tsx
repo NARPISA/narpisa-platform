@@ -5,12 +5,11 @@ import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 import { DATABASE_DRAWER_LINKS } from "@/app/database/database-types";
+import BrandHomeLink from "@/components/brand-home-link";
 import NavUnderlineLink from "@/components/nav-underline-link";
-import DatabaseBrandLogo from "./database-brand-logo";
 
 type DatabaseNavDrawerProps = {
   open: boolean;
@@ -38,12 +37,7 @@ export default function DatabaseNavDrawer({
     >
       <Stack spacing={3}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Stack direction="row" spacing={1.5} alignItems="center">
-            <DatabaseBrandLogo size={56} />
-            <Typography sx={{ fontSize: "2rem", fontWeight: 700 }}>
-              minerals
-            </Typography>
-          </Stack>
+          <BrandHomeLink size={56} title="MineralDB" color="common.white" />
           <IconButton onClick={onClose} sx={{ color: "common.white" }}>
             <CloseRoundedIcon />
           </IconButton>

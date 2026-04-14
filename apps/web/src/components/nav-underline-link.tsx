@@ -1,5 +1,4 @@
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 
 type NavUnderlineLinkProps = {
   href: string;
@@ -18,7 +17,6 @@ export default function NavUnderlineLink({
 }: NavUnderlineLinkProps) {
   return (
     <Link
-      component={NextLink}
       href={href}
       underline="none"
       color={color}

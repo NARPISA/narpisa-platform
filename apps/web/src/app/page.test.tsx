@@ -1,28 +1,10 @@
 import { render, screen } from "@testing-library/react";
-import { afterEach, beforeAll, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import ThemeRegistry from "@/components/theme-registry";
 import { nextNavigationMock } from "@/test/next-navigation-mock";
 
 import Home from "./page";
-
-vi.mock("@/components/mineral-hero", () => ({
-  default: function MineralHeroMock() {
-    return (
-      <div>
-        <h1>
-          MINERAL <span>DB</span>
-        </h1>
-      </div>
-    );
-  },
-}));
-
-vi.mock("@/components/africa-map-frame", () => ({
-  default: function AfricaMapFrameMock() {
-    return <section aria-label="Africa coverage map" />;
-  },
-}));
 
 function renderHome() {
   return render(
@@ -75,44 +57,45 @@ describe("Home page", () => {
     expect(screen.getByRole("main")).toBeInTheDocument();
   });
 
-  it("renders the MINERAL DB heading", () => {
+  it("renders the refreshed homepage headline", () => {
     renderHome();
 
     expect(
       screen.getByRole("heading", {
-        name: /mineral\s+db/i,
+        name: /unlock southern africa's natural resources all in one place/i,
       }),
     ).toBeInTheDocument();
   });
 
-  it("renders the navigation bar with MineralDB brand link", () => {
+  it("renders the new marketing header brand link", () => {
     renderHome();
 
-    const brand = screen.getByRole("link", { name: /^MineralDB$/i });
+    const brand = screen.getByRole("link", { name: /MineralDB/i });
     expect(brand).toHaveAttribute("href", "/");
   });
 
-  it("links to the data input page from the Database nav item", () => {
+  it("keeps the primary calls to action wired correctly", () => {
     renderHome();
 
-    expect(
-      screen.getByRole("link", { name: /^database$/i }),
-    ).toHaveAttribute("href", "/data_input");
+    expect(screen.getByRole("link", { name: /get started/i })).toHaveAttribute(
+      "href",
+      "/data_input",
+    );
+    expect(screen.getByRole("link", { name: /view databases/i })).toHaveAttribute(
+      "href",
+      "/database",
+    );
   });
 
-  it("renders Sign In in the nav", () => {
+  it("shows the three promoted feature routes", () => {
     renderHome();
 
-    expect(
-      screen.getByRole("link", { name: /^sign in$/i }),
-    ).toHaveAttribute("href", "/signin");
-  });
-
-  it("renders Home as an active-style nav link", () => {
-    renderHome();
-
-    expect(
-      screen.getByRole("link", { name: /^home$/i }),
-    ).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: /open feature/i })).toHaveAttribute(
+      "href",
+      "/database",
+    );
+    expect(screen.getByRole("button", { name: /database/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /map/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /networking/i })).toBeInTheDocument();
   });
 });
