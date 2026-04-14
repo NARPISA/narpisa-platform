@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 
 import GlassButton from "./glass-button";
+import NavUnderlineLink from "./nav-underline-link";
 
 interface NavLink {
   label: string;
@@ -91,25 +92,13 @@ export default function GlassNav() {
               {link.label}
             </GlassButton>
           ) : (
-            <Typography
+            <NavUnderlineLink
               key={link.label}
-              component={Link}
               href={link.href}
-              variant="body1"
-              sx={{
-                color: "background.paper",
-                textDecoration: "none",
-                fontWeight: 700,
-                fontSize: { xs: "1.8rem", md: "2rem" },
-                "&:hover": { 
-                  color: "background.paper",
-                  transform: "translateY(-2px)",
-                },
-                transition: "color 0.2s",
-              }}
-            >
-              {link.label}
-            </Typography>
+              label={link.label}
+              color="secondary.main"
+              fontSize={{ xs: "1.8rem", md: "2rem" }}
+            />
           ),
         )}
 
