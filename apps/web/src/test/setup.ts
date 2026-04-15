@@ -5,7 +5,7 @@ import { nextNavigationMock } from "./next-navigation-mock";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => nextNavigationMock.pathname,
-  useServerInsertedHTML: (_callback: () => unknown) => {},
+  useServerInsertedHTML: () => {},
 }));
 
 process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3000";

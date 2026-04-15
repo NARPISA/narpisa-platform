@@ -93,11 +93,11 @@ const NarpisaTextField = forwardRef<HTMLInputElement, NarpisaTextFieldProps>(
         disabled={disabled}
         fullWidth={fullWidth}
         sx={[
-          (theme) => ({
+          {
             width: "100%",
             maxWidth: maxWidthRem[fieldWidth],
             alignItems: "stretch",
-          }),
+          },
           ...(formControlSx === undefined || formControlSx === null
             ? []
             : Array.isArray(formControlSx)
