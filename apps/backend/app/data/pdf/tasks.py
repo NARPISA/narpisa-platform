@@ -2,12 +2,12 @@
 
 import asyncio
 
-from app.adaptors.pdf.services import QueuedDocumentProcessor, document_queue
+from app.data.pdf.services import QueuedDocumentProcessor, document_queue
 from app.celery_main import celery_app
 
 
 # Celery's decorator is intentionally untyped.
-@celery_app.task(name="app.worker.tasks.process_queued_document")
+@celery_app.task
 def process_queued_document(job_id: str) -> None:
     processor = QueuedDocumentProcessor()
     asyncio.run(processor.process(job_id))

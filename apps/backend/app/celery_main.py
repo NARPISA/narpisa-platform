@@ -1,16 +1,18 @@
 # mypy: disable-error-code=untyped-decorator
 
+from app.core.config import get_settings
 from celery import Celery
 from celery.signals import worker_ready
-
-from app.core.config import get_settings
 
 settings = get_settings()
 
 celery_app = Celery(
     "narpisa_pdf_worker",
     broker=settings.celery_broker_url,
-    include=["app.adaptors.pdf.tasks"],
+    include=[
+        "app.data.namibiamme.tasks",
+        "app.data.pdf.tasks"
+    ],
 )
 celery_app.conf.update(
     task_ignore_result=True,
@@ -20,6 +22,6 @@ celery_app.conf.update(
 
 @worker_ready.connect
 def requeue_recoverable_jobs(**_: object) -> None:
-    from app.adaptors.pdf.tasks import recover_queued_documents
+    from app.data.pdf.tasks import recover_queued_documents
 
     recover_queued_documents()

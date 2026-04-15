@@ -4,10 +4,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.config import Settings, get_settings
-from app.adaptors.services import FetchResult, fetch_data_source
-from app.adaptors.pdf.models import ParsedDocument, QueuedSourceDocument, SourceParseRequest
-from app.adaptors.pdf.services import PdfParser, document_queue
-from app.adaptors.pdf.tasks import process_queued_document
+from app.data.services import FetchResult, fetch_data_source
+from app.data.pdf.models import ParsedDocument, QueuedSourceDocument, SourceParseRequest
+from app.data.pdf.services import PdfParser, document_queue
+from app.data.pdf.tasks import process_queued_document
 
 
 router = APIRouter()

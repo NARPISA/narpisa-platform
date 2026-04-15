@@ -1,9 +1,10 @@
+from app.core.routes import router as core_router
+from app.data.routes import router as adaptor_router
+from app.data.pdf.routes import router as pdf_adaptor_router
+from app.core.config import get_settings
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.routes import router as core_router
-from app.adaptors.pdf.routes import router as pdf_adaptor_router
-from app.core.config import get_settings
 
 settings = get_settings()
 
@@ -24,4 +25,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(core_router, prefix="/api/v1")
+app.include_router(adaptor_router, prefix="/api/v1")
 app.include_router(pdf_adaptor_router, prefix="/api/v1")

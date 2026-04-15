@@ -15,6 +15,9 @@ dependencies = [
   "pydantic-settings",
   "pypdf",
   "uvicorn[standard]",
+  "dbfread",
+  "zipfile",
+  "supabase"
 ]
 
 [project.optional-dependencies]
