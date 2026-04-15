@@ -54,7 +54,7 @@ def update() -> None:
 			str(record["LICENSE_NO"]),
 			str(record["STATUS"]),
 			[i.strip() for i in str(record["APPLICANT"]).split(";")],
-			record["APPLICATIO"],
+			record["APPLICATION"],
 			record["VALID_FROM"],
 			record["VALID_TO"]
 		))

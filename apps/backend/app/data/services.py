@@ -22,7 +22,7 @@ async def fetch_data_source(
     client              : AsyncClient | None = None,
     timeout             : int = 20,
     chunk_size          : int = 1024*1024,
-    max_size            : int = 10*1024*1024
+    max_size            : int = 10*1024*1024,
 ) -> FetchResult:
     timeout = Timeout(timeout)
     hasher = sha256()

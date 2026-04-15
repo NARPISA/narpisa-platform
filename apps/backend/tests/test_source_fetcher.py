@@ -4,8 +4,7 @@ import httpx
 import pytest
 from fastapi import HTTPException
 
-from app.core.config import Settings
-from app.services.source_fetcher import SourceFetcher
+from app.data.services import fetch_data_source
 
 
 class FakeStreamResponse:
@@ -53,45 +52,31 @@ class FakeAsyncClient:
 
 @pytest.mark.asyncio
 async def test_fetch_pdf_streams_file_to_disk(tmp_path: Path) -> None:
-    settings = Settings(
-        supabase_url="https://example.supabase.co",
-        supabase_service_role_key="test-service-role-key",
-    )
-    fetcher = SourceFetcher(
-        settings=settings,
+    download_path = tmp_path / "sample.pdf"
+    result = await fetch_data_source(
+        "https://documents.example.org/sample.pdf",
+        download_path,
+        "application/pdf",
         client=FakeAsyncClient(FakeStreamResponse(chunks=[b"%PDF-", b"sample-bytes"])),
     )
 
-    download_path = tmp_path / "sample.pdf"
-    result = await fetcher.fetch_pdf(
-        "https://documents.example.org/sample.pdf",
-        download_path,
-    )
-
     assert download_path.exists()
-    assert result.file_path == download_path
-    assert result.size_bytes == len(b"%PDF-sample-bytes")
-    assert result.source_http_status == 200
+    assert result.path == download_path
+    assert result.hash == "82b3244f7b454a46df7211acccffdaf36c180592eddce4f54c7e48ce66a803e8"
+    assert result.source_status == 200
 
 
 @pytest.mark.asyncio
 async def test_fetch_pdf_rejects_oversized_files(tmp_path: Path) -> None:
-    settings = Settings(
-        fetch_max_bytes=4,
-        supabase_url="https://example.supabase.co",
-        supabase_service_role_key="test-service-role-key",
-    )
-    fetcher = SourceFetcher(
-        settings=settings,
-        client=FakeAsyncClient(FakeStreamResponse(chunks=[b"%PDF", b"-too-big"])),
-    )
-
     download_path = tmp_path / "sample.pdf"
 
     with pytest.raises(HTTPException) as error:
-        await fetcher.fetch_pdf(
+        await fetch_data_source(
             "https://documents.example.org/sample.pdf",
             download_path,
+            "application/pdf",
+            client=FakeAsyncClient(FakeStreamResponse(chunks=[b"%PDF", b"-too-big"])),
+            max_size=4,
         )
 
     assert error.value.status_code == 413

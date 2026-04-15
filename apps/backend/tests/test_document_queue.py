@@ -1,5 +1,5 @@
-from app.models.document import QueuedSourceDocument, SourceParseRequest
-from app.services.document_queue import DocumentQueue
+from app.data.pdf.models import QueuedSourceDocument, SourceParseRequest
+from app.data.pdf.services import DocumentQueue
 
 
 def build_job(title: str, source_url: str) -> QueuedSourceDocument:

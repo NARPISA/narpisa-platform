@@ -16,7 +16,6 @@ dependencies = [
   "pypdf",
   "uvicorn[standard]",
   "dbfread",
-  "zipfile",
   "supabase"
 ]
 

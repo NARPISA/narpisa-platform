@@ -1,6 +1,6 @@
-from app.models.document import QueuedSourceDocument, SourceParseRequest
-from app.services.document_queue import DocumentQueue
-from app.worker.tasks import process_queued_document, recover_queued_documents
+from app.data.pdf.models import QueuedSourceDocument, SourceParseRequest
+from app.data.pdf.services import DocumentQueue
+from app.data.pdf.tasks import process_queued_document, recover_queued_documents
 
 
 def build_queued_document() -> QueuedSourceDocument:

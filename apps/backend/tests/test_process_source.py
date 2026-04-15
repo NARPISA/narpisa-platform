@@ -3,28 +3,33 @@ from pathlib import Path
 from httpx import ASGITransport, AsyncClient
 
 from app.main import app
-from app.services.source_fetcher import FetchResult, SourceFetcher
+from app.data.services import FetchResult
 
 
 async def test_process_source_returns_parsed_metadata(
     monkeypatch, sample_pdf_bytes: bytes
 ) -> None:
-    async def fake_fetch_pdf(
-        self: SourceFetcher,
+    async def fake_fetch_data_source(
         source_url: str,
         destination_path: Path,
+        desired_mime_type: str | None = None,
+        **_: object,
     ) -> FetchResult:
+        assert source_url == "https://documents.example.org/sample.pdf"
+        assert desired_mime_type == "application/pdf"
         destination_path.write_bytes(sample_pdf_bytes)
         return FetchResult(
-            source_domain="documents.example.org",
             mime_type="application/pdf",
-            file_path=destination_path,
-            content_hash="a" * 64,
-            size_bytes=len(sample_pdf_bytes),
-            source_http_status=200,
+            path=destination_path,
+            hash="a" * 64,
+            source_domain="documents.example.org",
+            source_status=200,
         )
 
-    monkeypatch.setattr(SourceFetcher, "fetch_pdf", fake_fetch_pdf)
+    monkeypatch.setattr(
+        "app.data.pdf.routes.fetch_data_source",
+        fake_fetch_data_source,
+    )
 
     payload = {
         "title": "Sample Source",

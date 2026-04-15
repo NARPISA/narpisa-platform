@@ -1,10 +1,10 @@
-from app.core.routes import router as core_router
-from app.data.routes import router as adaptor_router
-from app.data.pdf.routes import router as pdf_adaptor_router
-from app.core.config import get_settings
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.config import get_settings
+from app.core.routes import router as core_router
+from app.data.pdf.routes import router as pdf_adaptor_router
+from app.data.routes import router as adaptor_router
 
 settings = get_settings()
 

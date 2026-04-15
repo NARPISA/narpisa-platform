@@ -1,9 +1,9 @@
 from httpx import ASGITransport, AsyncClient
 
 from app.main import app
-from app.models.document import QueuedSourceDocument, SourceParseRequest
-from app.services.document_queue import DocumentQueue
-from app.worker.tasks import process_queued_document
+from app.data.pdf.models import QueuedSourceDocument, SourceParseRequest
+from app.data.pdf.services import DocumentQueue
+from app.data.pdf.tasks import process_queued_document
 
 
 def build_queued_document() -> QueuedSourceDocument:

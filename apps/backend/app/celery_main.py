@@ -1,8 +1,9 @@
 # mypy: disable-error-code=untyped-decorator
 
-from app.core.config import get_settings
 from celery import Celery
 from celery.signals import worker_ready
+
+from app.core.config import get_settings
 
 settings = get_settings()
 

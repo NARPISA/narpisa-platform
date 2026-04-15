@@ -3,11 +3,8 @@ from pathlib import Path
 import pytest
 
 from app.core.config import Settings
-from app.models.document import ParsedDocument, QueuedSourceDocument, SourceParseRequest
-from app.services.job_processor import QueuedDocumentProcessor
-from app.services.job_store import JobStore
-from app.services.pdf_parser import PdfParser
-from app.services.source_fetcher import FetchResult, SourceFetcher
+from app.data.pdf.models import ParsedDocument, QueuedSourceDocument, SourceParseRequest
+from app.data.pdf.services import FetchResult, JobStore, PdfParser, QueuedDocumentProcessor
 
 
 @pytest.mark.asyncio
@@ -63,20 +60,21 @@ async def test_job_processor_updates_status_and_cleans_up_download(
         assert source_http_status == 200
         status_updates.append("completed")
 
-    async def fake_fetch_pdf(
-        self: SourceFetcher,
+    async def fake_fetch_data_source(
         source_url: str,
         destination_path: Path,
+        desired_mime_type: str | None = None,
+        **_: object,
     ) -> FetchResult:
         assert source_url == "https://documents.example.org/queued-source.pdf"
+        assert desired_mime_type == "application/pdf"
         destination_path.write_bytes(sample_pdf_bytes)
         return FetchResult(
-            source_domain="documents.example.org",
             mime_type="application/pdf",
-            file_path=destination_path,
-            content_hash="b" * 64,
-            size_bytes=len(sample_pdf_bytes),
-            source_http_status=200,
+            path=destination_path,
+            hash="b" * 64,
+            source_domain="documents.example.org",
+            source_status=200,
         )
 
     def fake_parse(
@@ -85,24 +83,27 @@ async def test_job_processor_updates_status_and_cleans_up_download(
         fetch_result: FetchResult,
     ) -> ParsedDocument:
         assert request.title == queued_job.title
-        assert fetch_result.file_path.exists()
+        assert fetch_result.path.exists()
         return ParsedDocument(
             title=request.title,
             source_url=request.source_url,
             source_domain=fetch_result.source_domain,
             attribution=request.attribution,
-            content_hash=fetch_result.content_hash,
+            content_hash=fetch_result.hash,
             page_count=1,
             extracted_text="",
             extracted_excerpt="",
         )
 
-    monkeypatch.setattr("app.services.job_processor.get_settings", lambda: settings)
+    monkeypatch.setattr("app.data.pdf.services.get_settings", lambda: settings)
     monkeypatch.setattr(JobStore, "get_job", fake_get_job)
     monkeypatch.setattr(JobStore, "mark_fetching", fake_mark_fetching)
     monkeypatch.setattr(JobStore, "mark_parsing", fake_mark_parsing)
     monkeypatch.setattr(JobStore, "mark_completed", fake_mark_completed)
-    monkeypatch.setattr(SourceFetcher, "fetch_pdf", fake_fetch_pdf)
+    monkeypatch.setattr(
+        "app.data.pdf.services.fetch_data_source",
+        fake_fetch_data_source,
+    )
     monkeypatch.setattr(PdfParser, "parse", fake_parse)
 
     processor = QueuedDocumentProcessor()
@@ -161,20 +162,21 @@ async def test_job_processor_keeps_download_when_debug_flag_is_enabled(
         assert page_count == 1
         assert source_http_status == 200
 
-    async def fake_fetch_pdf(
-        self: SourceFetcher,
+    async def fake_fetch_data_source(
         source_url: str,
         destination_path: Path,
+        desired_mime_type: str | None = None,
+        **_: object,
     ) -> FetchResult:
         assert source_url == "https://documents.example.org/queued-source.pdf"
+        assert desired_mime_type == "application/pdf"
         destination_path.write_bytes(sample_pdf_bytes)
         return FetchResult(
-            source_domain="documents.example.org",
             mime_type="application/pdf",
-            file_path=destination_path,
-            content_hash="b" * 64,
-            size_bytes=len(sample_pdf_bytes),
-            source_http_status=200,
+            path=destination_path,
+            hash="b" * 64,
+            source_domain="documents.example.org",
+            source_status=200,
         )
 
     def fake_parse(
@@ -183,24 +185,27 @@ async def test_job_processor_keeps_download_when_debug_flag_is_enabled(
         fetch_result: FetchResult,
     ) -> ParsedDocument:
         assert request.title == queued_job.title
-        assert fetch_result.file_path.exists()
+        assert fetch_result.path.exists()
         return ParsedDocument(
             title=request.title,
             source_url=request.source_url,
             source_domain=fetch_result.source_domain,
             attribution=request.attribution,
-            content_hash=fetch_result.content_hash,
+            content_hash=fetch_result.hash,
             page_count=1,
             extracted_text="",
             extracted_excerpt="",
         )
 
-    monkeypatch.setattr("app.services.job_processor.get_settings", lambda: settings)
+    monkeypatch.setattr("app.data.pdf.services.get_settings", lambda: settings)
     monkeypatch.setattr(JobStore, "get_job", fake_get_job)
     monkeypatch.setattr(JobStore, "mark_fetching", fake_mark_fetching)
     monkeypatch.setattr(JobStore, "mark_parsing", fake_mark_parsing)
     monkeypatch.setattr(JobStore, "mark_completed", fake_mark_completed)
-    monkeypatch.setattr(SourceFetcher, "fetch_pdf", fake_fetch_pdf)
+    monkeypatch.setattr(
+        "app.data.pdf.services.fetch_data_source",
+        fake_fetch_data_source,
+    )
     monkeypatch.setattr(PdfParser, "parse", fake_parse)
 
     processor = QueuedDocumentProcessor()
