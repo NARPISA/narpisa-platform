@@ -81,3 +81,19 @@ async def test_fetch_pdf_rejects_oversized_files(tmp_path: Path) -> None:
 
     assert error.value.status_code == 413
     assert not download_path.exists()
+
+
+@pytest.mark.asyncio
+async def test_fetch_pdf_rejects_missing_content_type(tmp_path: Path) -> None:
+    download_path = tmp_path / "sample.pdf"
+
+    with pytest.raises(HTTPException) as error:
+        await fetch_data_source(
+            "https://documents.example.org/sample.pdf",
+            download_path,
+            "application/pdf",
+            client=FakeAsyncClient(FakeStreamResponse(chunks=[b"%PDF"], content_type="")),
+        )
+
+    assert error.value.status_code == 400
+    assert not download_path.exists()

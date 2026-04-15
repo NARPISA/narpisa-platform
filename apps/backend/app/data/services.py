@@ -16,7 +16,7 @@ class FetchResult:
 
 
 async def fetch_data_source(
-    source              : URL,
+    source              : str | URL,
     destination         : Path,
     desired_mime_type   : str | None = None,
     client              : AsyncClient | None = None,
@@ -24,16 +24,18 @@ async def fetch_data_source(
     chunk_size          : int = 1024*1024,
     max_size            : int = 10*1024*1024,
 ) -> FetchResult:
-    timeout = Timeout(timeout)
+    source_url = str(source)
+    request_timeout = Timeout(timeout)
     hasher = sha256()
     size = 0
     destination.parent.mkdir(parents=True, exist_ok=True)
-    async with AsyncClient(timeout=timeout) as local_client:
+    async with AsyncClient(timeout=request_timeout) as local_client:
         client = client or local_client
         try:
-            async with client.stream("GET", source) as response:
+            async with client.stream("GET", source_url) as response:
                 response.raise_for_status()
-                mime_type = response.headers.get("content-type").split(";")[0]
+                content_type = response.headers.get("content-type", "")
+                mime_type = content_type.split(";")[0] if content_type else ""
                 if desired_mime_type and desired_mime_type != mime_type:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
@@ -53,7 +55,7 @@ async def fetch_data_source(
                     mime_type,
                     destination,
                     hasher.hexdigest(),
-                    urlparse(source).hostname or "unknown",
+                    urlparse(source_url).hostname or "unknown",
                     response.status_code
                 )
         except Exception:
