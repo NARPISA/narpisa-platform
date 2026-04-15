@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import Box from "@mui/material/Box";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { alpha } from "@mui/material/styles";
-import Link from "next/link";
 
 import GlassSurface, { type GlassSurfaceProps } from "./glass-surface";
 
@@ -82,7 +81,7 @@ export default function GlassButton({
       style={disabled ? { pointerEvents: "none" } : undefined}
     >
       {href && !disabled ? (
-        <Box component={Link} href={href} sx={merged}>
+        <Box component="a" href={href} sx={merged}>
           {children}
         </Box>
       ) : (

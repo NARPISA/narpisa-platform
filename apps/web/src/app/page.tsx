@@ -1,21 +1,5 @@
-import Box from "@mui/material/Box";
-
-import AfricaMapFrame from "@/components/frames/africa-map-frame";
-import GlassNav from "@/components/glass-nav";
-import MineralHero from "@/components/frames/mineral-hero";
+import HomepageClient from "@/components/home/homepage-client";
 
 export default function Home() {
-  return (
-    <Box
-      component="main"
-      sx={{
-        bgcolor: "background.default",
-        overflowX: "hidden",
-      }}
-    >
-      <GlassNav />
-      <MineralHero />
-      <AfricaMapFrame />
-    </Box>
-  );
+  return <HomepageClient />;
 }

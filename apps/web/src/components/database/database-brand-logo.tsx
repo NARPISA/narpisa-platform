@@ -1,7 +1,6 @@
 import Box from "@mui/material/Box";
 
-const DATABASE_LOGO_URL =
-  "https://www.figma.com/api/mcp/asset/1addbfa0-512a-479f-9b6a-6a8aa6f7c1ef";
+const DATABASE_LOGO_URL = "/logo.png";
 
 type DatabaseBrandLogoProps = {
   size?: number;
@@ -13,6 +12,9 @@ export default function DatabaseBrandLogo({ size = 56 }: DatabaseBrandLogoProps)
       component="img"
       src={DATABASE_LOGO_URL}
       alt="NaRPISA logo"
+      loading="eager"
+      fetchPriority="high"
+      decoding="async"
       sx={{
         width: size,
         height: size,

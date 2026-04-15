@@ -4,6 +4,17 @@ import { createTheme } from "@mui/material/styles";
 const fontMain = 'var(--font-manrope), "Helvetica Neue", Arial, sans-serif';
 const fontStyle = 'var(--font-bruno-ace), var(--font-chathura), sans-serif';
 
+type ExtendedColorScale = {
+  main: string;
+  100: string;
+  200: string;
+  300: string;
+  400: string;
+  500: string;
+  600: string;
+  700: string;
+};
+
 declare module "@mui/material/styles" {
   interface TypeBackground {
     100: string;
@@ -14,6 +25,14 @@ declare module "@mui/material/styles" {
     600: string;
     700: string;
     main: string;
+  }
+
+  interface Palette {
+    tertiary: ExtendedColorScale;
+  }
+
+  interface PaletteOptions {
+    tertiary?: ExtendedColorScale;
   }
 
   interface TypographyVariants {
@@ -53,6 +72,16 @@ const theme = createTheme({
       500: "#5384B4",
       600: "#3d6489",
       700: "#2a435c",
+    },
+    tertiary: {
+      main: "#1C3092",
+      100: "#e7ebfb",
+      200: "#c0caf2",
+      300: "#96a6e8",
+      400: "#6a80dc",
+      500: "#4560c8",
+      600: "#3248af",
+      700: "#1C3092",
     },
     background: {
       default: "#F6F6F6",
@@ -173,6 +202,7 @@ const theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         html: {
+          fontSize: "62.5%",
           scrollbarWidth: "none",
           msOverflowStyle: "none",
           "&::-webkit-scrollbar": {

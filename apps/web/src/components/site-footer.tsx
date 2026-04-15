@@ -1,20 +1,35 @@
+"use client";
+
 import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { usePathname } from "next/navigation";
 
-const LOGO_URL =
-  "https://www.figma.com/api/mcp/asset/1addbfa0-512a-479f-9b6a-6a8aa6f7c1ef";
+import BrandHomeLink from "@/components/brand-home-link";
+
+const FOOTER_LINKS = [
+  { label: "Database", href: "/database" },
+  { label: "About", href: "/about" },
+  { label: "Upload", href: "/data_input" },
+];
 
 export default function SiteFooter() {
+  const pathname = usePathname();
+
+  if (pathname === "/") {
+    return null;
+  }
+
   return (
     <Box
       component="footer"
       sx={{
         bgcolor: "#AF5428",
         color: "common.white",
-        px: { xs: 2, md: 3 },
-        py: 1.5,
+        px: { xs: 2, md: 4 },
+        py: { xs: 2.25, md: 2.5 },
+        borderTop: "1px solid rgba(255,255,255,0.12)",
       }}
     >
       <Stack
@@ -24,31 +39,25 @@ export default function SiteFooter() {
         spacing={1.5}
       >
         <Stack direction="row" spacing={1.5} alignItems="center">
-          <Box
-            component="img"
-            src={LOGO_URL}
-            alt="NaRPISA logo"
-            sx={{
-              width: 44,
-              height: 44,
-              borderRadius: "50%",
-              objectFit: "cover",
-              border: "2px solid #f0c700",
-            }}
-          />
-          <Typography sx={{ fontSize: { xs: "1rem", md: "2rem" }, fontWeight: 700, lineHeight: 1.2 }}>
+          <BrandHomeLink size={44} color="inherit" showText={false} />
+          <Typography sx={{ fontSize: { xs: "1.15rem", md: "1.5rem" }, fontWeight: 700, lineHeight: 1.2 }}>
             Natural Resources Polytechnic of Southern Africa
           </Typography>
         </Stack>
 
-        <Link
-          href="#"
-          underline="always"
-          color="inherit"
-          sx={{ fontSize: { xs: "1rem", md: "1.8rem" }, fontWeight: 700 }}
-        >
-          Other links here
-        </Link>
+        <Stack direction="row" spacing={2} flexWrap="wrap">
+          {FOOTER_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              underline="hover"
+              color="inherit"
+              sx={{ fontSize: { xs: "1.15rem", md: "1.35rem" }, fontWeight: 700 }}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </Stack>
       </Stack>
     </Box>
   );

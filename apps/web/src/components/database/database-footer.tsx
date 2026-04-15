@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import DatabaseBrandLogo from "./database-brand-logo";
+import BrandHomeLink from "@/components/brand-home-link";
 
 export default function DatabaseFooter() {
   return (
@@ -23,7 +23,7 @@ export default function DatabaseFooter() {
         spacing={2}
       >
         <Stack direction="row" spacing={1.5} alignItems="center">
-          <DatabaseBrandLogo size={52} />
+          <BrandHomeLink size={52} color="inherit" showText={false} />
           <Typography sx={{ fontSize: { xs: "1.25rem", md: "2.25rem" }, fontWeight: 700 }}>
             Natural Resources Polytechnic of Southern Africa
           </Typography>

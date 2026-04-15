@@ -14,7 +14,7 @@ import Typography from "@mui/material/Typography";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 
 import GlassButton from "@/components/glass-button";
-import GlassNav from "@/components/glass-nav";
+import MarketingHeader from "@/components/marketing/marketing-header";
 import NarpisaTextField from "@/components/text-field";
 import {
   createSourceDocumentInputSchema,
@@ -197,13 +197,13 @@ export default function DataInputPage() {
         overflowX: "hidden",
       }}
     >
-      <GlassNav />
+      <MarketingHeader />
 
       <Stack
         spacing={3}
         sx={{
           px: 3,
-          pt: { xs: 14, sm: 16 },
+          pt: { xs: 7, sm: 8 },
           pb: 5,
           maxWidth: "48rem",
           mx: "auto",

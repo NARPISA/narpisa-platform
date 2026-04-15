@@ -3,7 +3,6 @@
 import type { ReactNode } from "react";
 import Button, { type ButtonProps } from "@mui/material/Button";
 import type { SxProps, Theme } from "@mui/material/styles";
-import Link from "next/link";
 
 export type NarpisaPrimaryButtonWidth = "short" | "regular";
 
@@ -96,7 +95,6 @@ export default function NarpisaPrimaryButton({
   if (href && !disabled) {
     return (
       <Button
-        component={Link}
         href={href}
         disableRipple
         variant="contained"

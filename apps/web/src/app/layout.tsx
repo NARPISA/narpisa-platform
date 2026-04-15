@@ -7,15 +7,13 @@ import ThemeRegistry from "@/components/theme-registry";
 
 import "./globals.css";
 
-/** Primary UI copy: body, forms, dense UI text */
-const chathura = Chathura({
-  variable: "--font-chathura",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
-  weight: ["100", "300", "400", "700", "800"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
-/** Display / “style” headings and accent typography */
 const brunoAce = Bruno_Ace({
   variable: "--font-bruno-ace",
   subsets: ["latin"],
@@ -23,10 +21,10 @@ const brunoAce = Bruno_Ace({
   display: "swap",
 });
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const chathura = Chathura({
+  variable: "--font-chathura",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "700", "800"],
   display: "swap",
 });
 
