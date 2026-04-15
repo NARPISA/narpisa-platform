@@ -24,15 +24,15 @@ def update() -> None:
 	ml_list = []
 	for record in DBF(settings.download_directory/"namibiamme/MINERAL_LICENSE_ML_DOWNLOADPolygon.dbf", encoding="ansi"):
 		ml_list.append(MineralLicense(
-			"Namibia",
-			str(record["REGIONS"]),
-			str(record["LICENSE_TY"]),
-			str(record["LICENSE_NO"]),
-			str(record["STATUS"]),
-			[i.strip() for i in str(record["APPLICANT"]).split(";")],
-			record["APPLICATIO"],
-			record["VALID_FROM"],
-			record["VALID_TO"]
+			id=str(record["LICENSE_NO"]),
+			type=str(record["LICENSE_TY"]),
+			country="Namibia",
+			regions=str(record["REGIONS"]),
+			status=str(record["STATUS"]),
+			applicants=[i.strip() for i in str(record["APPLICANT"]).split(";")],
+			application_date=record["APPLICATIO"],
+			start_date=record["VALID_FROM"],
+			end_date=record["VALID_TO"],
 		))
 	print(f"Found {len(ml_list)} ML licenses.")
 
@@ -48,15 +48,15 @@ def update() -> None:
 	epl_list = []
 	for record in DBF(settings.download_directory/"namibiamme/MINERAL_LICENSE_EPL_DOWNLOADPolygon.dbf", encoding="ansi"):
 		epl_list.append(MineralLicense(
-			"Namibia",
-			str(record["REGIONS"]),
-			str(record["LICENSE_TY"]),
-			str(record["LICENSE_NO"]),
-			str(record["STATUS"]),
-			[i.strip() for i in str(record["APPLICANT"]).split(";")],
-			record["APPLICATION"],
-			record["VALID_FROM"],
-			record["VALID_TO"]
+			id=str(record["LICENSE_NO"]),
+			type=str(record["LICENSE_TY"]),
+			country="Namibia",
+			regions=str(record["REGIONS"]),
+			status=str(record["STATUS"]),
+			applicants=[i.strip() for i in str(record["APPLICANT"]).split(";")],
+			application_date=record["APPLICATION"],
+			start_date=record["VALID_FROM"],
+			end_date=record["VALID_TO"],
 		))
 	print(f"Found {len(epl_list)} EPL licenses.")
 
@@ -72,15 +72,15 @@ def update() -> None:
 	clm_list = []
 	for record in DBF(settings.download_directory/"namibiamme/MINERAL_LICENSE_CLM_DOWNLOADPolygon.dbf", encoding="ansi"):
 		clm_list.append(MineralLicense(
-			"Namibia",
-			str(record["REGIONS"]),
-			str(record["LICENSE_TY"]),
-			str(record["LICENSE_NO"]),
-			str(record["STATUS"]),
-			[i.strip() for i in str(record["APPLICANT"]).split(";")],
-			record["APPLICATIO"],
-			record["VALID_FROM"],
-			record["VALID_TO"]
+			id=str(record["LICENSE_NO"]),
+			type=str(record["LICENSE_TY"]),
+			country="Namibia",
+			regions=str(record["REGIONS"]),
+			status=str(record["STATUS"]),
+			applicants=[i.strip() for i in str(record["APPLICANT"]).split(";")],
+			application_date=record["APPLICATIO"],
+			start_date=record["VALID_FROM"],
+			end_date=record["VALID_TO"],
 		))
 	print(f"Found {len(clm_list)} CLM licenses.")
 
@@ -96,14 +96,14 @@ def update() -> None:
 	application_list = []
 	for record in DBF(settings.download_directory/"namibiamme/MINERAL_LICENSE_APPLICATION_DOWNLOADPolygon.dbf", encoding="ansi"):
 		application_list.append(MineralLicense(
-			"Namibia",
-			str(record["REGIONS"]),
-			str(record["LICENSE_TY"]),
-			str(record["LICENSE_NO"]),
-			str(record["STATUS"]),
-			[i.strip() for i in str(record["APPLICANT"]).split(";")],
-			record["APPLICATIO"],
-			record["VALID_FROM"],
-			record["VALID_TO"]
+			id=str(record["LICENSE_NO"]),
+			type=str(record["LICENSE_TY"]),
+			country="Namibia",
+			regions=str(record["REGIONS"]),
+			status=str(record["STATUS"]),
+			applicants=[i.strip() for i in str(record["APPLICANT"]).split(";")],
+			application_date=record["APPLICATIO"],
+			start_date=record["VALID_FROM"],
+			end_date=record["VALID_TO"],
 		))
 	print(f"Found {len(application_list)} application licenses.")
