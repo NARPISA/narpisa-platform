@@ -29,10 +29,10 @@ export default function DatabaseHeader() {
               lineHeight: 1.15,
             }}
           >
-            Oooga Booga
+            Natural Resource Database
           </Typography>
           <Typography sx={{ color: "text.secondary", fontSize: "0.95rem", mt: 0.5 }}>
-            South African mines and other stuff
+            A collection of data from the Natural Resources Polytechnic of Southern Africa
           </Typography>
         </Box>
 

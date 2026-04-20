@@ -84,7 +84,7 @@ export function useDatabaseData() {
         // TODO(backend): replace this stub with the finalized FastAPI endpoint contract.
         const response = await fetch("/api/v1/database", { cache: "no-store" });
         if (!response.ok) {
-          throw new Error("Database endpoint is not yet integrated.");
+          throw new Error("Database endpoint is not yet integrated. Showing placeholder data.");
         }
 
         const payload = (await response.json()) as Partial<DatabaseDataPayload>;
