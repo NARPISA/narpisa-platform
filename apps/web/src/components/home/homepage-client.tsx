@@ -15,7 +15,7 @@ import MarketingShell from "@/components/marketing/marketing-shell";
 
 const HERO_BACKGROUND = "/landingimage.png";
 
-const PREVIEW_DATABASE = "/preview-database.png";
+const PREVIEW_DATABASE = "/preview-database.jpeg";
 const PREVIEW_MAP = "/preview-map.png";
 
 const MotionBox = motion.create(Box);
