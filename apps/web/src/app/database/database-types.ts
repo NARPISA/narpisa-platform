@@ -11,12 +11,15 @@ export const DATABASE_DRAWER_LINKS = [
 
 export const DATABASE_CATEGORY_TABS = [
   "Mines",
-  "Usage",
-  "Other",
-  "Financial Plans",
-  "Personnel",
-  "Projects",
+  "Commodity Metrics",
+  "Water Metrics",
+  "Licenses",
 ] as const;
+
+export const DATABASE_METRIC_YEARS = Array.from(
+  { length: 10 },
+  (_value, index) => new Date().getFullYear() - 1 - index,
+);
 
 export type DatabaseCategory = (typeof DATABASE_CATEGORY_TABS)[number];
 

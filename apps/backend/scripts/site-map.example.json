@@ -1,0 +1,128 @@
+{
+  "Namdeb Holdings": {
+    "site_type": "open_air",
+    "owner": "Namdeb Holdings",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Namdeb Diamond Corporation": {
+    "site_type": "open_air",
+    "owner": "Namdeb Diamond Corporation",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Debmarine Namibia": {
+    "site_type": "open_air",
+    "owner": "Debmarine Namibia",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Beach and marine contractors": {
+    "site_type": "open_air",
+    "owner": "Beach and Marine Contractors",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Diamond Fields": {
+    "site_type": "open_air",
+    "owner": "Diamond Fields Namibia",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Sakawe Mining Corporation": {
+    "site_type": "open_air",
+    "owner": "Sakawe Mining Corporation",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Ocean Diamond Mining Holdings": {
+    "site_type": "open_air",
+    "owner": "Ocean Diamond Mining Holdings",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Sperrgebiet Diamond Mining": {
+    "site_type": "open_air",
+    "owner": "Sperrgebiet Diamond Mining",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Langer Heinrich": {
+    "site_type": "open_air",
+    "owner": "Langer Heinrich Uranium",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Swakop Uranium": {
+    "site_type": "open_air",
+    "owner": "Swakop Uranium",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Rossing Uranium": {
+    "site_type": "open_air",
+    "owner": "Rossing Uranium Limited",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Navachab": {
+    "site_type": "open_air",
+    "owner": "Navachab Gold Mine",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "B2Gold": {
+    "site_type": "open_air",
+    "owner": "B2Gold Namibia",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Dundee Precious Metals Tsumeb*": {
+    "site_type": "open_air",
+    "owner": "Dundee Precious Metals Tsumeb",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Weatherly Mining Namibia**": {
+    "site_type": "open_air",
+    "owner": "Weatherly Mining Namibia",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Kombat mine (Trigon Mining Namibia)": {
+    "site_type": "underground",
+    "owner": "Trigon Mining Namibia",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Otjihase mine & Matchless mine": {
+    "site_type": "underground",
+    "owner": "Otjihase Mine and Matchless Mine",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Tschudi copper mine": {
+    "site_type": "open_air",
+    "owner": "Tschudi Copper Mine",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Khusib Springs": {
+    "site_type": "underground",
+    "owner": "Khusib Springs",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Rosh Pinah Zinc Corporation": {
+    "site_type": "underground",
+    "owner": "Rosh Pinah Zinc Corporation",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Namib Lead and Zinc Mine": {
+    "site_type": "open_air",
+    "owner": "Namib Lead and Zinc Mine",
+    "country": "Namibia",
+    "stage": "production"
+  }
+}

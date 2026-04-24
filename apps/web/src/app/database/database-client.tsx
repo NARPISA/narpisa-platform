@@ -160,11 +160,11 @@ export default function DatabaseClient() {
           }}
         >
           <Typography sx={{ fontSize: "0.95rem", fontWeight: 700, mb: 0.5 }}>
-            Placeholder data active
+            Live data unavailable
           </Typography>
           <Typography sx={{ fontSize: "0.82rem", color: "text.secondary", mb: 1 }}>
             {data.sourceMessage ??
-              "Backend integration endpoint must be wired before this page can show live data."}
+              "The database view could not reach Supabase, so the page is showing an empty fallback state."}
           </Typography>
           <Button size="small" variant="contained" onClick={() => setPlaceholderDismissed(true)}>
             Dismiss

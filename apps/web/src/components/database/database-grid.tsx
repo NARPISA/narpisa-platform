@@ -1,9 +1,6 @@
 "use client";
 
-import StarRoundedIcon from "@mui/icons-material/StarRounded";
-import StarBorderRoundedIcon from "@mui/icons-material/StarBorderRounded";
 import Box from "@mui/material/Box";
-import Checkbox from "@mui/material/Checkbox";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Tab from "@mui/material/Tab";
@@ -22,6 +19,7 @@ import {
 import { useEffect, useMemo } from "react";
 
 import {
+  DATABASE_METRIC_YEARS,
   DATABASE_CATEGORY_TABS,
   type DatabaseCategory,
   type DatabaseRow,
@@ -40,7 +38,7 @@ function EmptyOverlay({ category }: { category: DatabaseCategory }) {
   return (
     <Stack alignItems="center" justifyContent="center" sx={{ height: "100%", px: 2 }}>
       <Typography sx={{ fontSize: "1rem", fontWeight: 600, color: "text.secondary", textAlign: "center" }}>
-        {category} will populate once backend integration is complete.
+        No {category.toLowerCase()} match the current view.
       </Typography>
     </Stack>
   );
@@ -63,6 +61,48 @@ function statusChip(status: DatabaseStatus) {
     label: "Decommissioned",
     sx: { bgcolor: "background.300", color: "background.700" },
   };
+}
+
+function buildMetricColumns(
+  leadingField: "commodity" | "waterType",
+  leadingHeader: string,
+): GridColDef<DatabaseRow>[] {
+  return [
+    { field: "site", headerName: "Site", minWidth: 170, flex: 1.1 },
+    { field: leadingField, headerName: leadingHeader, minWidth: 140, flex: 0.9 },
+    { field: "product", headerName: "Product", minWidth: 190, flex: 1.2 },
+    { field: "unit", headerName: "Unit", minWidth: 100, flex: 0.7 },
+    ...DATABASE_METRIC_YEARS.map(
+      (year) =>
+        ({
+          field: `year_${year}`,
+          headerName: String(year),
+          minWidth: 86,
+          flex: 0.56,
+          align: "center",
+          headerAlign: "center",
+          sortable: false,
+        }) satisfies GridColDef<DatabaseRow>,
+    ),
+    {
+      field: "annual",
+      headerName: "Annual",
+      minWidth: 94,
+      flex: 0.62,
+      align: "center",
+      headerAlign: "center",
+      sortable: false,
+    },
+    {
+      field: "lom",
+      headerName: "LOM",
+      minWidth: 82,
+      flex: 0.56,
+      align: "center",
+      headerAlign: "center",
+      sortable: false,
+    },
+  ];
 }
 
 export default function DatabaseGrid({
@@ -102,24 +142,11 @@ export default function DatabaseGrid({
     () => ({
       Mines: {
         columns: [
-          {
-            field: "selected",
-            headerName: "",
-            width: 52,
-            sortable: false,
-            filterable: false,
-            disableColumnMenu: true,
-            renderCell: (params) => (
-              <Checkbox
-                checked={Boolean(params.value)}
-                size="small"
-                sx={{ color: "common.white", "&.Mui-checked": { color: "primary.main" } }}
-              />
-            ),
-          },
-          { field: "mine", headerName: "Mine", flex: 1.1, minWidth: 150, headerAlign: "left" },
-          { field: "location", headerName: "Location", flex: 1, minWidth: 130 },
+          { field: "mine", headerName: "Mine", flex: 1.2, minWidth: 170, headerAlign: "left" },
+          { field: "owner", headerName: "Owner", flex: 1.2, minWidth: 170 },
+          { field: "country", headerName: "Country", flex: 0.9, minWidth: 130 },
           { field: "type", headerName: "Type", flex: 1, minWidth: 160 },
+          { field: "stage", headerName: "Stage", flex: 0.9, minWidth: 130 },
           {
             field: "status",
             headerName: "Status",
@@ -136,74 +163,28 @@ export default function DatabaseGrid({
               );
             },
           },
-          {
-            field: "sourceLinked",
-            headerName: "",
-            width: 52,
-            sortable: false,
-            filterable: false,
-            disableColumnMenu: true,
-            renderCell: (params) =>
-              params.value ? (
-                <Typography sx={{ color: "primary.main", fontSize: "1rem" }}>↻</Typography>
-              ) : (
-                <Box sx={{ width: 16, height: 16 }} />
-              ),
-          },
-          { field: "columnTitle", headerName: "Column Title", flex: 1, minWidth: 150 },
-          {
-            field: "favorite",
-            headerName: "",
-            width: 52,
-            sortable: false,
-            filterable: false,
-            disableColumnMenu: true,
-            renderCell: (params) =>
-              params.value ? (
-                <StarRoundedIcon sx={{ fontSize: 16, color: "primary.main" }} />
-              ) : (
-                <StarBorderRoundedIcon sx={{ fontSize: 16, color: "background.300" }} />
-              ),
-          },
+          { field: "commodities", headerName: "Commodities", flex: 1.1, minWidth: 180 },
+          { field: "lifetimeOfMine", headerName: "Life (yrs)", flex: 0.75, minWidth: 110 },
+          { field: "pitDepth", headerName: "Pit Depth", flex: 0.8, minWidth: 110 },
+          { field: "shaftDepth", headerName: "Shaft Depth", flex: 0.8, minWidth: 120 },
         ],
       },
-      Usage: {
-        columns: [
-          { field: "asset", headerName: "Asset", flex: 1.1, minWidth: 160 },
-          { field: "usageType", headerName: "Usage Type", flex: 1, minWidth: 140 },
-          { field: "region", headerName: "Region", flex: 1, minWidth: 140 },
-          { field: "owner", headerName: "Owner", flex: 1, minWidth: 140 },
-        ],
+      "Commodity Metrics": {
+        columns: buildMetricColumns("commodity", "Commodity"),
       },
-      Other: {
-        columns: [
-          { field: "item", headerName: "Item", flex: 1, minWidth: 170 },
-          { field: "summary", headerName: "Summary", flex: 1.3, minWidth: 240 },
-          { field: "status", headerName: "Status", flex: 0.7, minWidth: 120 },
-        ],
+      "Water Metrics": {
+        columns: buildMetricColumns("waterType", "Water Type"),
       },
-      "Financial Plans": {
+      Licenses: {
         columns: [
-          { field: "project", headerName: "Project", flex: 1.1, minWidth: 170 },
-          { field: "budget", headerName: "Budget", flex: 0.8, minWidth: 130 },
-          { field: "phase", headerName: "Phase", flex: 0.8, minWidth: 120 },
-          { field: "owner", headerName: "Owner", flex: 1, minWidth: 160 },
-        ],
-      },
-      Personnel: {
-        columns: [
-          { field: "name", headerName: "Name", flex: 1, minWidth: 160 },
-          { field: "team", headerName: "Team", flex: 1, minWidth: 150 },
-          { field: "role", headerName: "Role", flex: 1, minWidth: 140 },
-          { field: "location", headerName: "Location", flex: 1, minWidth: 140 },
-        ],
-      },
-      Projects: {
-        columns: [
-          { field: "project", headerName: "Project", flex: 1.2, minWidth: 180 },
+          { field: "type", headerName: "Type", flex: 1, minWidth: 150 },
           { field: "country", headerName: "Country", flex: 1, minWidth: 130 },
-          { field: "milestone", headerName: "Milestone", flex: 1, minWidth: 150 },
+          { field: "region", headerName: "Region", flex: 1, minWidth: 140 },
           { field: "status", headerName: "Status", flex: 0.8, minWidth: 120 },
+          { field: "applicants", headerName: "Applicants", flex: 1.4, minWidth: 240 },
+          { field: "applicationDate", headerName: "Applied", flex: 0.8, minWidth: 120 },
+          { field: "startDate", headerName: "Start", flex: 0.8, minWidth: 120 },
+          { field: "endDate", headerName: "End", flex: 0.8, minWidth: 120 },
         ],
       },
     }),
@@ -253,8 +234,19 @@ export default function DatabaseGrid({
           rows={rows}
           columns={activeTable.columns}
           loading={isLoading}
-          hideFooter
+          columnHeaderHeight={44}
+          pagination
+          pageSizeOptions={[20, 50, 100]}
+          initialState={{
+            pagination: {
+              paginationModel: {
+                pageSize: 20,
+                page: 0,
+              },
+            },
+          }}
           disableRowSelectionOnClick
+          hideFooterSelectedRowCount
           rowHeight={40}
           slots={{
             toolbar: DatabaseToolbar,
@@ -274,7 +266,7 @@ export default function DatabaseGrid({
             "& .MuiDataGrid-columnHeaderTitle": {
               color: "common.white",
               fontWeight: 800,
-              fontSize: "1rem",
+              fontSize: activeCategory.includes("Metrics") ? "0.9rem" : "1rem",
             },
             "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within": {
               outline: "none",
@@ -333,6 +325,25 @@ export default function DatabaseGrid({
             },
             "& .MuiDataGrid-row:hover": {
               bgcolor: "rgba(83,132,180,0.08)",
+            },
+            "& .MuiDataGrid-footerContainer": {
+              minHeight: 40,
+              borderTopColor: "background.300",
+              color: "text.secondary",
+            },
+            "& .MuiTablePagination-root": {
+              fontSize: "0.74rem",
+            },
+            "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows": {
+              fontSize: "0.74rem",
+              margin: 0,
+            },
+            "& .MuiTablePagination-select": {
+              fontSize: "0.74rem",
+              py: 0.25,
+            },
+            "& .MuiTablePagination-actions button": {
+              p: 0.5,
             },
           }}
         />

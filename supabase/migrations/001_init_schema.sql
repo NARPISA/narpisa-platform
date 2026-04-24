@@ -87,6 +87,18 @@ create table public.profiles (
     updated_at timestamptz not null default timezone('utc', now())
 );
 
+create or replace function public.is_admin_user()
+returns boolean
+language sql
+stable
+as $$
+    select exists (
+        select 1
+        from public.profiles p
+        where p.id = (select auth.uid()) and p.role = 'admin'
+    );
+$$;
+
 -- BILLING
 create table public.tiers (
     id uuid primary key default gen_random_uuid(),
@@ -145,7 +157,6 @@ create table public.extracted_records (
     job_id uuid references public.processing_jobs (id) on delete set null,
     record_type text not null,
     source_section text,
-    confidence numeric(4, 3),
     payload jsonb not null,
     created_at timestamptz not null default timezone('utc', now()),
     updated_at timestamptz not null default timezone('utc', now())
@@ -194,7 +205,9 @@ create table public.site_data (
     lifetime_of_mine_years numeric(8, 2),
     field_packets jsonb not null default '{}'::jsonb,
     created_at timestamptz not null default timezone('utc', now()),
-    updated_at timestamptz not null default timezone('utc', now())
+    updated_at timestamptz not null default timezone('utc', now()),
+    constraint site_data_field_packets_object
+        check (jsonb_typeof(field_packets) = 'object')
 );
 
 comment on table public.site_data is
@@ -242,6 +255,16 @@ create table public.site_data_fields (
 
 comment on table public.site_data_fields is
 'Registry of fields shown to the admin UI and LLM parser, including which table/column each field maps to.';
+
+
+-- NOTE: Site order 
+-- The field_key is used to identify the field in the database.
+-- The label is used to display the field in the admin UI.
+-- The data_type is used to define the data type of the field.
+-- The table_target is used to define the table that the field belongs to.
+-- The column_name is used to define the column that the field belongs to.
+-- The subtype_scope is used to define the subtype that the field belongs to.
+-- The sort_order is used to define the sort order of the field in the admin UI.
 
 insert into public.site_data_fields (
     field_key,
@@ -345,7 +368,6 @@ create table public.site_facts (
     unit text,
     project_label text,
     status public.site_fact_status not null default 'candidate',
-    confidence numeric(4, 3),
     provenance jsonb not null default '{}'::jsonb,
     created_at timestamptz not null default timezone('utc', now()),
     updated_at timestamptz not null default timezone('utc', now()),
@@ -357,7 +379,9 @@ create table public.site_facts (
             (value_date is not null)::integer +
             (value_json is not null)::integer
         ) = 1
-    )
+    ),
+    constraint site_facts_provenance_object
+        check (jsonb_typeof(provenance) = 'object')
 );
 
 comment on table public.site_facts is
@@ -423,14 +447,25 @@ create index extracted_records_payload_gin_idx on public.extracted_records using
 create index citations_document_id_idx on public.citations (document_id);
 create index sites_country_id_idx on public.sites (country_id);
 create index subscriptions_profile_id_idx on public.subscriptions (profile_id);
+create index subscriptions_tier_id_idx on public.subscriptions (tier_id);
+create index documents_created_by_idx on public.documents (created_by);
 create index site_data_stage_idx on public.site_data (stage);
+create index extracted_records_job_id_idx on public.extracted_records (job_id);
+create index site_commodities_commodity_id_idx on public.site_commodities (commodity_id);
 create index site_facts_site_field_idx on public.site_facts (site_id, field_key);
 create index site_facts_site_field_year_idx on public.site_facts (site_id, field_key, effective_year);
 create index site_facts_status_idx on public.site_facts (status);
 create index site_facts_document_id_idx on public.site_facts (document_id);
+create index site_facts_citation_id_idx on public.site_facts (citation_id);
+create index site_facts_extracted_record_id_idx on public.site_facts (extracted_record_id);
+create index site_facts_commodity_id_idx on public.site_facts (commodity_id);
 create index site_facts_provenance_gin_idx on public.site_facts using gin (provenance);
+create index site_water_metrics_definition_id_idx on public.site_water_metrics (definition_id);
 create index site_water_metrics_fact_id_idx on public.site_water_metrics (fact_id);
+create index site_commodity_metrics_commodity_id_idx on public.site_commodity_metrics (commodity_id);
+create index site_commodity_metrics_definition_id_idx on public.site_commodity_metrics (definition_id);
 create index site_commodity_metrics_fact_id_idx on public.site_commodity_metrics (fact_id);
+create index licenses_country_id_idx on public.licenses (country_id);
 
 create unique index site_water_metrics_unique_idx
 on public.site_water_metrics (
@@ -496,59 +531,51 @@ for each row execute procedure public.set_updated_at();
 
 -- RLS
 alter table public.profiles enable row level security;
+alter table public.tiers enable row level security;
+alter table public.subscriptions enable row level security;
 alter table public.documents enable row level security;
 alter table public.processing_jobs enable row level security;
 alter table public.extracted_records enable row level security;
+alter table public.citations enable row level security;
+alter table public.countries enable row level security;
+alter table public.sites enable row level security;
+alter table public.site_data enable row level security;
+alter table public.open_air_sites enable row level security;
+alter table public.underground_sites enable row level security;
+alter table public.site_data_fields enable row level security;
+alter table public.site_water_metric_definitions enable row level security;
+alter table public.site_commodity_metric_definitions enable row level security;
+alter table public.commodities enable row level security;
+alter table public.site_commodities enable row level security;
+alter table public.site_facts enable row level security;
+alter table public.site_water_metrics enable row level security;
+alter table public.site_commodity_metrics enable row level security;
+alter table public.licenses enable row level security;
 
 create policy "admins can create documents"
 on public.documents
 for insert
 to authenticated
-with check (
-    exists (
-        select 1 from public.profiles p
-        where p.id = auth.uid() and p.role = 'admin'
-    )
-);
+with check (public.is_admin_user());
 
 create policy "admins can update documents"
 on public.documents
 for update
 to authenticated
-using (
-    exists (
-        select 1 from public.profiles p
-        where p.id = auth.uid() and p.role = 'admin'
-    )
-)
-with check (
-    exists (
-        select 1 from public.profiles p
-        where p.id = auth.uid() and p.role = 'admin'
-    )
-);
+using (public.is_admin_user())
+with check (public.is_admin_user());
 
 create policy "admins can delete documents"
 on public.documents
 for delete
 to authenticated
-using (
-    exists (
-        select 1 from public.profiles p
-        where p.id = auth.uid() and p.role = 'admin'
-    )
-);
+using (public.is_admin_user());
 
 create policy "admins can read processing jobs"
 on public.processing_jobs
 for select
 to authenticated
-using (
-    exists (
-        select 1 from public.profiles
-        where id = auth.uid() and role = 'admin'
-    )
-);
+using (public.is_admin_user());
 
 create policy "profiles are readable by authenticated users"
 on public.profiles
@@ -556,21 +583,446 @@ for select
 to authenticated
 using (true);
 
+create policy "public users can read tiers"
+on public.tiers
+for select
+to anon, authenticated
+using (true);
+
+create policy "users can read their own subscriptions"
+on public.subscriptions
+for select
+to authenticated
+using (public.is_admin_user() or (select auth.uid()) = profile_id);
+
 create policy "users can update their own profile"
 on public.profiles
 for update
 to authenticated
-using (auth.uid() = id)
-with check (auth.uid() = id);
+using ((select auth.uid()) = id)
+with check ((select auth.uid()) = id);
 
-create policy "authenticated users can read documents"
+create policy "public users can read documents"
 on public.documents
 for select
-to authenticated
+to anon, authenticated
 using (true);
 
-create policy "authenticated users can read extracted records"
+create policy "public users can read extracted records"
 on public.extracted_records
 for select
-to authenticated
+to anon, authenticated
 using (true);
+
+create policy "public users can read citations"
+on public.citations
+for select
+to anon, authenticated
+using (true);
+
+create policy "public users can read countries"
+on public.countries
+for select
+to anon, authenticated
+using (true);
+
+create policy "public users can read sites"
+on public.sites
+for select
+to anon, authenticated
+using (true);
+
+create policy "public users can read site data"
+on public.site_data
+for select
+to anon, authenticated
+using (true);
+
+create policy "public users can read open air sites"
+on public.open_air_sites
+for select
+to anon, authenticated
+using (true);
+
+create policy "public users can read underground sites"
+on public.underground_sites
+for select
+to anon, authenticated
+using (true);
+
+create policy "public users can read site data fields"
+on public.site_data_fields
+for select
+to anon, authenticated
+using (true);
+
+create policy "public users can read water metric definitions"
+on public.site_water_metric_definitions
+for select
+to anon, authenticated
+using (true);
+
+create policy "public users can read commodity metric definitions"
+on public.site_commodity_metric_definitions
+for select
+to anon, authenticated
+using (true);
+
+create policy "public users can read commodities"
+on public.commodities
+for select
+to anon, authenticated
+using (true);
+
+create policy "public users can read site commodities"
+on public.site_commodities
+for select
+to anon, authenticated
+using (true);
+
+create policy "public users can read site facts"
+on public.site_facts
+for select
+to anon, authenticated
+using (true);
+
+create policy "public users can read site water metrics"
+on public.site_water_metrics
+for select
+to anon, authenticated
+using (true);
+
+create policy "public users can read site commodity metrics"
+on public.site_commodity_metrics
+for select
+to anon, authenticated
+using (true);
+
+create policy "public users can read licenses"
+on public.licenses
+for select
+to anon, authenticated
+using (true);
+
+create policy "admins can manage citations"
+on public.citations
+for insert
+to authenticated
+with check (public.is_admin_user());
+
+create policy "admins can update citations"
+on public.citations
+for update
+to authenticated
+using (public.is_admin_user())
+with check (public.is_admin_user());
+
+create policy "admins can delete citations"
+on public.citations
+for delete
+to authenticated
+using (public.is_admin_user());
+
+create policy "admins can manage countries"
+on public.countries
+for insert
+to authenticated
+with check (public.is_admin_user());
+
+create policy "admins can update countries"
+on public.countries
+for update
+to authenticated
+using (public.is_admin_user())
+with check (public.is_admin_user());
+
+create policy "admins can delete countries"
+on public.countries
+for delete
+to authenticated
+using (public.is_admin_user());
+
+create policy "admins can manage sites"
+on public.sites
+for insert
+to authenticated
+with check (public.is_admin_user());
+
+create policy "admins can update sites"
+on public.sites
+for update
+to authenticated
+using (public.is_admin_user())
+with check (public.is_admin_user());
+
+create policy "admins can delete sites"
+on public.sites
+for delete
+to authenticated
+using (public.is_admin_user());
+
+create policy "admins can manage site data"
+on public.site_data
+for insert
+to authenticated
+with check (public.is_admin_user());
+
+create policy "admins can update site data"
+on public.site_data
+for update
+to authenticated
+using (public.is_admin_user())
+with check (public.is_admin_user());
+
+create policy "admins can delete site data"
+on public.site_data
+for delete
+to authenticated
+using (public.is_admin_user());
+
+create policy "admins can manage open air sites"
+on public.open_air_sites
+for insert
+to authenticated
+with check (public.is_admin_user());
+
+create policy "admins can update open air sites"
+on public.open_air_sites
+for update
+to authenticated
+using (public.is_admin_user())
+with check (public.is_admin_user());
+
+create policy "admins can delete open air sites"
+on public.open_air_sites
+for delete
+to authenticated
+using (public.is_admin_user());
+
+create policy "admins can manage underground sites"
+on public.underground_sites
+for insert
+to authenticated
+with check (public.is_admin_user());
+
+create policy "admins can update underground sites"
+on public.underground_sites
+for update
+to authenticated
+using (public.is_admin_user())
+with check (public.is_admin_user());
+
+create policy "admins can delete underground sites"
+on public.underground_sites
+for delete
+to authenticated
+using (public.is_admin_user());
+
+create policy "admins can manage site data fields"
+on public.site_data_fields
+for insert
+to authenticated
+with check (public.is_admin_user());
+
+create policy "admins can update site data fields"
+on public.site_data_fields
+for update
+to authenticated
+using (public.is_admin_user())
+with check (public.is_admin_user());
+
+create policy "admins can delete site data fields"
+on public.site_data_fields
+for delete
+to authenticated
+using (public.is_admin_user());
+
+create policy "admins can manage water metric definitions"
+on public.site_water_metric_definitions
+for insert
+to authenticated
+with check (public.is_admin_user());
+
+create policy "admins can update water metric definitions"
+on public.site_water_metric_definitions
+for update
+to authenticated
+using (public.is_admin_user())
+with check (public.is_admin_user());
+
+create policy "admins can delete water metric definitions"
+on public.site_water_metric_definitions
+for delete
+to authenticated
+using (public.is_admin_user());
+
+create policy "admins can manage commodity metric definitions"
+on public.site_commodity_metric_definitions
+for insert
+to authenticated
+with check (public.is_admin_user());
+
+create policy "admins can update commodity metric definitions"
+on public.site_commodity_metric_definitions
+for update
+to authenticated
+using (public.is_admin_user())
+with check (public.is_admin_user());
+
+create policy "admins can delete commodity metric definitions"
+on public.site_commodity_metric_definitions
+for delete
+to authenticated
+using (public.is_admin_user());
+
+create policy "admins can manage commodities"
+on public.commodities
+for insert
+to authenticated
+with check (public.is_admin_user());
+
+create policy "admins can update commodities"
+on public.commodities
+for update
+to authenticated
+using (public.is_admin_user())
+with check (public.is_admin_user());
+
+create policy "admins can delete commodities"
+on public.commodities
+for delete
+to authenticated
+using (public.is_admin_user());
+
+create policy "admins can manage site commodities"
+on public.site_commodities
+for insert
+to authenticated
+with check (public.is_admin_user());
+
+create policy "admins can update site commodities"
+on public.site_commodities
+for update
+to authenticated
+using (public.is_admin_user())
+with check (public.is_admin_user());
+
+create policy "admins can delete site commodities"
+on public.site_commodities
+for delete
+to authenticated
+using (public.is_admin_user());
+
+create policy "admins can manage site facts"
+on public.site_facts
+for insert
+to authenticated
+with check (public.is_admin_user());
+
+create policy "admins can update site facts"
+on public.site_facts
+for update
+to authenticated
+using (public.is_admin_user())
+with check (public.is_admin_user());
+
+create policy "admins can delete site facts"
+on public.site_facts
+for delete
+to authenticated
+using (public.is_admin_user());
+
+create policy "admins can manage site water metrics"
+on public.site_water_metrics
+for insert
+to authenticated
+with check (public.is_admin_user());
+
+create policy "admins can update site water metrics"
+on public.site_water_metrics
+for update
+to authenticated
+using (public.is_admin_user())
+with check (public.is_admin_user());
+
+create policy "admins can delete site water metrics"
+on public.site_water_metrics
+for delete
+to authenticated
+using (public.is_admin_user());
+
+create policy "admins can manage site commodity metrics"
+on public.site_commodity_metrics
+for insert
+to authenticated
+with check (public.is_admin_user());
+
+create policy "admins can update site commodity metrics"
+on public.site_commodity_metrics
+for update
+to authenticated
+using (public.is_admin_user())
+with check (public.is_admin_user());
+
+create policy "admins can delete site commodity metrics"
+on public.site_commodity_metrics
+for delete
+to authenticated
+using (public.is_admin_user());
+
+create policy "admins can manage licenses"
+on public.licenses
+for insert
+to authenticated
+with check (public.is_admin_user());
+
+create policy "admins can update licenses"
+on public.licenses
+for update
+to authenticated
+using (public.is_admin_user())
+with check (public.is_admin_user());
+
+create policy "admins can delete licenses"
+on public.licenses
+for delete
+to authenticated
+using (public.is_admin_user());
+
+create policy "admins can create tiers"
+on public.tiers
+for insert
+to authenticated
+with check (public.is_admin_user());
+
+create policy "admins can update tiers"
+on public.tiers
+for update
+to authenticated
+using (public.is_admin_user())
+with check (public.is_admin_user());
+
+create policy "admins can delete tiers"
+on public.tiers
+for delete
+to authenticated
+using (public.is_admin_user());
+
+create policy "admins can create subscriptions"
+on public.subscriptions
+for insert
+to authenticated
+with check (public.is_admin_user());
+
+create policy "admins can update subscriptions"
+on public.subscriptions
+for update
+to authenticated
+using (public.is_admin_user())
+with check (public.is_admin_user());
+
+create policy "admins can delete subscriptions"
+on public.subscriptions
+for delete
+to authenticated
+using (public.is_admin_user());

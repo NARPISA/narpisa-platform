@@ -16,7 +16,7 @@ dependencies = [
   "pypdf",
   "uvicorn[standard]",
   "dbfread",
-  "supabase"
+  "supabase>=2.28.3"
 ]
 
 [project.optional-dependencies]
