@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import MuiLink from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import NextLink from "next/link";
 
 import MarketingShell from "@/components/marketing/marketing-shell";
 
@@ -21,7 +20,7 @@ export default function AuthCodeErrorPage() {
           We could not complete sign-in. The link may have expired, or SSO may not be configured for
           this environment.
         </Typography>
-        <MuiLink component={NextLink} href="/signin" underline="hover">
+        <MuiLink href="/signin" underline="hover">
           Back to sign in
         </MuiLink>
       </Stack>
