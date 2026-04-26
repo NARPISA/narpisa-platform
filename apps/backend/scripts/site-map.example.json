@@ -124,5 +124,71 @@
     "owner": "Namib Lead and Zinc Mine",
     "country": "Namibia",
     "stage": "production"
+  },
+  "Tsumeb operations": {
+    "site_type": "open_air",
+    "owner": "Tsumeb operations",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Uis Tin Mine": {
+    "site_type": "open_air",
+    "owner": "Uis Tin Mine",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Okorusu Fluorspar": {
+    "site_type": "open_air",
+    "owner": "Okorusu Fluorspar",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Okorusu operated by Gecko Namibia": {
+    "site_type": "open_air",
+    "owner": "Okorusu operated by Gecko Namibia",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Lodestone Dordabis Iron Ore Mine": {
+    "site_type": "open_air",
+    "owner": "Lodestone Dordabis Iron Ore Mine",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Imerys Gecko Graphite Namibia": {
+    "site_type": "open_air",
+    "owner": "Imerys Gecko Graphite Namibia",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Ohorongo Cement": {
+    "site_type": "open_air",
+    "owner": "Ohorongo Cement",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Cheeth Cement": {
+    "site_type": "open_air",
+    "owner": "Cheeth Cement",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Walvis Bay Salt & Chemicals": {
+    "site_type": "open_air",
+    "owner": "Walvis Bay Salt & Chemicals",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "The Salt Company": {
+    "site_type": "open_air",
+    "owner": "The Salt Company",
+    "country": "Namibia",
+    "stage": "production"
+  },
+  "Gecko Salt": {
+    "site_type": "open_air",
+    "owner": "Gecko Salt",
+    "country": "Namibia",
+    "stage": "production"
   }
 }
