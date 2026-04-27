@@ -26,7 +26,11 @@ function mapUser(user: User | null): Session | null {
     return null;
   }
   const meta = user.user_metadata as Record<string, string | undefined> | undefined;
-  const name = (meta?.full_name as string | undefined)?.trim() || user.email || null;
+  const fullName = (meta?.full_name as string | undefined)?.trim() ?? "";
+  const firstName = fullName.split(/\s+/).filter(Boolean)[0];
+  const email = user.email ?? null;
+  const fallbackName = email ? (email.length > 5 ? `${email.slice(0, 5)}...` : email) : null;
+  const name = firstName ? `Hi, ${firstName}` : fallbackName ? `Hi, ${fallbackName}` : null;
 
   return {
     user: {
