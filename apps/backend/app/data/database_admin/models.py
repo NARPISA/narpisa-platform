@@ -1,16 +1,17 @@
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
-
+from pydantic import BaseModel, ConfigDict, Field
 
 AdminColumnDataType = Literal["text", "numeric", "integer", "date", "boolean", "enum"]
 
 
 class AddColumnRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     category: str = Field(min_length=1)
     label: str = Field(min_length=1, max_length=64)
-    dataType: AdminColumnDataType
-    enumOptions: list[str] | None = None
+    data_type: AdminColumnDataType = Field(alias="dataType")
+    enum_options: list[str] | None = Field(default=None, alias="enumOptions")
 
 
 class ColumnVisibilityRequest(BaseModel):
@@ -20,12 +21,17 @@ class ColumnVisibilityRequest(BaseModel):
 
 
 class DirtyCellChange(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     category: str = Field(min_length=1)
-    rowId: int
+    row_id: int = Field(alias="rowId")
     field: str = Field(min_length=1)
     value: str | int | float | bool | None = None
-    originalValue: str | int | float | bool | None = None
-    metricRowId: int | None = None
+    original_value: str | int | float | bool | None = Field(
+        default=None,
+        alias="originalValue",
+    )
+    metric_row_id: int | None = Field(default=None, alias="metricRowId")
 
 
 class SaveRowsRequest(BaseModel):
@@ -33,7 +39,12 @@ class SaveRowsRequest(BaseModel):
 
 
 class SaveFailure(BaseModel):
-    rowId: int
+    model_config = ConfigDict(
+        populate_by_name=True,
+        ser_json_by_alias=True,  # type: ignore[typeddict-unknown-key]
+    )
+
+    row_id: int = Field(alias="rowId")
     field: str
     message: str
 

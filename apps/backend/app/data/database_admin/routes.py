@@ -39,8 +39,8 @@ async def add_column(
         {
             "target_category": category["source_key"],
             "column_label": payload.label,
-            "data_type": payload.dataType,
-            "enum_options": payload.enumOptions or [],
+            "data_type": payload.data_type,
+            "enum_options": payload.enum_options or [],
         },
     ).execute()
     return {"column": response.data, "editedBy": user.id}

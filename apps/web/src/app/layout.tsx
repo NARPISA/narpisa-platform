@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Bruno_Ace, Chathura, Manrope } from "next/font/google";
+import { Manrope } from "next/font/google";
 import Box from "@mui/material/Box";
 import { Suspense } from "react";
 

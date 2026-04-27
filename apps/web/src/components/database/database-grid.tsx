@@ -3,6 +3,7 @@
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import Box from "@mui/material/Box";
+import NoSsr from "@mui/material/NoSsr";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
@@ -20,7 +21,7 @@ import {
   useGridApiRef,
   type GridColDef,
 } from "@mui/x-data-grid";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 
 import {
   DATABASE_METRIC_YEARS,
@@ -252,11 +253,6 @@ export default function DatabaseGrid({
   onExportHandlersChange,
 }: DatabaseGridProps) {
   const apiRef = useGridApiRef();
-  const [hasMounted, setHasMounted] = useState(false);
-
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
 
   useEffect(() => {
     onExportHandlersChange({
@@ -451,150 +447,148 @@ export default function DatabaseGrid({
       </Tabs>
 
       <Box sx={{ width: "100%", minHeight: 460 }}>
-        {hasMounted ? (
+        <NoSsr fallback={<Box sx={{ minHeight: 460, bgcolor: "background.200" }} />}>
           <DataGrid
             apiRef={apiRef}
             rows={rows}
             columns={activeColumns}
-          loading={isLoading}
-          processRowUpdate={processRowUpdate}
-          onProcessRowUpdateError={() => undefined}
-          columnHeaderHeight={44}
-          pagination
-          pageSizeOptions={[20, 50, 100]}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 20,
-                page: 0,
+            loading={isLoading}
+            processRowUpdate={processRowUpdate}
+            onProcessRowUpdateError={() => undefined}
+            columnHeaderHeight={44}
+            pagination
+            pageSizeOptions={[20, 50, 100]}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 20,
+                  page: 0,
+                },
               },
-            },
-          }}
-          disableRowSelectionOnClick
-          hideFooterSelectedRowCount
-          rowHeight={40}
-          slots={slots}
-          showToolbar
-          sx={{
-            border: "none",
-            bgcolor: "background.200",
-            "& .MuiDataGrid-columnHeaders": {
-              bgcolor: "secondary.main",
-              borderBottom: "none",
-            },
-            "& .MuiDataGrid-columnHeader": {
-              bgcolor: "secondary.main",
-            },
-            "& .MuiDataGrid-columnHeaderTitle": {
-              color: "common.white",
-              fontWeight: 800,
-              fontSize: activeCategory.includes("Metrics") ? "0.9rem" : "1rem",
-            },
-            "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-iconButtonContainer .MuiSvgIcon-root, & .MuiDataGrid-sortIcon": {
-              color: "common.white",
-            },
-            "& .MuiDataGrid-columnHeader .MuiIconButton-root": {
-              width: 18,
-              height: 18,
-              p: 0,
-              borderRadius: 0,
-              bgcolor: "transparent",
-            },
-            "& .MuiDataGrid-columnHeader .MuiIconButton-root:not(.admin-hide-column):hover": {
-              bgcolor: "transparent !important",
-            },
-            "& .MuiDataGrid-columnHeader .MuiIconButton-root:not(.admin-hide-column).Mui-focusVisible": {
-              bgcolor: "transparent !important",
-              outline: "none",
-            },
-            "& .MuiDataGrid-columnHeader .MuiIconButton-root.admin-hide-column": {
-              color: "common.white",
-              bgcolor: "error.main",
-              borderRadius: "50%",
-              width: 20,
-              height: 20,
-            },
-            "& .MuiDataGrid-columnHeader .MuiIconButton-root.admin-hide-column:hover": {
-              bgcolor: "error.dark !important",
-            },
-            "& .MuiDataGrid-columnHeader .MuiIconButton-root.admin-hide-column.Mui-focusVisible": {
-              bgcolor: "error.dark !important",
-              outline: "none",
-            },
-            "& .MuiDataGrid-columnHeader .MuiTouchRipple-root": {
-              display: "none",
-            },
-            "& .MuiDataGrid-columnSeparator": {
-              color: "rgba(255,255,255,0.55)",
-            },
-            "& .MuiDataGrid-columnSeparator svg": {
-              display: "none",
-            },
-            "& .MuiDataGrid-cell": {
-              borderBottomColor: "background.200",
-              fontSize: "0.85rem",
-              color: "text.secondary",
-            },
-            "& .MuiDataGrid-main": {
-              fontSize: "0.85rem",
-            },
-            "& .MuiDataGrid-cell--editing": {
-              bgcolor: "common.white",
-              boxShadow: 2,
-            },
-            "& .MuiDataGrid-cell--editing .MuiInputBase-root, & .MuiDataGrid-cell--editing .MuiInputBase-input":
-              {
+            }}
+            disableRowSelectionOnClick
+            hideFooterSelectedRowCount
+            rowHeight={40}
+            slots={slots}
+            showToolbar
+            sx={{
+              border: "none",
+              bgcolor: "background.200",
+              "& .MuiDataGrid-columnHeaders": {
+                bgcolor: "secondary.main",
+                borderBottom: "none",
+              },
+              "& .MuiDataGrid-columnHeader": {
+                bgcolor: "secondary.main",
+              },
+              "& .MuiDataGrid-columnHeaderTitle": {
+                color: "common.white",
+                fontWeight: 800,
+                fontSize: activeCategory.includes("Metrics") ? "0.9rem" : "1rem",
+              },
+              "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within": {
+                outline: "none",
+              },
+              "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
+                outline: "none",
+              },
+              "& .MuiDataGrid-iconButtonContainer .MuiSvgIcon-root, & .MuiDataGrid-sortIcon": {
+                color: "common.white",
+              },
+              "& .MuiDataGrid-columnHeader .MuiIconButton-root": {
+                width: 18,
+                height: 18,
+                p: 0,
+                borderRadius: 0,
+                bgcolor: "transparent",
+              },
+              "& .MuiDataGrid-columnHeader .MuiIconButton-root:not(.admin-hide-column):hover": {
+                bgcolor: "transparent !important",
+              },
+              "& .MuiDataGrid-columnHeader .MuiIconButton-root:not(.admin-hide-column).Mui-focusVisible": {
+                bgcolor: "transparent !important",
+                outline: "none",
+              },
+              "& .MuiDataGrid-columnHeader .MuiIconButton-root.admin-hide-column": {
+                color: "common.white",
+                bgcolor: "error.main",
+                borderRadius: "50%",
+                width: 20,
+                height: 20,
+              },
+              "& .MuiDataGrid-columnHeader .MuiIconButton-root.admin-hide-column:hover": {
+                bgcolor: "error.dark !important",
+              },
+              "& .MuiDataGrid-columnHeader .MuiIconButton-root.admin-hide-column.Mui-focusVisible": {
+                bgcolor: "error.dark !important",
+                outline: "none",
+              },
+              "& .MuiDataGrid-columnHeader .MuiTouchRipple-root": {
+                display: "none",
+              },
+              "& .MuiDataGrid-columnSeparator": {
+                color: "rgba(255,255,255,0.55)",
+              },
+              "& .MuiDataGrid-columnSeparator svg": {
+                display: "none",
+              },
+              "& .MuiDataGrid-cell": {
+                borderBottomColor: "background.200",
                 fontSize: "0.85rem",
-                lineHeight: 1.3,
+                color: "text.secondary",
               },
-            "& .MuiDataGrid-toolbarContainer": {
-              px: 0.25,
-              pb: 0.75,
-            },
-            "& .MuiDataGrid-toolbarContainer .MuiButton-root": {
-              color: "text.secondary",
-              textTransform: "none",
-              fontSize: "0.78rem",
-              fontWeight: 600,
-            },
-            "& .MuiDataGrid-toolbarContainer .MuiInputBase-root": {
-              borderRadius: "10px",
-              bgcolor: "background.100",
-              fontSize: "0.78rem",
-            },
-            "& .MuiDataGrid-row:hover": {
-              bgcolor: "rgba(83,132,180,0.08)",
-            },
-            "& .MuiDataGrid-footerContainer": {
-              minHeight: 40,
-              borderTopColor: "background.300",
-              color: "text.secondary",
-            },
-            "& .MuiTablePagination-root": {
-              fontSize: "0.74rem",
-            },
-            "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows": {
-              fontSize: "0.74rem",
-              margin: 0,
-            },
-            "& .MuiTablePagination-select": {
-              fontSize: "0.74rem",
-              py: 0.25,
-            },
-            "& .MuiTablePagination-actions button": {
-              p: 0.5,
-            },
-          }}
+              "& .MuiDataGrid-main": {
+                fontSize: "0.85rem",
+              },
+              "& .MuiDataGrid-cell--editing": {
+                bgcolor: "common.white",
+                boxShadow: 2,
+              },
+              "& .MuiDataGrid-cell--editing .MuiInputBase-root, & .MuiDataGrid-cell--editing .MuiInputBase-input":
+                {
+                  fontSize: "0.85rem",
+                  lineHeight: 1.3,
+                },
+              "& .MuiDataGrid-toolbarContainer": {
+                px: 0.25,
+                pb: 0.75,
+              },
+              "& .MuiDataGrid-toolbarContainer .MuiButton-root": {
+                color: "text.secondary",
+                textTransform: "none",
+                fontSize: "0.78rem",
+                fontWeight: 600,
+              },
+              "& .MuiDataGrid-toolbarContainer .MuiInputBase-root": {
+                borderRadius: "10px",
+                bgcolor: "background.100",
+                fontSize: "0.78rem",
+              },
+              "& .MuiDataGrid-row:hover": {
+                bgcolor: "rgba(83,132,180,0.08)",
+              },
+              "& .MuiDataGrid-footerContainer": {
+                minHeight: 40,
+                borderTopColor: "background.300",
+                color: "text.secondary",
+              },
+              "& .MuiTablePagination-root": {
+                fontSize: "0.74rem",
+              },
+              "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows": {
+                fontSize: "0.74rem",
+                margin: 0,
+              },
+              "& .MuiTablePagination-select": {
+                fontSize: "0.74rem",
+                py: 0.25,
+              },
+              "& .MuiTablePagination-actions button": {
+                p: 0.5,
+              },
+            }}
           />
-        ) : (
-          <Box sx={{ minHeight: 460, bgcolor: "background.200" }} />
-        )}
+        </NoSsr>
       </Box>
     </Stack>
   );

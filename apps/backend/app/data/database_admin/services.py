@@ -1,7 +1,7 @@
-from typing import Annotated, Any
+from typing import Annotated, Any, cast
 
 from fastapi import Depends, Header, HTTPException, status
-from gotrue.errors import AuthApiError  # type: ignore[reportMissingImports]
+from gotrue.errors import AuthApiError
 from postgrest.exceptions import APIError
 from supabase import Client, create_client
 
@@ -44,6 +44,11 @@ def require_admin_user_from_token(settings: Settings, token: str) -> AdminUser:
             detail="Authentication required.",
         ) from exc
 
+    if user_response is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required.",
+        )
     user = user_response.user
     if user is None:
         raise HTTPException(
@@ -120,7 +125,11 @@ def editable_categories(supabase: Client) -> dict[str, dict[str, Any]]:
         .eq("can_edit_cells", True)
         .execute()
     )
-    return {str(row["label"]): row for row in response.data or []}
+    raw = response.data or []
+    if not isinstance(raw, list):
+        return {}
+    rows = [cast(dict[str, Any], row) for row in raw if isinstance(row, dict)]
+    return {str(row["label"]): row for row in rows}
 
 
 def field_mapping(
@@ -174,9 +183,7 @@ def resolve_relation_value(
         return existing_row["id"]
 
     created = (
-        supabase.table(str(relation_table))
-        .insert({str(label_column): label})
-        .execute()
+        supabase.table(str(relation_table)).insert({str(label_column): label}).execute()
     )
     return single_or_bad_request(created.data, "Unable to create related row.")["id"]
 
@@ -202,7 +209,7 @@ def write_audit(
         {
             "category": change.category,
             "table_name": table_name,
-            "row_id": str(change.rowId),
+            "row_id": str(change.row_id),
             "field_key": change.field,
             "old_value": old_value,
             "new_value": change.value,
@@ -226,13 +233,15 @@ def save_registered_field_change(
     mapping = field_mapping(supabase, category, change.field)
     table_name = str(mapping["table_target"])
     column_name = str(mapping["column_name"])
-    key_column = str(mapping.get("row_key_column") or category.get("row_key_column") or "id")
+    key_column = str(
+        mapping.get("row_key_column") or category.get("row_key_column") or "id"
+    )
     value = coerce_field_value(supabase, mapping, change.value)
 
     previous = (
         supabase.table(table_name)
         .select(column_name)
-        .eq(key_column, change.rowId)
+        .eq(key_column, change.row_id)
         .limit(1)
         .execute()
     )
@@ -241,11 +250,11 @@ def save_registered_field_change(
 
     if previous_row is None:
         supabase.table(table_name).insert(
-            {key_column: change.rowId, column_name: value}
+            {key_column: change.row_id, column_name: value}
         ).execute()
     else:
         supabase.table(table_name).update({column_name: value}).eq(
-            key_column, change.rowId
+            key_column, change.row_id
         ).execute()
 
     write_audit(supabase, change, user, table_name, old_value)
@@ -259,14 +268,18 @@ def save_metric_change(
 ) -> None:
     table_name = category.get("editable_table")
     key_column = str(category.get("row_key_column") or "id")
-    if not table_name or change.metricRowId is None or not change.field.startswith("year_"):
+    if (
+        not table_name
+        or change.metric_row_id is None
+        or not change.field.startswith("year_")
+    ):
         raise ValueError("Only yearly metric values are editable.")
 
     value = coerce_value(change.value, "numeric")
     previous = (
         supabase.table(str(table_name))
         .select("value_numeric,fact_id")
-        .eq(key_column, change.metricRowId)
+        .eq(key_column, change.metric_row_id)
         .limit(1)
         .execute()
     )
@@ -275,7 +288,7 @@ def save_metric_change(
     fact_id = previous_row.get("fact_id")
 
     supabase.table(str(table_name)).update({"value_numeric": value}).eq(
-        key_column, change.metricRowId
+        key_column, change.metric_row_id
     ).execute()
 
     if fact_id:
@@ -323,10 +336,12 @@ def save_database_changes(
             saved += 1
         except (APIError, ValueError) as exc:
             failed.append(
-                SaveFailure(
-                    rowId=change.rowId,
-                    field=change.field,
-                    message=str(exc),
+                SaveFailure.model_validate(
+                    {
+                        "rowId": change.row_id,
+                        "field": change.field,
+                        "message": str(exc),
+                    }
                 )
             )
 
