@@ -8,16 +8,38 @@ import { usePathname } from "next/navigation";
 
 import BrandHomeLink from "@/components/brand-home-link";
 
+type SiteFooterBehavior = "auto" | "hidden" | "static" | "sticky";
+
+type SiteFooterProps = {
+  behavior?: SiteFooterBehavior;
+};
+
 const FOOTER_LINKS = [
   { label: "Database", href: "/database" },
   { label: "About", href: "/about" },
   { label: "Upload", href: "/data_input" },
 ];
 
-export default function SiteFooter() {
-  const pathname = usePathname();
+function resolveFooterBehavior(
+  pathname: string | null,
+  behavior: SiteFooterBehavior,
+) {
+  if (behavior !== "auto") {
+    return behavior;
+  }
 
-  if (pathname === "/") {
+  return pathname?.startsWith("/signin") ||
+    pathname?.startsWith("/signup") ||
+    pathname?.startsWith("/forgot-password")
+    ? "hidden"
+    : "sticky";
+}
+
+export default function SiteFooter({ behavior = "auto" }: SiteFooterProps) {
+  const pathname = usePathname();
+  const resolvedBehavior = resolveFooterBehavior(pathname, behavior);
+
+  if (pathname === "/" || resolvedBehavior === "hidden") {
     return null;
   }
 
@@ -25,6 +47,9 @@ export default function SiteFooter() {
     <Box
       component="footer"
       sx={{
+        position: resolvedBehavior === "sticky" ? "sticky" : "static",
+        bottom: resolvedBehavior === "sticky" ? 0 : "auto",
+        zIndex: resolvedBehavior === "sticky" ? 0 : "auto",
         bgcolor: "#AF5428",
         color: "common.white",
         px: { xs: 2, md: 4 },
@@ -40,7 +65,13 @@ export default function SiteFooter() {
       >
         <Stack direction="row" spacing={1.5} alignItems="center">
           <BrandHomeLink size={44} color="inherit" showText={false} />
-          <Typography sx={{ fontSize: { xs: "1.15rem", md: "1.5rem" }, fontWeight: 700, lineHeight: 1.2 }}>
+          <Typography
+            sx={{
+              fontSize: { xs: "1.15rem", md: "1.5rem" },
+              fontWeight: 700,
+              lineHeight: 1.2,
+            }}
+          >
             Natural Resources Polytechnic of Southern Africa
           </Typography>
         </Stack>
@@ -52,7 +83,10 @@ export default function SiteFooter() {
               href={link.href}
               underline="hover"
               color="inherit"
-              sx={{ fontSize: { xs: "1.15rem", md: "1.35rem" }, fontWeight: 700 }}
+              sx={{
+                fontSize: { xs: "1.15rem", md: "1.35rem" },
+                fontWeight: 700,
+              }}
             >
               {link.label}
             </Link>

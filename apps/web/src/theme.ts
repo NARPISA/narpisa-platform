@@ -1,8 +1,8 @@
 import type { CSSProperties } from "react";
 import { createTheme } from "@mui/material/styles";
 
-const fontMain = 'var(--font-manrope), "Helvetica Neue", Arial, sans-serif';
-const fontStyle = 'var(--font-bruno-ace), var(--font-chathura), sans-serif';
+const fontMain = "var(--font-manrope), 'Helvetica Neue', Arial, sans-serif";
+const fontStyle = "var(--font-manrope), 'Helvetica Neue', Arial, sans-serif";
 
 type ExtendedColorScale = {
   main: string;
@@ -36,16 +36,31 @@ declare module "@mui/material/styles" {
   }
 
   interface TypographyVariants {
+    authTitle: CSSProperties;
+    authBody: CSSProperties;
+    authLabel: CSSProperties;
+    authInput: CSSProperties;
+    authAction: CSSProperties;
     style: CSSProperties;
   }
 
   interface TypographyVariantsOptions {
+    authTitle?: CSSProperties;
+    authBody?: CSSProperties;
+    authLabel?: CSSProperties;
+    authInput?: CSSProperties;
+    authAction?: CSSProperties;
     style?: CSSProperties;
   }
 }
 
 declare module "@mui/material/Typography" {
   interface TypographyPropsVariantOverrides {
+    authTitle: true;
+    authBody: true;
+    authLabel: true;
+    authInput: true;
+    authAction: true;
     style: true;
   }
 }
@@ -157,6 +172,36 @@ const theme = createTheme({
       fontWeight: 400,
       fontSize: "4rem",
     },
+    authTitle: {
+      fontFamily: fontStyle,
+      fontWeight: 400,
+      fontSize: "6rem",
+      lineHeight: 1.15,
+    },
+    authBody: {
+      fontFamily: fontMain,
+      fontWeight: 400,
+      fontSize: "2.2rem",
+      lineHeight: 1.4,
+    },
+    authLabel: {
+      fontFamily: fontMain,
+      fontWeight: 400,
+      fontSize: "2.2rem",
+      lineHeight: 1.25,
+    },
+    authInput: {
+      fontFamily: fontMain,
+      fontWeight: 400,
+      fontSize: "2.2rem",
+      lineHeight: 1.25,
+    },
+    authAction: {
+      fontFamily: fontMain,
+      fontWeight: 400,
+      fontSize: "3rem",
+      lineHeight: 1.25,
+    },
     style: {
       fontFamily: fontStyle,
       fontWeight: 400,
@@ -199,6 +244,57 @@ const theme = createTheme({
         },
       },
     },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          fontFamily: fontMain,
+          fontSize: "0.95rem",
+          lineHeight: 1.25,
+        },
+      },
+    },
+    MuiDialogTitle: {
+      styleOverrides: {
+        root: {
+          fontFamily: fontMain,
+          fontSize: "1.15rem",
+          lineHeight: 1.3,
+          fontWeight: 800,
+        },
+      },
+    },
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          fontFamily: fontMain,
+          fontSize: "0.95rem",
+          lineHeight: 1.35,
+        },
+        input: {
+          fontFamily: fontMain,
+          fontSize: "0.95rem",
+          lineHeight: 1.35,
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          fontFamily: fontMain,
+          fontSize: "0.9rem",
+          lineHeight: 1.25,
+        },
+      },
+    },
+    MuiFormHelperText: {
+      styleOverrides: {
+        root: {
+          fontFamily: fontMain,
+          fontSize: "0.74rem",
+          lineHeight: 1.3,
+        },
+      },
+    },
     MuiCssBaseline: {
       styleOverrides: {
         html: {
@@ -229,9 +325,10 @@ const theme = createTheme({
         "body .MuiDataGrid-panel .MuiDataGrid-filterForm .MuiFormLabel-root": {
           fontSize: "0.72rem",
         },
-        "body .MuiDataGrid-panel .MuiDataGrid-filterForm .MuiInputBase-input, body .MuiDataGrid-panel .MuiDataGrid-filterForm .MuiSelect-select": {
-          fontSize: "0.74rem",
-        },
+        "body .MuiDataGrid-panel .MuiDataGrid-filterForm .MuiInputBase-input, body .MuiDataGrid-panel .MuiDataGrid-filterForm .MuiSelect-select":
+          {
+            fontSize: "0.74rem",
+          },
         "body .MuiDataGrid-panel .MuiDataGrid-filterForm .MuiIconButton-root": {
           padding: "4px",
         },
@@ -241,33 +338,37 @@ const theme = createTheme({
         "body .MuiDataGrid-panel .MuiDataGrid-columnsManagementHeader": {
           padding: "8px 12px 4px",
         },
-        "body .MuiDataGrid-panel .MuiDataGrid-columnsManagementSearchInput .MuiInputBase-root": {
-          minHeight: "34px",
-          fontSize: "0.78rem",
-        },
-        "body .MuiDataGrid-panel .MuiDataGrid-columnsManagementSearchInput .MuiInputBase-input": {
-          paddingTop: "7px",
-          paddingBottom: "7px",
-        },
+        "body .MuiDataGrid-panel .MuiDataGrid-columnsManagementSearchInput .MuiInputBase-root":
+          {
+            minHeight: "34px",
+            fontSize: "0.78rem",
+          },
+        "body .MuiDataGrid-panel .MuiDataGrid-columnsManagementSearchInput .MuiInputBase-input":
+          {
+            paddingTop: "7px",
+            paddingBottom: "7px",
+          },
         "body .MuiDataGrid-panel .MuiDataGrid-columnsManagementRow": {
           fontSize: "0.74rem",
         },
         "body .MuiDataGrid-panel .MuiDataGrid-columnsManagementFooter": {
           padding: "6px 12px 10px",
         },
-        "body .MuiDataGrid-panel .MuiDataGrid-columnsManagementFooter .MuiButton-root": {
-          minWidth: "auto",
-          padding: "4px 10px",
-          fontSize: "0.72rem",
-        },
+        "body .MuiDataGrid-panel .MuiDataGrid-columnsManagementFooter .MuiButton-root":
+          {
+            minWidth: "auto",
+            padding: "4px 10px",
+            fontSize: "0.72rem",
+          },
         "body .MuiDataGrid-menu .MuiMenuItem-root": {
           minHeight: "34px",
           fontSize: "0.74rem",
         },
-        "body .MuiDataGrid-menu .MuiMenuItem-root .MuiTypography-root, body .MuiDataGrid-menu .MuiMenuItem-root .MuiListItemText-primary": {
-          fontSize: "0.74rem",
-          lineHeight: 1.2,
-        },
+        "body .MuiDataGrid-menu .MuiMenuItem-root .MuiTypography-root, body .MuiDataGrid-menu .MuiMenuItem-root .MuiListItemText-primary":
+          {
+            fontSize: "0.74rem",
+            lineHeight: 1.2,
+          },
         "body .MuiDataGrid-menu .MuiListItemIcon-root": {
           minWidth: "24px",
         },

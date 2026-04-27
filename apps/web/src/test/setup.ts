@@ -5,6 +5,14 @@ import { nextNavigationMock } from "./next-navigation-mock";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => nextNavigationMock.pathname,
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    refresh: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+  }),
+  useSearchParams: () => new URLSearchParams(),
   useServerInsertedHTML: () => {},
 }));
 

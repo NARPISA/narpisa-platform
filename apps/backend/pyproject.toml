@@ -16,7 +16,8 @@ dependencies = [
   "pypdf",
   "uvicorn[standard]",
   "dbfread",
-  "supabase>=2.28.3"
+  "supabase>=2.28.3",
+  "supabase-auth>=2.28.2",
 ]
 
 [project.optional-dependencies]
@@ -50,6 +51,7 @@ testpaths = ["tests"]
 python_version = "3.11"
 strict = true
 warn_unused_configs = true
+warn_unused_ignores = true
 exclude = ["tests"]
 
 [[tool.mypy.overrides]]

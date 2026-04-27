@@ -8,12 +8,22 @@ const publicEnvSchema = z.object({
 
 const pdfWorkerUrlSchema = z.url();
 
-export function getPublicEnv() {
+export type PublicEnv = z.infer<typeof publicEnvSchema>;
+
+export function getPublicEnv(): PublicEnv {
   return publicEnvSchema.parse({
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   });
+}
+
+export function getSupabaseAnonKey(): string {
+  return getPublicEnv().NEXT_PUBLIC_SUPABASE_ANON_KEY;
+}
+
+export function getSupabaseUrl(): string {
+  return getPublicEnv().NEXT_PUBLIC_SUPABASE_URL;
 }
 
 export function getPdfWorkerUrl() {

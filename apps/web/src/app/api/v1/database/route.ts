@@ -1,38 +1,30 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 
 import type {
+  DatabaseAdminMeta,
   DatabaseCategory,
+  DatabaseCategoryMeta,
+  DatabaseColumnDataType,
+  DatabaseColumnMeta,
   DatabaseDataPayload,
   DatabaseFilterGroup,
   DatabaseRow,
 } from "@/app/database/database-types";
 import { DATABASE_METRIC_YEARS } from "@/app/database/database-types";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 const EMPTY_TABLES: Record<DatabaseCategory, DatabaseRow[]> = {
-  Mines: [],
-  "Commodity Metrics": [],
-  "Water Metrics": [],
-  Licenses: [],
 };
 
-function createSupabaseRouteClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!url || !anonKey) {
-    throw new Error("Missing public Supabase environment variables.");
-  }
-
-  return createClient(url, anonKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
-}
+const EMPTY_ADMIN: DatabaseAdminMeta = {
+  isAdmin: false,
+  columnsByCategory: {},
+  hiddenColumnsByCategory: {},
+  canAddColumnsByCategory: {},
+  canHideColumnsByCategory: {},
+};
 
 function ensureArray<T>(value: T | T[] | null | undefined): T[] {
   if (Array.isArray(value)) {
@@ -71,6 +63,20 @@ function numericValue(value: unknown) {
   }
 
   return null;
+}
+
+function booleanValue(value: unknown) {
+  return typeof value === "boolean" ? value : Boolean(value);
+}
+
+function normalizeDataType(value: unknown): DatabaseColumnDataType {
+  if (value === "numeric" || value === "integer" || value === "boolean" || value === "date") {
+    return value;
+  }
+  if (value === "enum") {
+    return "enum";
+  }
+  return "text";
 }
 
 function relationField(
@@ -165,33 +171,12 @@ function buildMetricBaseRow(id: number, extra: MetricExtraFields): DatabaseRow {
 }
 
 function inferCommodityLabel(...sources: Array<string | null>) {
-  const haystack = sources
+  const fallback = sources
     .filter((value): value is string => Boolean(value))
-    .join(" ")
-    .toLowerCase();
+    .map((value) => cleanMetricLabel(value))
+    .find(Boolean);
 
-  const keywords: Array<[RegExp, string]> = [
-    [/\blead\b/, "Lead"],
-    [/\bzinc\b/, "Zinc"],
-    [/\bcopper\b/, "Copper"],
-    [/\bgold\b/, "Gold"],
-    [/\buranium\b/, "Uranium"],
-    [/\bdiamond|\bcarat/, "Diamond"],
-    [/\btin\b/, "Tin"],
-    [/\bfluorspar\b/, "Fluorspar"],
-    [/\biron ore\b/, "Iron Ore"],
-    [/\bgraphite\b/, "Graphite"],
-    [/\bsalt\b/, "Salt"],
-    [/\bcement\b/, "Cement"],
-  ];
-
-  for (const [pattern, label] of keywords) {
-    if (pattern.test(haystack)) {
-      return label;
-    }
-  }
-
-  return "Unknown";
+  return fallback || "Unknown";
 }
 
 function buildCommodityProduct(
@@ -212,6 +197,7 @@ function buildCommodityProduct(
 }
 
 type MetricPivotSourceRow = {
+  metricRowId: number;
   site: string;
   project: string;
   unit: string;
@@ -254,7 +240,12 @@ function pivotMetricRows(
       });
 
     if (row.year !== null && DATABASE_METRIC_YEARS.includes(row.year)) {
-      baseRow[metricYearField(row.year)] = formatMetricValue(row.value);
+      const field = metricYearField(row.year);
+      baseRow[field] = formatMetricValue(row.value);
+      baseRow.__metricIds = {
+        ...((baseRow.__metricIds as Record<string, number> | undefined) ?? {}),
+        [field]: row.metricRowId,
+      };
     }
 
     if (baseRow.annual === "-" && row.value !== null) {
@@ -305,29 +296,129 @@ function withGroups(
   return groups.filter((group): group is DatabaseFilterGroup => group !== null);
 }
 
+function buildMetricColumnMeta(
+  leadingField: "commodity" | "waterType",
+  leadingHeader: string,
+): DatabaseColumnMeta[] {
+  return [
+    {
+      field: "site",
+      headerName: "Site",
+      dataType: "text",
+      source: "derived",
+      editable: false,
+      hideable: false,
+      addable: false,
+      visible: true,
+      flex: 1.1,
+    },
+    {
+      field: leadingField,
+      headerName: leadingHeader,
+      dataType: "text",
+      source: "derived",
+      editable: false,
+      hideable: false,
+      addable: false,
+      visible: true,
+      flex: 0.9,
+    },
+    {
+      field: "product",
+      headerName: "Product",
+      dataType: "text",
+      source: "derived",
+      editable: false,
+      hideable: false,
+      addable: false,
+      visible: true,
+      flex: 1.2,
+    },
+    {
+      field: "unit",
+      headerName: "Unit",
+      dataType: "text",
+      source: "derived",
+      editable: false,
+      hideable: false,
+      addable: false,
+      visible: true,
+      flex: 0.7,
+    },
+    ...DATABASE_METRIC_YEARS.map((year) => ({
+      field: metricYearField(year),
+      headerName: String(year),
+      dataType: "numeric" as const,
+      source: leadingField === "commodity" ? "site_commodity_metrics" as const : "site_water_metrics" as const,
+      editable: true,
+      hideable: false,
+      addable: false,
+      visible: true,
+      relation: "metric-year" as const,
+      width: 86,
+      flex: 0.56,
+    })),
+    {
+      field: "annual",
+      headerName: "Annual",
+      dataType: "numeric",
+      source: "derived",
+      editable: false,
+      hideable: false,
+      addable: false,
+      visible: true,
+      flex: 0.62,
+    },
+    {
+      field: "lom",
+      headerName: "LOM",
+      dataType: "numeric",
+      source: "derived",
+      editable: false,
+      hideable: false,
+      addable: false,
+      visible: true,
+      flex: 0.56,
+    },
+  ];
+}
+
+function visibleColumns(columns: DatabaseColumnMeta[]) {
+  return columns.filter((column) => column.visible);
+}
+
+function hiddenColumns(columns: DatabaseColumnMeta[]) {
+  return columns.filter((column) => !column.visible);
+}
+
 export async function GET() {
   try {
-    const supabase = createSupabaseRouteClient();
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { data: isAdminResult } = user
+      ? await supabase.rpc("is_admin_user")
+      : { data: false };
 
     const [
       sitesResponse,
       commodityMetricsResponse,
       waterMetricsResponse,
       licensesResponse,
+      siteFieldsResponse,
+      licenseFieldsResponse,
+      categoriesResponse,
     ] = await Promise.all([
       supabase
         .from("sites")
         .select(
           `
-            id,
-            name,
-            owner,
-            status,
-            site_type,
+            *,
             country:countries(name),
-            site_data(stage, latitude, longitude, lifetime_of_mine_years),
-            open_air_sites(pit_depth, surface_area),
-            underground_sites(shaft_depth, tunnel_length),
+            site_data(*),
+            open_air_sites(*),
+            underground_sites(*),
             site_commodities(commodity:commodities(name))
           `,
         )
@@ -367,18 +458,27 @@ export async function GET() {
         .from("licenses")
         .select(
           `
-            id,
-            type,
-            region,
-            status,
-            applicants,
-            application_date,
-            start_date,
-            end_date,
+            *,
             country:countries(name)
           `,
         )
         .order("application_date", { ascending: false }),
+      supabase
+        .from("site_data_fields")
+        .select(
+          "field_key,label,data_type,table_target,column_name,ui_field,subtype_scope,is_visible,is_admin_editable,sort_order",
+        )
+        .order("sort_order"),
+      supabase
+        .from("license_data_fields")
+        .select(
+          "field_key,label,data_type,column_name,ui_field,is_visible,is_admin_editable,sort_order",
+        )
+        .order("sort_order"),
+      supabase
+        .from("database_categories")
+        .select("label,source_key,can_edit_cells,can_add_columns,can_hide_columns,sort_order")
+        .order("sort_order"),
     ]);
 
     const firstError = [
@@ -386,11 +486,112 @@ export async function GET() {
       commodityMetricsResponse.error,
       waterMetricsResponse.error,
       licensesResponse.error,
+      siteFieldsResponse.error,
+      licenseFieldsResponse.error,
+      categoriesResponse.error,
     ].find(Boolean);
 
     if (firstError) {
       throw new Error(firstError.message);
     }
+
+    const isAdmin = Boolean(isAdminResult);
+    const categories: DatabaseCategoryMeta[] = (categoriesResponse.data ?? []).map(
+      (category) => ({
+        label: stringValue(category.label) ?? "",
+        source: stringValue(category.source_key) ?? "",
+        canEditCells: booleanValue(category.can_edit_cells),
+        canAddColumns: booleanValue(category.can_add_columns),
+        canHideColumns: booleanValue(category.can_hide_columns),
+        sortOrder: numericValue(category.sort_order) ?? 0,
+      }),
+    ).filter((category) => category.label);
+    const categoryBySource = new Map(categories.map((category) => [category.source, category]));
+    const minesCategory = categoryBySource.get("mines")?.label ?? "Mines";
+    const commodityMetricsCategory =
+      categoryBySource.get("commodity_metrics")?.label ?? "Commodity Metrics";
+    const waterMetricsCategory =
+      categoryBySource.get("water_metrics")?.label ?? "Water Metrics";
+    const licensesCategory = categoryBySource.get("licenses")?.label ?? "Licenses";
+    const siteFieldRows = siteFieldsResponse.data ?? [];
+    const licenseFieldRows = licenseFieldsResponse.data ?? [];
+    const mineColumns: DatabaseColumnMeta[] = [
+      ...siteFieldRows.map((field) => ({
+        field: stringValue(field.ui_field) ?? stringValue(field.field_key) ?? "",
+        headerName: stringValue(field.label) ?? "Field",
+        dataType: normalizeDataType(field.data_type),
+        source: stringValue(field.table_target) as DatabaseColumnMeta["source"],
+        editable: booleanValue(field.is_admin_editable),
+        hideable: true,
+        addable: false,
+        visible: booleanValue(field.is_visible),
+        relation: field.field_key === "country_id" ? ("country" as const) : undefined,
+        flex: 1,
+      })),
+      {
+        field: "commodities",
+        headerName: "Commodities",
+        dataType: "text" as const,
+        source: "derived" as const,
+        editable: false,
+        hideable: false,
+        addable: false,
+        visible: true,
+        flex: 1.1,
+      } satisfies DatabaseColumnMeta,
+    ].filter((column) => column.field);
+    const licenseColumns: DatabaseColumnMeta[] = licenseFieldRows
+      .map((field) => ({
+        field: stringValue(field.ui_field) ?? stringValue(field.field_key) ?? "",
+        headerName: stringValue(field.label) ?? "Field",
+        dataType: normalizeDataType(field.data_type),
+        source: "licenses" as const,
+        editable: booleanValue(field.is_admin_editable),
+        hideable: true,
+        addable: false,
+        visible: booleanValue(field.is_visible),
+        relation:
+          field.field_key === "country"
+            ? ("country" as const)
+            : field.field_key === "applicants"
+              ? ("applicants" as const)
+              : undefined,
+        flex: field.field_key === "applicants" ? 1.4 : 1,
+      }))
+      .filter((column) => column.field);
+    const commodityMetricColumns = buildMetricColumnMeta("commodity", "Commodity");
+    const waterMetricColumns = buildMetricColumnMeta("waterType", "Water Type");
+    const adminMeta: DatabaseAdminMeta = {
+      isAdmin,
+      columnsByCategory: {
+        [minesCategory]: isAdmin ? mineColumns : visibleColumns(mineColumns),
+        [commodityMetricsCategory]: commodityMetricColumns,
+        [waterMetricsCategory]: waterMetricColumns,
+        [licensesCategory]: isAdmin ? licenseColumns : visibleColumns(licenseColumns),
+      },
+      hiddenColumnsByCategory: {
+        [minesCategory]: isAdmin ? hiddenColumns(mineColumns) : [],
+        [commodityMetricsCategory]: [],
+        [waterMetricsCategory]: [],
+        [licensesCategory]: isAdmin ? hiddenColumns(licenseColumns) : [],
+      },
+      canAddColumnsByCategory: {
+        [minesCategory]: isAdmin && Boolean(categoryBySource.get("mines")?.canAddColumns),
+        [commodityMetricsCategory]:
+          isAdmin && Boolean(categoryBySource.get("commodity_metrics")?.canAddColumns),
+        [waterMetricsCategory]:
+          isAdmin && Boolean(categoryBySource.get("water_metrics")?.canAddColumns),
+        [licensesCategory]: isAdmin && Boolean(categoryBySource.get("licenses")?.canAddColumns),
+      },
+      canHideColumnsByCategory: {
+        [minesCategory]: isAdmin && Boolean(categoryBySource.get("mines")?.canHideColumns),
+        [commodityMetricsCategory]:
+          isAdmin && Boolean(categoryBySource.get("commodity_metrics")?.canHideColumns),
+        [waterMetricsCategory]:
+          isAdmin && Boolean(categoryBySource.get("water_metrics")?.canHideColumns),
+        [licensesCategory]: isAdmin && Boolean(categoryBySource.get("licenses")?.canHideColumns),
+      },
+    };
 
     const minesRows: DatabaseRow[] = (sitesResponse.data ?? []).map((row) => {
       const siteData = firstRecord(row.site_data);
@@ -402,7 +603,7 @@ export async function GET() {
         .map((siteCommodity) => stringValue(relationField(siteCommodity.commodity, "name")))
         .filter((value): value is string => Boolean(value));
 
-      return {
+      const baseRow: DatabaseRow = {
         id: numericValue(row.id) ?? 0,
         mine: stringValue(row.name) ?? "Unknown site",
         owner: stringValue(row.owner) ?? "",
@@ -417,6 +618,36 @@ export async function GET() {
         pitDepth: numericValue(openAir?.pit_depth) ?? "",
         shaftDepth: numericValue(underground?.shaft_depth) ?? "",
       };
+
+      mineColumns.forEach((column) => {
+        if (baseRow[column.field] !== undefined) {
+          return;
+        }
+        const registry = siteFieldRows.find(
+          (field) =>
+            (stringValue(field.ui_field) ?? stringValue(field.field_key)) === column.field,
+        );
+        const columnName = stringValue(registry?.column_name);
+        if (!registry || !columnName) {
+          return;
+        }
+        const tableTarget = stringValue(registry.table_target);
+        const source =
+          tableTarget === "sites"
+            ? row
+            : tableTarget === "open_air_sites"
+              ? openAir
+              : tableTarget === "underground_sites"
+                ? underground
+                : siteData;
+        baseRow[column.field] = stringValue(source?.[columnName]) ?? numericValue(source?.[columnName]) ?? "";
+      });
+
+      return Object.fromEntries(
+        Object.entries(baseRow).filter(
+          ([field]) => field === "id" || mineColumns.some((column) => column.field === field && column.visible),
+        ),
+      ) as DatabaseRow;
     });
 
     const commodityMetricRows = pivotMetricRows(
@@ -433,6 +664,7 @@ export async function GET() {
           buildCommodityProduct(rowLabel, siteName, metricLabel);
 
         return {
+          metricRowId: numericValue(row.id) ?? 0,
           site: siteName,
           project: stringValue(row.project_label) ?? "",
           unit: stringValue(row.unit) ?? "",
@@ -459,6 +691,7 @@ export async function GET() {
           "";
 
         return {
+          metricRowId: numericValue(row.id) ?? 0,
           site: siteName,
           project: stringValue(row.project_label) ?? "",
           unit: stringValue(row.unit) ?? "",
@@ -475,48 +708,75 @@ export async function GET() {
       "water",
     );
 
-    const licenseRows: DatabaseRow[] = (licensesResponse.data ?? []).map((row) => ({
-      id: numericValue(row.id) ?? 0,
-      type: stringValue(row.type) ?? "",
-      country: stringValue(relationField(row.country, "name")) ?? "",
-      region: stringValue(row.region) ?? "",
-      status: titleizeEnum(stringValue(row.status)),
-      applicants: compactJoin(ensureArray(row.applicants as string[] | undefined), ", "),
-      applicationDate: stringValue(row.application_date) ?? "",
-      startDate: stringValue(row.start_date) ?? "",
-      endDate: stringValue(row.end_date) ?? "",
-    }));
+    const licenseRows: DatabaseRow[] = (licensesResponse.data ?? []).map((row) => {
+      const baseRow: DatabaseRow = {
+        id: numericValue(row.id) ?? 0,
+        type: stringValue(row.type) ?? "",
+        country: stringValue(relationField(row.country, "name")) ?? "",
+        region: stringValue(row.region) ?? "",
+        status: titleizeEnum(stringValue(row.status)),
+        applicants: compactJoin(ensureArray(row.applicants as string[] | undefined), ", "),
+        applicationDate: stringValue(row.application_date) ?? "",
+        startDate: stringValue(row.start_date) ?? "",
+        endDate: stringValue(row.end_date) ?? "",
+      };
+
+      licenseColumns.forEach((column) => {
+        if (baseRow[column.field] !== undefined) {
+          return;
+        }
+        const registry = licenseFieldRows.find(
+          (field) => stringValue(field.field_key) === column.field,
+        );
+        const columnName = stringValue(registry?.column_name);
+        if (!columnName) {
+          return;
+        }
+        baseRow[column.field] =
+          stringValue(row[columnName]) ?? numericValue(row[columnName]) ?? "";
+      });
+
+      return Object.fromEntries(
+        Object.entries(baseRow).filter(
+          ([field]) =>
+            field === "id" ||
+            licenseColumns.some((column) => column.field === field && column.visible),
+        ),
+      ) as DatabaseRow;
+    });
 
     const payload: DatabaseDataPayload = {
+      categories,
       tablesByCategory: {
-        Mines: minesRows,
-        "Commodity Metrics": commodityMetricRows,
-        "Water Metrics": waterMetricRows,
-        Licenses: licenseRows,
+        [minesCategory]: minesRows,
+        [commodityMetricsCategory]: commodityMetricRows,
+        [waterMetricsCategory]: waterMetricRows,
+        [licensesCategory]: licenseRows,
       },
       filterGroupsByCategory: {
-        Mines: withGroups(minesRows, [
+        [minesCategory]: withGroups(minesRows, [
           buildFilterGroup(minesRows, "Country", "country"),
           buildFilterGroup(minesRows, "Type", "type"),
           buildFilterGroup(minesRows, "Stage", "stage"),
           buildFilterGroup(minesRows, "Status", "status"),
         ]),
-        "Commodity Metrics": withGroups(commodityMetricRows, [
+        [commodityMetricsCategory]: withGroups(commodityMetricRows, [
           buildFilterGroup(commodityMetricRows, "Site", "site"),
           buildFilterGroup(commodityMetricRows, "Commodity", "commodity"),
           buildFilterGroup(commodityMetricRows, "Metric", "metric"),
         ]),
-        "Water Metrics": withGroups(waterMetricRows, [
+        [waterMetricsCategory]: withGroups(waterMetricRows, [
           buildFilterGroup(waterMetricRows, "Site", "site"),
           buildFilterGroup(waterMetricRows, "Water Type", "waterType"),
           buildFilterGroup(waterMetricRows, "Product", "product"),
         ]),
-        Licenses: withGroups(licenseRows, [
+        [licensesCategory]: withGroups(licenseRows, [
           buildFilterGroup(licenseRows, "Country", "country"),
           buildFilterGroup(licenseRows, "Status", "status"),
           buildFilterGroup(licenseRows, "Type", "type"),
         ]),
       },
+      admin: adminMeta,
       sourceKind: "backend",
     };
 
@@ -526,12 +786,9 @@ export async function GET() {
       {
         ...{
           tablesByCategory: EMPTY_TABLES,
-          filterGroupsByCategory: {
-            Mines: [],
-            "Commodity Metrics": [],
-            "Water Metrics": [],
-            Licenses: [],
-          },
+          filterGroupsByCategory: {},
+          admin: EMPTY_ADMIN,
+          categories: [],
           sourceKind: "placeholder",
         },
         detail:

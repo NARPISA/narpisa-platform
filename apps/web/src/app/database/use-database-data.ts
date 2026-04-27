@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import {
+  type DatabaseAdminMeta,
   type DatabaseCategory,
   type DatabaseDataPayload,
   type DatabaseFilterGroup,
@@ -16,23 +17,25 @@ type DatabaseDataState = {
 };
 
 const EMPTY_TABLES: Record<DatabaseCategory, DatabaseRow[]> = {
-  Mines: [],
-  "Commodity Metrics": [],
-  "Water Metrics": [],
-  Licenses: [],
 };
 
 const EMPTY_FILTERS: Record<DatabaseCategory, DatabaseFilterGroup[]> = {
-  Mines: [],
-  "Commodity Metrics": [],
-  "Water Metrics": [],
-  Licenses: [],
+};
+
+const EMPTY_ADMIN: DatabaseAdminMeta = {
+  isAdmin: false,
+  columnsByCategory: {},
+  hiddenColumnsByCategory: {},
+  canAddColumnsByCategory: {},
+  canHideColumnsByCategory: {},
 };
 
 function buildPlaceholder(reason: string): DatabaseDataPayload {
   return {
+    categories: [],
     tablesByCategory: EMPTY_TABLES,
     filterGroupsByCategory: EMPTY_FILTERS,
+    admin: EMPTY_ADMIN,
     sourceKind: "placeholder",
     sourceMessage: reason,
   };
@@ -44,6 +47,9 @@ export function useDatabaseData() {
     isLoading: true,
     error: null,
   });
+  const setData = useCallback((updater: (data: DatabaseDataPayload) => DatabaseDataPayload) => {
+    setState((current) => ({ ...current, data: updater(current.data) }));
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,12 +68,14 @@ export function useDatabaseData() {
 
         const payload = (await response.json()) as Partial<DatabaseDataPayload>;
         const usablePayload: DatabaseDataPayload = {
+          categories: payload.categories ?? [],
           tablesByCategory: (payload.tablesByCategory ?? EMPTY_TABLES) as Record<
             DatabaseCategory,
             DatabaseRow[]
           >,
           filterGroupsByCategory: (payload.filterGroupsByCategory ??
             EMPTY_FILTERS) as Record<DatabaseCategory, DatabaseFilterGroup[]>,
+          admin: payload.admin ?? EMPTY_ADMIN,
           sourceKind: "backend",
           sourceMessage: payload.sourceMessage,
         };
@@ -94,5 +102,5 @@ export function useDatabaseData() {
     };
   }, []);
 
-  return state;
+  return { ...state, setData };
 }

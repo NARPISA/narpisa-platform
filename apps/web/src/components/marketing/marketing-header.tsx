@@ -1,5 +1,7 @@
 "use client";
 
+import { Account } from "@toolpad/core/Account";
+import { useSession } from "@toolpad/core/useSession";
 import { useState } from "react";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import Box from "@mui/material/Box";
@@ -78,6 +80,7 @@ function HeaderLink({
 
 export default function MarketingHeader({ transparent = false }: MarketingHeaderProps) {
   const pathname = usePathname() ?? "";
+  const session = useSession();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const textColor = transparent ? "common.white" : "text.primary";
@@ -120,12 +123,59 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
             sx={{ display: { xs: "none", md: "flex" } }}
           >
             {NAV_LINKS.map((link) => (
-              <HeaderLink
-                key={link.href}
-                {...link}
-                active={isActive(pathname, link.href)}
-                color={textColor}
-              />
+              link.href === "/signin" && session?.user ? (
+                <Account
+                  key={link.href}
+                  localeText={{
+                    accountSignInLabel: "Login",
+                    accountSignOutLabel: "Sign out",
+                  }}
+                  slotProps={{
+                    preview: {
+                      variant: "expanded",
+                      sx: {
+                        py: 0,
+                        px: 0,
+                        gap: 1,
+                        "& .MuiAvatar-root": {
+                          width: 32,
+                          height: 32,
+                          fontSize: "1.4rem",
+                          bgcolor: transparent ? "rgba(255,255,255,0.18)" : "secondary.100",
+                          color: transparent ? "common.white" : "secondary.main",
+                        },
+                        "& .MuiTypography-body2": {
+                          color: textColor,
+                          fontSize: "1.55rem",
+                          fontWeight: 700,
+                        },
+                        "& .MuiTypography-caption": {
+                          display: "none",
+                        },
+                      },
+                      slotProps: {
+                        moreIconButton: {
+                          sx: {
+                            color: textColor,
+                            px: 0.25,
+                          },
+                        },
+                      },
+                    },
+                    popover: {
+                      anchorOrigin: { vertical: "bottom", horizontal: "right" },
+                      transformOrigin: { vertical: "top", horizontal: "right" },
+                    },
+                  }}
+                />
+              ) : (
+                <HeaderLink
+                  key={link.href}
+                  {...link}
+                  active={isActive(pathname, link.href)}
+                  color={textColor}
+                />
+              )
             ))}
           </Stack>
 
@@ -158,7 +208,7 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
       >
         <Stack spacing={2.5}>
           <BrandHomeLink size={48} title="MineralDB" color="text.primary" />
-          {NAV_LINKS.map((link) => (
+          {NAV_LINKS.filter((link) => !(link.href === "/signin" && session?.user)).map((link) => (
             <Button
               key={link.href}
               href={link.href}
@@ -175,6 +225,28 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
               {link.label}
             </Button>
           ))}
+          {session?.user ? (
+            <Box sx={{ pt: 1 }}>
+              <Account
+                localeText={{
+                  accountSignInLabel: "Login",
+                  accountSignOutLabel: "Sign out",
+                }}
+                slotProps={{
+                  preview: {
+                    variant: "expanded",
+                    sx: {
+                      px: 0,
+                      py: 0,
+                      "& .MuiTypography-caption": {
+                        display: "none",
+                      },
+                    },
+                  },
+                }}
+              />
+            </Box>
+          ) : null}
         </Stack>
       </Drawer>
     </>

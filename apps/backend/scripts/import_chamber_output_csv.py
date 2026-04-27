@@ -78,6 +78,11 @@ COMMODITY_PATTERNS: tuple[tuple[re.Pattern[str], str, str], ...] = (
     (re.compile(r"\btin\b", re.IGNORECASE), "Tin", "tin"),
     (re.compile(r"\bfluorspar\b", re.IGNORECASE), "Fluorspar", "fluorspar"),
     (re.compile(r"\biron ore\b", re.IGNORECASE), "Iron Ore", "iron ore"),
+    (
+        re.compile(r"\brailway ballast\b|\bballast\b", re.IGNORECASE),
+        "Railway Ballast",
+        "railway ballast",
+    ),
     (re.compile(r"\bgraphite\b", re.IGNORECASE), "Graphite", "graphite"),
     (re.compile(r"\bsalt\b", re.IGNORECASE), "Salt", "salt"),
     (re.compile(r"\bcement\b", re.IGNORECASE), "Cement", "cement"),
@@ -326,14 +331,20 @@ def infer_commodity_from_site(*sources: str | None) -> tuple[str, str] | None:
     return None
 
 
-def classify_series_row(row: dict[str, Any]) -> CommodityResolution:
+def classify_series_row(
+    row: dict[str, Any],
+    *,
+    site_labels: set[str] | None = None,
+) -> CommodityResolution:
     raw_context = row.get("context_label")
     raw_series_name = row["series_name"]
     raw_unit = row.get("unit")
 
-    site_label = normalize_text(raw_context or raw_series_name)
     series_name = strip_footnote_markers(raw_series_name)
     unit = normalize_text(raw_unit) if raw_unit else None
+    normalized_site_labels = site_labels or set()
+    explicit_site_label = raw_series_name if raw_series_name in normalized_site_labels else None
+    site_label = normalize_text(explicit_site_label or raw_context or raw_series_name)
 
     lower_sources = " ".join(
         value.lower()
@@ -358,7 +369,7 @@ def classify_series_row(row: dict[str, Any]) -> CommodityResolution:
                 unit=unit,
             )
 
-    top_level_series = raw_context is None
+    top_level_series = raw_context is None or explicit_site_label is not None
     default_metric_label = "Reported output"
     if top_level_series and unit:
         default_metric_label = strip_footnote_markers(unit)
@@ -443,6 +454,16 @@ class SupabaseDataClient:
         query = self._apply_filters(query, filters)
         self._execute(f"delete from {table_name}", query)
 
+    def _delete_in(self, table_name: str, *, column: str, values: list[str]) -> None:
+        if not values:
+            return
+        self._execute(
+            f"delete from {table_name}",
+            self.client.table(table_name)
+            .delete(returning=ReturnMethod.minimal)
+            .in_(column, values),
+        )
+
     def get_document_by_source_url(self, source_url: str) -> dict[str, Any] | None:
         return self._select_first("documents", filters={"source_url": source_url})
 
@@ -524,6 +545,9 @@ class SupabaseDataClient:
     def create_definition(self, table_name: str, payload: dict[str, Any]) -> dict[str, Any]:
         return self._insert_one(table_name, payload)
 
+    def patch_definition(self, table_name: str, definition_id: int, payload: dict[str, Any]) -> None:
+        self._update(table_name, filters={"id": definition_id}, payload=payload)
+
     def create_site_fact(self, payload: dict[str, Any]) -> dict[str, Any]:
         return self._insert_one("site_facts", payload)
 
@@ -541,6 +565,12 @@ class SupabaseDataClient:
 
     def delete_site_commodity_metrics_by_fact_id(self, fact_id: str) -> None:
         self._delete("site_commodity_metrics", filters={"fact_id": fact_id})
+
+    def delete_site_water_metrics_by_fact_ids(self, fact_ids: list[str]) -> None:
+        self._delete_in("site_water_metrics", column="fact_id", values=fact_ids)
+
+    def delete_site_commodity_metrics_by_fact_ids(self, fact_ids: list[str]) -> None:
+        self._delete_in("site_commodity_metrics", column="fact_id", values=fact_ids)
 
     def get_metric_row(
         self,
@@ -866,10 +896,6 @@ def ensure_metric_definition(
         if table_name == "site_water_metrics"
         else "site_commodity_metric_definitions"
     )
-    existing = client.get_definition_by_key(definitions_table, metric_key)
-    if existing is not None:
-        return int(existing["id"])
-
     payload: dict[str, Any] = {
         "metric_key": metric_key,
         "label": label,
@@ -878,6 +904,18 @@ def ensure_metric_definition(
     }
     if definitions_table == "site_commodity_metric_definitions":
         payload["commodity_scoped"] = commodity_scoped
+
+    existing = client.get_definition_by_key(definitions_table, metric_key)
+    if existing is not None:
+        updates = {
+            key: value
+            for key, value in payload.items()
+            if existing.get(key) != value
+        }
+        if updates:
+            client.patch_definition(definitions_table, int(existing["id"]), updates)
+        return int(existing["id"])
+
     created = client.create_definition(definitions_table, payload)
     return int(created["id"])
 
@@ -918,10 +956,18 @@ def project_rows_to_site_facts(
         return {"projected_rows": 0, "skipped_rows": len(series_rows)}
 
     existing_facts = client.list_site_facts_by_document(document_id)
-    for fact in existing_facts:
-        fact_id = str(fact["id"])
-        client.delete_site_water_metrics_by_fact_id(fact_id)
-        client.delete_site_commodity_metrics_by_fact_id(fact_id)
+    if existing_facts:
+        print(
+            f"Replacing {len(existing_facts)} existing site facts for document {document_id}.",
+            flush=True,
+        )
+    for fact_id_batch in chunked(
+        [{"id": str(fact["id"])} for fact in existing_facts],
+        size=200,
+    ):
+        fact_ids = [fact["id"] for fact in fact_id_batch]
+        client.delete_site_water_metrics_by_fact_ids(fact_ids)
+        client.delete_site_commodity_metrics_by_fact_ids(fact_ids)
     if existing_facts:
         client.delete_site_facts_by_document(document_id)
 
@@ -929,8 +975,9 @@ def project_rows_to_site_facts(
     skipped_rows = 0
     imported_at = utc_now()
 
+    site_labels = set(site_seeds)
     for row in series_rows:
-        classification = classify_series_row(row)
+        classification = classify_series_row(row, site_labels=site_labels)
         site_seed = site_seeds.get(classification.site_label)
         if site_seed is None:
             skipped_rows += 1
@@ -1018,6 +1065,8 @@ def project_rows_to_site_facts(
                     metric_payload,
                 )
             projected_rows += 1
+            if projected_rows % 50 == 0:
+                print(f"Projected {projected_rows} metric rows...", flush=True)
     return {"projected_rows": projected_rows, "skipped_rows": skipped_rows}
 
 

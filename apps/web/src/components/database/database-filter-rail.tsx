@@ -1,10 +1,12 @@
 "use client";
 
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
+import CircularProgress from "@mui/material/CircularProgress";
 import InputAdornment from "@mui/material/InputAdornment";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
@@ -26,6 +28,11 @@ type DatabaseFilterRailProps = {
   onResetFilters: () => void;
   onExportCsv: () => void;
   onExportPdf: () => void;
+  isAdmin: boolean;
+  hasPendingChanges: boolean;
+  isSaving: boolean;
+  pendingChangeCount: number;
+  onSaveChanges: () => void;
 };
 
 type SearchableFilterOption = DatabaseFilterGroup["options"][number] & {
@@ -46,6 +53,11 @@ export default function DatabaseFilterRail({
   onResetFilters,
   onExportCsv,
   onExportPdf,
+  isAdmin,
+  hasPendingChanges,
+  isSaving,
+  pendingChangeCount,
+  onSaveChanges,
 }: DatabaseFilterRailProps) {
   const [optionSearch, setOptionSearch] = useState("");
   const filteredGroups: SearchableFilterGroup[] = useMemo(() => {
@@ -194,6 +206,45 @@ export default function DatabaseFilterRail({
             Reset
           </Button>
         </Stack>
+
+        {isAdmin ? (
+          <Stack spacing={0.75}>
+            <Typography sx={{ fontSize: "0.8rem", color: "background.600", fontWeight: 700 }}>
+              Admin changes
+            </Typography>
+            <Button
+              variant="contained"
+              disabled={!hasPendingChanges || isSaving}
+              onClick={onSaveChanges}
+              startIcon={
+                isSaving ? (
+                  <CircularProgress size={14} sx={{ color: "common.white" }} />
+                ) : (
+                  <SaveRoundedIcon fontSize="small" />
+                )
+              }
+              sx={{
+                width: 1,
+                height: 36,
+                borderRadius: 0,
+                bgcolor: hasPendingChanges ? "tertiary.main" : "background.500",
+                color: "common.white",
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                "&.Mui-disabled": {
+                  bgcolor: "background.500",
+                  color: "common.white",
+                },
+              }}
+            >
+              {isSaving
+                ? "Saving..."
+                : hasPendingChanges
+                  ? `Save ${pendingChangeCount} change${pendingChangeCount === 1 ? "" : "s"}`
+                  : "No changes"}
+            </Button>
+          </Stack>
+        ) : null}
 
         <Stack direction="row" spacing={1.5} justifyContent="space-between">
           <Button
