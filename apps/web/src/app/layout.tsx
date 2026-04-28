@@ -42,7 +42,13 @@ export default function RootLayout({
                   flexDirection: "column",
                 }}
               >
-                <Box sx={{ position: "relative", zIndex: 1, flex: 1 }}>
+                <Box
+                  sx={{
+                    position: "relative",
+                    zIndex: 1,
+                    flex: 1,
+                  }}
+                >
                   {children}
                 </Box>
                 <SiteFooter />
