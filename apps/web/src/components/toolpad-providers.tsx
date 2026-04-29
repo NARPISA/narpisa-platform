@@ -21,18 +21,17 @@ function getSafeAvatarUrl(value: string | undefined): string | null {
   }
 }
 
-function mapUser(user: User | null): Session | null {
+function mapUser(user: User | null, firstName: string | null = null): Session | null {
   if (!user) {
     return null;
   }
   const meta = user.user_metadata as Record<string, string | undefined> | undefined;
-  const name = (meta?.full_name as string | undefined)?.trim() || user.email || null;
 
   return {
     user: {
       id: user.id,
       email: user.email ?? null,
-      name,
+      name: firstName || null,
       image: getSafeAvatarUrl(meta?.avatar_url as string | undefined),
     },
   };
@@ -47,17 +46,45 @@ function ToolpadProvidersInner({ children }: { children: React.ReactNode }) {
   const supabase = React.useMemo(() => createClient(), []);
 
   React.useEffect(() => {
+    let active = true;
+
+    async function setSessionFromUser(user: User | null | undefined) {
+      if (!user) {
+        if (active) {
+          setSession(null);
+        }
+        return;
+      }
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("firstname")
+        .eq("id", user.id)
+        .maybeSingle();
+      const firstName =
+        typeof data?.firstname === "string" && data.firstname.trim()
+          ? data.firstname.trim()
+          : null;
+
+      if (active) {
+        setSession(mapUser(user, firstName));
+      }
+    }
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, authSession) => {
-      setSession(mapUser(authSession?.user ?? null));
+      void setSessionFromUser(authSession?.user);
     });
 
-    void supabase.auth.getUser().then(({ data: { user } }) => {
-      setSession(mapUser(user));
+    void supabase.auth.getSession().then(({ data: { session: authSession } }) => {
+      void setSessionFromUser(authSession?.user);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, [supabase]);
 
   const toolpadRouter = React.useMemo<ToolpadRouter>(
