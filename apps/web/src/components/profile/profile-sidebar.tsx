@@ -9,6 +9,7 @@ import Link from "next/link";
 
 const NAV_ITEMS = [
   { href: "/profile", label: "Profile", prefixMatch: false },
+  { href: "/profile/password", label: "Security", prefixMatch: true },
   { href: "/profile/users", label: "Users", prefixMatch: true },
 ] as const;
 
