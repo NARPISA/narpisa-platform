@@ -191,7 +191,6 @@ export default function UsersAdminView({
               <TableCell sx={headSx}>Last name</TableCell>
               <TableCell sx={headSx}>Email</TableCell>
               <TableCell sx={headSx}>Tier</TableCell>
-              <TableCell sx={headSx}>User ID</TableCell>
               <TableCell align="right" sx={headSx}>
                 Actions
               </TableCell>
@@ -258,14 +257,6 @@ export default function UsersAdminView({
                     ) : (
                       <Typography sx={{ ...bodySx, py: 0.5 }}>{row.tier_name ?? "—"}</Typography>
                     )}
-                  </TableCell>
-                  <TableCell sx={{ verticalAlign: "top", maxWidth: 200 }}>
-                    <Typography sx={{ ...bodySx, wordBreak: "break-all", fontFamily: "monospace" }}>
-                      {row.id}
-                    </Typography>
-                    {isSelf ? (
-                      <Typography sx={{ ...bodySx, fontSize: "0.75rem", color: "text.secondary" }}>You</Typography>
-                    ) : null}
                   </TableCell>
                   <TableCell align="right" sx={{ verticalAlign: "top" }}>
                     {isAdmin ? (

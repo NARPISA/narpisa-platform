@@ -4,6 +4,9 @@
 alter table public.profiles
   add column if not exists email text;
 
+alter table public.profiles
+  add column if not exists linkedin_url text;
+
 update public.profiles profiles
 set email = users.email
 from auth.users users
@@ -69,5 +72,7 @@ create trigger on_auth_user_email_updated
 after update of email on auth.users
 for each row
 execute function app_private.sync_profile_email_from_auth();
+
+grant update (firstname, lastname, tier_id, linkedin_url) on public.profiles to authenticated;
 
 drop function if exists public.list_profiles_for_directory();

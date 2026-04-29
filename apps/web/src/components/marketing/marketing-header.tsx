@@ -128,7 +128,6 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
                 <Button
                   key={link.href}
                   href="/profile"
-                  variant="text"
                   sx={{
                     display: "inline-flex",
                     alignItems: "center",
@@ -138,26 +137,13 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
                     py: 0.75,
                     minHeight: 48,
                     color: textColor,
-                    bgcolor: "transparent",
-                    border: "1px solid transparent",
-                    boxShadow: "none",
+                    bgcolor: transparent ? "rgba(255,255,255,0.12)" : "secondary.100",
+                    border: "1px solid",
+                    borderColor: "transparent",
                     textTransform: "none",
-                    transition:
-                      "background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, backdrop-filter 180ms ease",
                     "&:hover": {
-                      bgcolor: transparent ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.55)",
-                      backdropFilter: "blur(12px)",
-                      WebkitBackdropFilter: "blur(12px)",
-                      borderColor: transparent ? "rgba(255,255,255,0.45)" : "rgba(83,132,180,0.32)",
-                      boxShadow: transparent
-                        ? "0 8px 28px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.22)"
-                        : "0 8px 24px rgba(28,48,146,0.1), inset 0 1px 0 rgba(255,255,255,0.85)",
-                    },
-                    "&:focus-visible": {
-                      outline: transparent
-                        ? "2px solid rgba(255,255,255,0.9)"
-                        : (theme) => `2px solid ${theme.palette.primary.main}`,
-                      outlineOffset: 3,
+                      bgcolor: transparent ? "rgba(255,255,255,0.2)" : "secondary.200",
+                      borderColor: transparent ? "rgba(255,255,255,0.3)" : "rgba(83,132,180,0.3)",
                     },
                   }}
                 >

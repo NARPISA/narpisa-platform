@@ -10,7 +10,6 @@ import Link from "next/link";
 const NAV_ITEMS = [
   { href: "/profile", label: "Profile", prefixMatch: false },
   { href: "/profile/users", label: "Users", prefixMatch: true },
-  { href: "/profile/another-feature", label: "Another feature", prefixMatch: true },
 ] as const;
 
 function isActive(pathname: string, href: string, prefixMatch: boolean) {

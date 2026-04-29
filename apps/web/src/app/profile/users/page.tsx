@@ -47,25 +47,10 @@ export default async function ProfileUsersPage() {
     redirect("/profile");
   }
 
-  let profilesRaw: Array<Record<string, unknown>> | null = null;
-  let profilesError: Error | null = null;
-  const profilesWithEmailQuery = await supabase
+  const { data: profilesRaw, error: profilesError } = await supabase
     .from("profiles")
     .select("id, firstname, lastname, tier_id, created_at, email, tiers!profiles_tier_id_fkey ( id, name )")
     .order("created_at", { ascending: false });
-  profilesRaw = profilesWithEmailQuery.data as Array<Record<string, unknown>> | null;
-  profilesError = profilesWithEmailQuery.error;
-  let hasEmailColumn = true;
-
-  if (profilesError?.message.includes("column profiles.email does not exist")) {
-    hasEmailColumn = false;
-    const fallback = await supabase
-      .from("profiles")
-      .select("id, firstname, lastname, tier_id, created_at, tiers!profiles_tier_id_fkey ( id, name )")
-      .order("created_at", { ascending: false });
-    profilesRaw = fallback.data as Array<Record<string, unknown>> | null;
-    profilesError = fallback.error;
-  }
 
   if (profilesError) {
     return (
@@ -79,13 +64,10 @@ export default async function ProfileUsersPage() {
     );
   }
 
-  const sessionEmail = user.email?.trim() ?? null;
-
-  const initialRows: ProfileUserRow[] = (profilesRaw ?? []).map((row) => {
+  const initialRows: ProfileUserRow[] = ((profilesRaw as Array<Record<string, unknown>> | null) ?? []).map((row) => {
     const id = row.id as string;
-    const rawEmail = hasEmailColumn ? ((row as { email?: string | null }).email ?? null) : null;
+    const rawEmail = (row as { email?: string | null }).email ?? null;
     const fromDb = typeof rawEmail === "string" && rawEmail.trim() ? rawEmail.trim() : null;
-    const email = fromDb ?? (id === user.id ? sessionEmail : null);
     return {
       id,
       firstname: (row.firstname as string | null) ?? null,
@@ -93,7 +75,7 @@ export default async function ProfileUsersPage() {
       tier_id: row.tier_id as string,
       created_at: row.created_at as string,
       tier_name: tierNameFromJoin(row.tiers),
-      email,
+      email: fromDb,
     };
   });
 

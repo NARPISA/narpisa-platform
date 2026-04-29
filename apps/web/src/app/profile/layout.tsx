@@ -6,7 +6,6 @@ import Container from "@mui/material/Container";
 
 import MarketingShell from "@/components/marketing/marketing-shell";
 import ProfileSidebar from "@/components/profile/profile-sidebar";
-import ProfileUnsavedFloating from "@/components/profile/profile-unsaved-floating";
 import { createClient } from "@/lib/supabase/server";
 
 function tierNameFromJoin(tiers: unknown): string | null {
@@ -46,32 +45,24 @@ export default async function ProfileLayout({ children }: { children: ReactNode 
         sx={{
           pt: { xs: 7, md: 3 },
           pb: { xs: 7, md: 3 },
-          height: { md: "calc(100svh - 96px)" },
-          overflow: { md: "hidden" },
-          display: { md: "flex" },
-          flexDirection: { md: "column" },
         }}
       >
         <Stack
           direction={{ xs: "column", md: "row" }}
           spacing={{ xs: 2.5, md: 3.5 }}
           alignItems="stretch"
-          sx={{ minHeight: 0, flex: { md: 1 } }}
+          sx={{ minHeight: 0 }}
         >
-          <Box sx={{ alignSelf: "flex-start", position: { md: "sticky" }, top: { md: 0 } }}>
+          <Box sx={{ alignSelf: "flex-start" }}>
             <ProfileSidebar isAdmin={isAdmin} />
           </Box>
           <Box
             sx={{
               flex: 1,
               minWidth: 0,
-              minHeight: 0,
-              overflowY: { md: "auto" },
-              pr: { md: 0.5 },
             }}
           >
             {children}
-            <ProfileUnsavedFloating />
           </Box>
         </Stack>
       </Container>
