@@ -290,6 +290,31 @@ function buildFilterGroup(
   return { title, field, options };
 }
 
+function buildMultiValueFilterGroup(
+  rows: DatabaseRow[],
+  title: string,
+  field: string,
+): DatabaseFilterGroup | null {
+  const options = Array.from(
+    new Set(
+      rows.flatMap((row) =>
+        String(row[field] ?? "")
+          .split(",")
+          .map((value) => value.trim())
+          .filter(Boolean),
+      ),
+    ),
+  )
+    .sort((left, right) => left.localeCompare(right))
+    .map((label) => ({ label, checked: true }));
+
+  if (options.length === 0) {
+    return null;
+  }
+
+  return { title, field, options };
+}
+
 function withGroups(
   rows: DatabaseRow[],
   groups: Array<DatabaseFilterGroup | null>,
@@ -796,6 +821,7 @@ export async function GET() {
         ]),
         [licensesCategory]: withGroups(licenseRows, [
           buildFilterGroup(licenseRows, "Country", "country"),
+          buildMultiValueFilterGroup(licenseRows, "Regions", "region"),
           buildFilterGroup(licenseRows, "Status", "status"),
           buildFilterGroup(licenseRows, "Type", "type"),
         ]),
