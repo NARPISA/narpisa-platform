@@ -83,7 +83,8 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
   const session = useSession();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const textColor = transparent ? "common.white" : "text.primary";
+  const textColor = transparent ? "var(--marketing-header-fg, #ffffff)" : "text.primary";
+  const transparentBorderColor = "var(--marketing-header-border, rgba(255,255,255,0.18))";
 
   return (
     <>
@@ -186,7 +187,7 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
               display: { xs: "inline-flex", md: "none" },
               color: textColor,
               border: "1px solid",
-              borderColor: transparent ? "rgba(255,255,255,0.18)" : "rgba(83,132,180,0.18)",
+              borderColor: transparent ? transparentBorderColor : "rgba(83,132,180,0.18)",
             }}
           >
             <MenuRoundedIcon />

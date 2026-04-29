@@ -1,24 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import ArrowOutwardRoundedIcon from "@mui/icons-material/ArrowOutwardRounded";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
-import Container from "@mui/material/Container";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import { motion } from "motion/react";
+import * as React from "react";
+import { useState } from "react";
 
-import HomePreviewCard, { type HomeFeaturePreview } from "@/components/home/home-preview-card";
+import HomeFeaturesPage from "@/components/home/pages/home-features-page";
+import HomeInvestorsPage from "@/components/home/pages/home-investors-page";
+import HomeLandingPage from "@/components/home/pages/home-landing-page";
+import { type HomeFeaturePreview } from "@/components/home/home-preview-card";
 import MarketingShell from "@/components/marketing/marketing-shell";
 
 const HERO_BACKGROUND = "/landingimage.png";
 
 const PREVIEW_DATABASE = "/preview-database.jpeg";
 const PREVIEW_MAP = "/preview-map.png";
-
-const MotionBox = motion.create(Box);
 
 const FEATURE_PREVIEWS: HomeFeaturePreview[] = [
   {
@@ -52,6 +47,36 @@ const FEATURE_PREVIEWS: HomeFeaturePreview[] = [
 
 export default function HomepageClient() {
   const [activeSlideId, setActiveSlideId] = useState(FEATURE_PREVIEWS[0].id);
+  const snapContainerRef = React.useRef<HTMLDivElement | null>(null);
+
+  React.useEffect(() => {
+    function syncHeaderTone() {
+      const scroller = snapContainerRef.current;
+      if (!scroller) return;
+      const sectionHeight = Math.max(scroller.clientHeight, 1);
+      const sectionIndex = Math.round(scroller.scrollTop / sectionHeight);
+      const useDark = sectionIndex >= 2;
+      document.documentElement.style.setProperty(
+        "--marketing-header-fg",
+        useDark ? "rgba(20, 24, 34, 0.96)" : "#ffffff",
+      );
+      document.documentElement.style.setProperty(
+        "--marketing-header-border",
+        useDark ? "rgba(20, 24, 34, 0.3)" : "rgba(255,255,255,0.18)",
+      );
+    }
+
+    syncHeaderTone();
+    const scroller = snapContainerRef.current;
+    scroller?.addEventListener("scroll", syncHeaderTone, { passive: true });
+    window.addEventListener("resize", syncHeaderTone);
+    return () => {
+      scroller?.removeEventListener("scroll", syncHeaderTone);
+      window.removeEventListener("resize", syncHeaderTone);
+      document.documentElement.style.removeProperty("--marketing-header-fg");
+      document.documentElement.style.removeProperty("--marketing-header-border");
+    };
+  }, []);
 
   return (
     <MarketingShell
@@ -59,8 +84,7 @@ export default function HomepageClient() {
       sx={{
         color: "common.white",
         minHeight: "100svh",
-        height: "100svh",
-        overflow: "hidden",
+        overflowX: "hidden",
       }}
     >
       <Box
@@ -92,166 +116,26 @@ export default function HomepageClient() {
         }}
       />
 
-      <Container
-        maxWidth={false}
+      <Box
+        ref={snapContainerRef}
         sx={{
           position: "relative",
           zIndex: 1,
-          maxWidth: "1240px",
           height: "100svh",
-          display: "flex",
-          alignItems: "center",
-          pt: { xs: 10, md: 11 },
-          pb: { xs: 4, md: 4 },
+          overflowY: "auto",
+          scrollSnapType: "y mandatory",
+          scrollBehavior: "smooth",
+          overscrollBehaviorY: "contain",
         }}
       >
-        <Stack
-          direction={{ xs: "column", lg: "row" }}
-          spacing={{ xs: 5, md: 7 }}
-          alignItems={{ xs: "stretch", lg: "center" }}
-          justifyContent="space-between"
-        >
-          <MotionBox
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: {},
-              visible: {
-                transition: {
-                  staggerChildren: 0.1,
-                },
-              },
-            }}
-            sx={{ maxWidth: 670 }}
-          >
-            <MotionBox
-              variants={{
-                hidden: { opacity: 0, y: 22 },
-                visible: { opacity: 1, y: 0 },
-              }}
-            >
-              <Chip
-                label="Southern Africa resource intelligence"
-                sx={{
-                  mb: 2.25,
-                  bgcolor: "rgba(255,255,255,0.14)",
-                  color: "common.white",
-                  fontSize: "1.2rem",
-                  fontWeight: 700,
-                  backdropFilter: "blur(12px)",
-                }}
-              />
-            </MotionBox>
-
-            <MotionBox
-              variants={{
-                hidden: { opacity: 0, y: 22 },
-                visible: { opacity: 1, y: 0 },
-              }}
-            >
-              <Typography
-                component="h1"
-                sx={{
-                  maxWidth: 650,
-                  color: "tertiary.main",
-                  fontSize: { xs: "4.6rem", md: "7rem" },
-                  fontWeight: 800,
-                  lineHeight: { xs: 1.02, md: 0.98 },
-                  letterSpacing: "-0.05em",
-                  textWrap: "balance",
-                }}
-              >
-                Unlock Southern Africa&apos;s natural resources all in one place.
-              </Typography>
-            </MotionBox>
-
-            <MotionBox
-              variants={{
-                hidden: { opacity: 0, y: 22 },
-                visible: { opacity: 1, y: 0 },
-              }}
-            >
-              <Typography
-                sx={{
-                  mt: 2.5,
-                  maxWidth: 620,
-                  fontSize: { xs: "1.9rem", md: "2.2rem" },
-                  lineHeight: 1.5,
-                  color: "rgba(255,255,255,0.95)",
-                  textWrap: "pretty",
-                }}
-              >
-                Logistics insights for FDI investors in Southern Africa, with source-led
-                workflows for discovery, screening, and deeper database exploration.
-              </Typography>
-            </MotionBox>
-
-            <MotionBox
-              variants={{
-                hidden: { opacity: 0, y: 22 },
-                visible: { opacity: 1, y: 0 },
-              }}
-            >
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={2}
-                alignItems={{ xs: "stretch", sm: "center" }}
-                sx={{ mt: 4 }}
-              >
-                <Button
-                  href="/data_input"
-                  variant="contained"
-                  endIcon={<ArrowOutwardRoundedIcon />}
-                  sx={{
-                    minHeight: 76,
-                    borderRadius: "999px",
-                    px: 4,
-                    fontSize: "2rem",
-                    fontWeight: 800,
-                    boxShadow: "0 14px 36px rgba(240,114,19,0.28)",
-                    "&:hover": {
-                      backgroundColor: "#f48a31",
-                      boxShadow: "0 18px 40px rgba(240,114,19,0.32)",
-                    },
-                  }}
-                >
-                  Get started
-                </Button>
-                <Button
-                  href="/database"
-                  variant="text"
-                  sx={{
-                    minHeight: 76,
-                    borderRadius: "999px",
-                    px: 4,
-                    fontSize: "2rem",
-                    fontWeight: 600,
-                    color: "common.white",
-                    bgcolor: "rgba(99, 57, 24, 0.56)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    backdropFilter: "blur(10px)",
-                  }}
-                >
-                  View databases
-                </Button>
-              </Stack>
-            </MotionBox>
-          </MotionBox>
-
-          <MotionBox
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.45, ease: "easeOut", delay: 0.1 }}
-            sx={{ flex: 1, minWidth: 0 }}
-          >
-            <HomePreviewCard
-              activeSlideId={activeSlideId}
-              slides={FEATURE_PREVIEWS}
-              onSelect={setActiveSlideId}
-            />
-          </MotionBox>
-        </Stack>
-      </Container>
+        <HomeLandingPage
+          featurePreviews={FEATURE_PREVIEWS}
+          activeSlideId={activeSlideId}
+          onSelectSlide={setActiveSlideId}
+        />
+        <HomeFeaturesPage />
+        <HomeInvestorsPage />
+      </Box>
     </MarketingShell>
   );
 }
