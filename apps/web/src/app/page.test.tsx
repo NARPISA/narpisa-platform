@@ -70,7 +70,7 @@ describe("Home page", () => {
   it("renders the new marketing header brand link", () => {
     renderHome();
 
-    const brand = screen.getByRole("link", { name: /MineralDB/i });
+    const brand = screen.getByRole("link", { name: /Alluvial AI/i });
     expect(brand).toHaveAttribute("href", "/");
   });
 

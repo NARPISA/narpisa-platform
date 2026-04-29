@@ -78,7 +78,7 @@ describe("Data input page", () => {
     ).toBeInTheDocument();
 
     expect(screen.getByRole("navigation", { name: /primary/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /MineralDB/i })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: /Alluvial AI/i })).toHaveAttribute("href", "/");
   });
 
   it("blocks submission for an invalid payload", async () => {
