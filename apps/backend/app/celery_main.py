@@ -15,6 +15,12 @@ celery_app = Celery(
 celery_app.conf.update(
     task_ignore_result=True,
     worker_prefetch_multiplier=1,
+    beat_schedule={
+        "update-namibia-mme-licenses-daily": {
+            "task": "app.data.namibiamme.tasks.update",
+            "schedule": 24 * 60 * 60,
+        },
+    },
 )
 
 
