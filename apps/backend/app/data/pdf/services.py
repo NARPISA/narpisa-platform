@@ -1,17 +1,65 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, date
+from json
 from pathlib import Path
 from typing import Any, cast
 from urllib.parse import urlparse
 
 import httpx
 from fastapi import HTTPException
+from pydantic import BaseModel, create_model
 from pypdf import PdfReader
 
 from app.core.config import Settings, get_settings
+from app.core.database import engine
 from app.data.pdf.models import ParsedDocument, QueuedSourceDocument, SourceParseRequest
 from app.data.services import FetchResult, fetch_data_source
+
+
+async def build_model(
+    field_keys: list[str],
+    labels : list[str],
+    data_types : list[str],
+    table_targets : list[str]
+) -> type[BaseModel]:
+    model_dict = {}
+    for field_key, label, data_type, table_target in field_keys, labels, data_types, table_targets:
+        model_field_type = None
+        match data_type:
+            case "text":
+                model_field_type = str
+            case "numeric":
+                model_field_type = float
+            case "integer":
+                model_field_type = int
+            case "boolean":
+                model_field_type = bool
+            case "date":
+                model_field_type = date
+            case "json":
+                
+            case "enum":
+            case "foreign_key":
+
+
+async def get_site_fields():
+    response = (engine.table("site_data_fields")
+        .select(
+            "field_key",
+            "label",
+            "data_type",
+            "table_target"
+        )
+        .eq("table_target", "sites")
+        .execute()
+    )
+    data = {k : [d[k] for d in response.data] for k in response.data[0]}
+    
+
+
+async def parse_pdf(request : SourceParseRequest, fetch_result : FetchResult) -> ParsedDocument:
+    pass
 
 
 class PdfParser:
