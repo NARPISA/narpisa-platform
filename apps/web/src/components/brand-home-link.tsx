@@ -22,7 +22,7 @@ export default function BrandHomeLink({
   size = 56,
   color = "inherit",
   subtitle,
-  title = "MineralDB",
+  title = "Alluvial AI",
   showText = true,
   direction = "row",
   trailingContent,

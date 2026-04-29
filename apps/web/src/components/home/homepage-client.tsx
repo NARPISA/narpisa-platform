@@ -159,9 +159,10 @@ export default function HomepageClient() {
                   lineHeight: { xs: 1.02, md: 0.98 },
                   letterSpacing: "-0.05em",
                   textWrap: "balance",
+                  userSelect: "none",
                 }}
               >
-                Unlock Southern Africa&apos;s natural resources all in one place.
+                Natural resource intelligence for smarter investment​
               </Typography>
             </MotionBox>
 
@@ -179,6 +180,7 @@ export default function HomepageClient() {
                   lineHeight: 1.5,
                   color: "rgba(255,255,255,0.95)",
                   textWrap: "pretty",
+                  userSelect: "none",
                 }}
               >
                 Logistics insights for FDI investors in Southern Africa, with source-led
@@ -199,7 +201,7 @@ export default function HomepageClient() {
                 sx={{ mt: 4 }}
               >
                 <Button
-                  href="/data_input"
+                  href="/signin"
                   variant="contained"
                   endIcon={<ArrowOutwardRoundedIcon />}
                   sx={{
@@ -230,6 +232,10 @@ export default function HomepageClient() {
                     bgcolor: "rgba(99, 57, 24, 0.56)",
                     border: "1px solid rgba(255,255,255,0.12)",
                     backdropFilter: "blur(10px)",
+                    "&:hover": {
+                      backgroundColor: "primary.400",
+                      boxShadow: "0 18px 40px rgba(240,114,19,0.32)",
+                    },
                   }}
                 >
                   View databases

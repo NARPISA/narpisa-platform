@@ -4,7 +4,7 @@ import ForgotPasswordView from "./forgot-password-view";
 
 export const metadata: Metadata = {
   title: "Forgot password",
-  description: "Reset your NaRPISA platform password",
+  description: "Reset your Alluvial AI platform password",
 };
 
 export default function ForgotPasswordPage() {
