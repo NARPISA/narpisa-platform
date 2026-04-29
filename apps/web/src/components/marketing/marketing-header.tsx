@@ -1,8 +1,8 @@
 "use client";
 
-import { Account } from "@toolpad/core/Account";
 import { useSession } from "@toolpad/core/useSession";
 import { useState } from "react";
+import Avatar from "@mui/material/Avatar";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -10,6 +10,7 @@ import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { usePathname } from "next/navigation";
 
 import BrandHomeLink from "@/components/brand-home-link";
@@ -32,6 +33,19 @@ const NAV_LINKS: MarketingNavLink[] = [
 
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+type HeaderProfileUser = {
+  name?: string | null;
+  email?: string | null;
+};
+
+function getProfileLabel(user: HeaderProfileUser) {
+  const name = user.name?.trim();
+  if (name) {
+    return `Hi, ${name}`;
+  }
+  return user.email ?? "Profile";
 }
 
 function HeaderLink({
@@ -113,7 +127,7 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
             minHeight: 58,
           }}
         >
-          <BrandHomeLink size={52} color={textColor} title="MineralDB" subtitle="NaRPISA platform" />
+          <BrandHomeLink size={52} color={textColor} title="Alluvial AI" subtitle="a NaRPISA platform" />
 
           <Stack
             component="nav"
@@ -125,50 +139,43 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
           >
             {NAV_LINKS.map((link) => (
               link.href === "/signin" && session?.user ? (
-                <Account
+                <Button
                   key={link.href}
-                  localeText={{
-                    accountSignInLabel: "Login",
-                    accountSignOutLabel: "Sign out",
-                  }}
-                  slotProps={{
-                    preview: {
-                      variant: "expanded",
-                      sx: {
-                        py: 0,
-                        px: 0,
-                        gap: 1,
-                        "& .MuiAvatar-root": {
-                          width: 32,
-                          height: 32,
-                          fontSize: "1.4rem",
-                          bgcolor: transparent ? "rgba(255,255,255,0.18)" : "secondary.100",
-                          color: transparent ? "common.white" : "secondary.main",
-                        },
-                        "& .MuiTypography-body2": {
-                          color: textColor,
-                          fontSize: "1.55rem",
-                          fontWeight: 700,
-                        },
-                        "& .MuiTypography-caption": {
-                          display: "none",
-                        },
-                      },
-                      slotProps: {
-                        moreIconButton: {
-                          sx: {
-                            color: textColor,
-                            px: 0.25,
-                          },
-                        },
-                      },
-                    },
-                    popover: {
-                      anchorOrigin: { vertical: "bottom", horizontal: "right" },
-                      transformOrigin: { vertical: "top", horizontal: "right" },
+                  href="/profile"
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 1.25,
+                    borderRadius: "999px",
+                    px: 1.25,
+                    py: 0.75,
+                    minHeight: 48,
+                    color: textColor,
+                    bgcolor: transparent ? "rgba(255,255,255,0.12)" : "secondary.100",
+                    border: "1px solid",
+                    borderColor: "transparent",
+                    textTransform: "none",
+                    "&:hover": {
+                      bgcolor: transparent ? "rgba(255,255,255,0.2)" : "secondary.200",
+                      borderColor: transparent ? "rgba(255,255,255,0.3)" : "rgba(83,132,180,0.3)",
                     },
                   }}
-                />
+                >
+                  <Avatar
+                    src={session.user.image ?? undefined}
+                    alt={session.user.name ?? session.user.email ?? "Profile"}
+                    sx={{
+                      width: 34,
+                      height: 34,
+                      fontSize: "1.3rem",
+                      bgcolor: transparent ? "rgba(255,255,255,0.22)" : "secondary.main",
+                      color: "common.white",
+                    }}
+                  />
+                  <Typography sx={{ fontSize: "1.45rem", fontWeight: 700, color: textColor }}>
+                    {profileLabel}
+                  </Typography>
+                </Button>
               ) : (
                 <HeaderLink
                   key={link.href}
@@ -208,7 +215,7 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
         }}
       >
         <Stack spacing={2.5}>
-          <BrandHomeLink size={48} title="MineralDB" color="text.primary" />
+          <BrandHomeLink size={48} title="Alluvial AI" color="text.primary" />
           {NAV_LINKS.filter((link) => !(link.href === "/signin" && session?.user)).map((link) => (
             <Button
               key={link.href}
@@ -228,24 +235,39 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
           ))}
           {session?.user ? (
             <Box sx={{ pt: 1 }}>
-              <Account
-                localeText={{
-                  accountSignInLabel: "Login",
-                  accountSignOutLabel: "Sign out",
-                }}
-                slotProps={{
-                  preview: {
-                    variant: "expanded",
-                    sx: {
-                      px: 0,
-                      py: 0,
-                      "& .MuiTypography-caption": {
-                        display: "none",
-                      },
-                    },
+              <Button
+                href="/profile"
+                onClick={() => setDrawerOpen(false)}
+                sx={{
+                  width: "100%",
+                  justifyContent: "flex-start",
+                  gap: 1.25,
+                  px: 1,
+                  py: 1,
+                  borderRadius: 3,
+                  textTransform: "none",
+                  bgcolor: "secondary.100",
+                  border: "1px solid transparent",
+                  "&:hover": {
+                    borderColor: "rgba(83,132,180,0.3)",
                   },
                 }}
-              />
+              >
+                <Avatar
+                  src={session.user.image ?? undefined}
+                  alt={session.user.name ?? session.user.email ?? "Profile"}
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    fontSize: "1.3rem",
+                    bgcolor: "secondary.main",
+                    color: "common.white",
+                  }}
+                />
+                <Typography sx={{ fontSize: "1.55rem", fontWeight: 700, color: "text.primary" }}>
+                  {profileLabel}
+                </Typography>
+              </Button>
             </Box>
           ) : null}
         </Stack>

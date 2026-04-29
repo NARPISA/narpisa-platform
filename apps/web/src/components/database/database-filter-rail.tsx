@@ -96,7 +96,7 @@ export default function DatabaseFilterRail({
     >
       <Stack spacing={2.5}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <BrandHomeLink size={70} color="background.700" title="MineralDB" subtitle="" />
+          <BrandHomeLink size={70} color="background.700" title="Alluvial AI" subtitle="" />
           <DatabaseHamburgerButton open={menuOpen} onClick={onOpenMenu} />
         </Stack>
 

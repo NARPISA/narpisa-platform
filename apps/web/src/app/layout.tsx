@@ -17,7 +17,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "NaRPISA Platform",
+  title: "Alluvial AI, a NaRPISA Platform",
   description:
     "Source-led intelligence platform for mineral value addition, document parsing, and trading workflows.",
   icons: {
@@ -36,6 +36,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${manrope.variable} antialiased`}
+        suppressHydrationWarning
       >
         <ThemeRegistry>
           <Suspense fallback={null}>
@@ -47,7 +48,13 @@ export default function RootLayout({
                   flexDirection: "column",
                 }}
               >
-                <Box sx={{ position: "relative", zIndex: 1, flex: 1 }}>
+                <Box
+                  sx={{
+                    position: "relative",
+                    zIndex: 1,
+                    flex: 1,
+                  }}
+                >
                   {children}
                 </Box>
                 <SiteFooter />

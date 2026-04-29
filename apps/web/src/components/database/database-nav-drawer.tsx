@@ -37,7 +37,7 @@ export default function DatabaseNavDrawer({
     >
       <Stack spacing={3}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <BrandHomeLink size={56} title="MineralDB" color="common.white" />
+          <BrandHomeLink size={56} title="Alluvial AI" color="common.white" />
           <IconButton onClick={onClose} sx={{ color: "common.white" }}>
             <CloseRoundedIcon />
           </IconButton>
