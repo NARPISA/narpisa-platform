@@ -62,7 +62,7 @@ describe("Home page", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: /unlock southern africa's natural resources all in one place/i,
+        name: /natural resource intelligence for smarter investment/i,
       }),
     ).toBeInTheDocument();
   });
@@ -79,7 +79,7 @@ describe("Home page", () => {
 
     expect(screen.getByRole("link", { name: /get started/i })).toHaveAttribute(
       "href",
-      "/data_input",
+      "/signin",
     );
     expect(screen.getByRole("link", { name: /view databases/i })).toHaveAttribute(
       "href",

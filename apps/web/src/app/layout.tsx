@@ -31,6 +31,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${manrope.variable} antialiased`}
+        suppressHydrationWarning
       >
         <ThemeRegistry>
           <Suspense fallback={null}>
@@ -42,7 +43,13 @@ export default function RootLayout({
                   flexDirection: "column",
                 }}
               >
-                <Box sx={{ position: "relative", zIndex: 1, flex: 1 }}>
+                <Box
+                  sx={{
+                    position: "relative",
+                    zIndex: 1,
+                    flex: 1,
+                  }}
+                >
                   {children}
                 </Box>
                 <SiteFooter />
