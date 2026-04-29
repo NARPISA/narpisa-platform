@@ -27,6 +27,51 @@ import SiteFooter from "@/components/site-footer";
 import { getPublicEnv } from "@/lib/env";
 import { createClient } from "@/lib/supabase/client";
 
+const compactTitleSx = {
+  ...authTitleSx,
+  fontSize: { xs: "2.6rem", md: "3.6rem" },
+  lineHeight: 1.15,
+} as const;
+
+const compactBodyTextSx = {
+  ...authBodyTextSx,
+  maxWidth: "34rem",
+  fontSize: { xs: "1.05rem", md: "1.2rem" },
+  lineHeight: 1.35,
+} as const;
+
+const compactLabelSx = {
+  ...authLabelSx,
+  fontSize: "1.1rem",
+} as const;
+
+const compactLinkSx = {
+  ...authLinkSx,
+  fontSize: { xs: "1.25rem", md: "1.45rem" },
+} as const;
+
+const compactFieldSx = [
+  authFieldSx,
+  {
+    "& .MuiOutlinedInput-root": {
+      minHeight: "3.8rem",
+      typography: "body1",
+    },
+    "& .MuiInputBase-input": {
+      fontSize: "1.15rem",
+      lineHeight: 1.25,
+      py: 1.1,
+    },
+  },
+] as const;
+
+const compactButtonSx = {
+  ...authPrimaryButtonSx,
+  minHeight: "4rem",
+  py: "0.85rem",
+  fontSize: "1.15rem",
+} as const;
+
 export default function ForgotPasswordView() {
   const [email, setEmail] = React.useState("");
   const [message, setMessage] = React.useState<string | null>(null);
@@ -44,7 +89,7 @@ export default function ForgotPasswordView() {
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
       email,
       {
-        redirectTo: `${appUrl}/auth/callback?next=/signin`,
+        redirectTo: `${appUrl}/auth/callback?next=/profile/password`,
       },
     );
 
@@ -56,7 +101,7 @@ export default function ForgotPasswordView() {
     }
 
     setMessage(
-      "If an account exists for this email, you will receive a reset link shortly.",
+      "If an account exists for this email, you will receive a reset link shortly. Please check your spam folder too.",
     );
   }
 
@@ -76,7 +121,7 @@ export default function ForgotPasswordView() {
                 Reset password
               </Typography>
 
-              <Typography sx={authBodyTextSx}>
+              <Typography sx={compactBodyTextSx}>
                 Enter your account email and we&apos;ll send a password reset
                 link.
               </Typography>
@@ -112,11 +157,11 @@ export default function ForgotPasswordView() {
                   required
                   fullWidth
                   autoComplete="email"
-                  sx={authFieldSx}
+                  sx={compactFieldSx}
                 />
               </Stack>
 
-              <Button type="submit" disabled={loading} sx={authPrimaryButtonSx}>
+              <Button type="submit" disabled={loading} sx={compactButtonSx}>
                 Send reset link
               </Button>
 
@@ -124,7 +169,7 @@ export default function ForgotPasswordView() {
                 component={NextLink}
                 href="/signin"
                 underline="hover"
-                sx={authLinkSx}
+                sx={compactLinkSx}
               >
                 Back to sign in
               </MuiLink>
