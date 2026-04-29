@@ -113,7 +113,7 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
             minHeight: 58,
           }}
         >
-          <BrandHomeLink size={52} color={textColor} title="MineralDB" subtitle="NaRPISA platform" />
+          <BrandHomeLink size={52} color={textColor} title="Alluvial AI" subtitle="a NaRPISA platform" />
 
           <Stack
             component="nav"
@@ -215,7 +215,7 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
         }}
       >
         <Stack spacing={2.5}>
-          <BrandHomeLink size={48} title="MineralDB" color="text.primary" />
+          <BrandHomeLink size={48} title="Alluvial AI" color="text.primary" />
           {NAV_LINKS.filter((link) => !(link.href === "/signin" && session?.user)).map((link) => (
             <Button
               key={link.href}

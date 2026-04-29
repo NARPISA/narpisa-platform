@@ -17,7 +17,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "NaRPISA Platform",
+  title: "Alluvial AI, a NaRPISA Platform",
   description:
     "Source-led intelligence platform for mineral value addition, document parsing, and trading workflows.",
 };

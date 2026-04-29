@@ -8,7 +8,7 @@ import SignInView from "./sign-in-view";
 
 export const metadata: Metadata = {
   title: "Sign in",
-  description: "Sign in to the NaRPISA platform",
+  description: "Sign in to the Alluvial AI platform",
 };
 
 type SearchParams = Promise<{ callbackUrl?: string }>;
