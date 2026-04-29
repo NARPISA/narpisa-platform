@@ -96,6 +96,7 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
   const pathname = usePathname() ?? "";
   const session = useSession();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const profileLabel = session?.user ? getProfileLabel(session.user) : "Profile";
 
   const textColor = transparent ? "var(--marketing-header-fg, #ffffff)" : "text.primary";
   const transparentBorderColor = "var(--marketing-header-border, rgba(255,255,255,0.18))";

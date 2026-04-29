@@ -89,9 +89,10 @@ export default function HomeLandingPage({
                   lineHeight: { xs: 1.02, md: 0.98 },
                   letterSpacing: "-0.05em",
                   textWrap: "balance",
+                  userSelect: "none",
                 }}
               >
-                Unlock Southern Africa&apos;s natural resources all in one place.
+                Natural resource intelligence for smarter investment​
               </Typography>
             </MotionBox>
 
@@ -144,6 +145,10 @@ export default function HomeLandingPage({
                     bgcolor: "rgba(99, 57, 24, 0.56)",
                     border: "1px solid rgba(255,255,255,0.12)",
                     backdropFilter: "blur(10px)",
+                    "&:hover": {
+                      backgroundColor: "primary.400",
+                      boxShadow: "0 18px 40px rgba(240,114,19,0.32)",
+                    },
                   }}
                 >
                   View databases
