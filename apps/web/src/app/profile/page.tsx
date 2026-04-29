@@ -11,18 +11,17 @@ export const metadata: Metadata = {
 
 export default async function ProfilePage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+  const userId = claimsData?.claims?.sub;
 
-  if (!user) {
+  if (claimsError || !userId) {
     redirect("/signin?callbackUrl=%2Fprofile");
   }
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("firstname, lastname, email, linkedin_url")
-    .eq("id", user.id)
+    .eq("id", userId)
     .maybeSingle();
 
   if (profileError) {
@@ -31,7 +30,7 @@ export default async function ProfilePage() {
 
   return (
     <ProfileView
-      profileId={user.id}
+      profileId={userId}
       initialFirstName={profile?.firstname ?? ""}
       initialLastName={profile?.lastname ?? ""}
       email={profile?.email ?? "Not available"}

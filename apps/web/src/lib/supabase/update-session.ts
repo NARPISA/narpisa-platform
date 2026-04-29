@@ -16,6 +16,14 @@ function copyAuthCookies(from: NextResponse, to: NextResponse) {
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
+  const pathname = request.nextUrl.pathname;
+  const isProtected =
+    pathname.startsWith("/database") || pathname.startsWith("/profile");
+  const needsAuthCheck = isProtected || pathname.startsWith("/signin");
+
+  if (!needsAuthCheck) {
+    return response;
+  }
 
   const supabase = createServerClient(getSupabaseUrl(), getSupabaseAnonKey(), {
     cookies: {
@@ -32,16 +40,10 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data, error } = await supabase.auth.getClaims();
+  const isSignedIn = !error && Boolean(data?.claims?.sub);
 
-  const pathname = request.nextUrl.pathname;
-
-  const isProtected =
-    pathname.startsWith("/database") || pathname.startsWith("/profile");
-
-  if (isProtected && !user) {
+  if (isProtected && !isSignedIn) {
     const url = request.nextUrl.clone();
     url.pathname = "/signin";
     url.searchParams.set(
@@ -51,7 +53,7 @@ export async function updateSession(request: NextRequest) {
     return copyAuthCookies(response, NextResponse.redirect(url));
   }
 
-  if (user && pathname.startsWith("/signin")) {
+  if (isSignedIn && pathname.startsWith("/signin")) {
     const dest = getSafeInternalRedirect(request.nextUrl.searchParams.get("callbackUrl"));
     const url = new URL(dest, request.url);
     return copyAuthCookies(response, NextResponse.redirect(url));

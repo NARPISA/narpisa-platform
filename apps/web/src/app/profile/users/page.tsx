@@ -26,18 +26,17 @@ function tierNameFromJoin(tiers: unknown): string | null {
 
 export default async function ProfileUsersPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+  const userId = claimsData?.claims?.sub;
 
-  if (!user) {
+  if (claimsError || !userId) {
     redirect("/signin?callbackUrl=%2Fprofile%2Fusers");
   }
 
   const { data: myProfile } = await supabase
     .from("profiles")
     .select("tier_id, tiers!profiles_tier_id_fkey ( name )")
-    .eq("id", user.id)
+    .eq("id", userId)
     .maybeSingle();
 
   const myTierName = tierNameFromJoin(myProfile?.tiers);
@@ -56,7 +55,7 @@ export default async function ProfileUsersPage() {
     return (
       <UsersAdminView
         isAdmin={isAdmin}
-        currentUserId={user.id}
+        currentUserId={userId}
         initialRows={[]}
         tiers={[]}
         errorMessage={`Could not load users: ${profilesError.message}`}
@@ -93,7 +92,7 @@ export default async function ProfileUsersPage() {
   return (
     <UsersAdminView
       isAdmin={isAdmin}
-      currentUserId={user.id}
+      currentUserId={userId}
       initialRows={initialRows}
       tiers={tiers}
       errorMessage={tiersError?.message ?? null}

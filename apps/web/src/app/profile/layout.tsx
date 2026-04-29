@@ -24,17 +24,17 @@ function tierNameFromJoin(tiers: unknown): string | null {
 
 export default async function ProfileLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+  const userId = claimsData?.claims?.sub;
 
-  if (!user) {
+  if (claimsError || !userId) {
     redirect("/signin?callbackUrl=%2Fprofile");
   }
+
   const { data: myProfile } = await supabase
     .from("profiles")
     .select("tier_id, tiers!profiles_tier_id_fkey ( name )")
-    .eq("id", user.id)
+    .eq("id", userId)
     .maybeSingle();
   const isAdmin = tierNameFromJoin(myProfile?.tiers)?.toLowerCase() === "admin";
 

@@ -47,6 +47,7 @@ export default function ProfileSidebar({ isAdmin }: ProfileSidebarProps) {
               key={href}
               component={Link}
               href={href}
+              prefetch={false}
               selected={active}
               sx={{
                 borderRadius: 1,

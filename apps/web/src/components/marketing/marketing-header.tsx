@@ -35,6 +35,19 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+type HeaderProfileUser = {
+  name?: string | null;
+  email?: string | null;
+};
+
+function getProfileLabel(user: HeaderProfileUser) {
+  const name = user.name?.trim();
+  if (name) {
+    return `Hi, ${name}`;
+  }
+  return user.email ?? "Profile";
+}
+
 function HeaderLink({
   href,
   label,
@@ -85,6 +98,7 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const textColor = transparent ? "common.white" : "text.primary";
+  const profileLabel = session?.user ? getProfileLabel(session.user) : null;
 
   return (
     <>
@@ -159,7 +173,7 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
                     }}
                   />
                   <Typography sx={{ fontSize: "1.45rem", fontWeight: 700, color: textColor }}>
-                    {session.user.name ?? "Hi"}
+                    {profileLabel}
                   </Typography>
                 </Button>
               ) : (
@@ -251,7 +265,7 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
                   }}
                 />
                 <Typography sx={{ fontSize: "1.55rem", fontWeight: 700, color: "text.primary" }}>
-                  {session.user.name ?? "Hi"}
+                  {profileLabel}
                 </Typography>
               </Button>
             </Box>
