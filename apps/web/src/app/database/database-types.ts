@@ -3,6 +3,7 @@ export type DatabaseStatus = string;
 export const DATABASE_DRAWER_LINKS = [
   { label: "Home", href: "/" },
   { label: "Database", href: "/database" },
+  { label: "Map", href: "/map" },
   { label: "Pricing", href: "/pricing" },
   { label: "About", href: "/about" },
   { label: "Profile", href: "/profile" },
