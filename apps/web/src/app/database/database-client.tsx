@@ -74,6 +74,7 @@ export default function DatabaseClient() {
   >(null);
   const [dirtyCells, setDirtyCells] = useState<Record<string, DatabaseDirtyCell>>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [applicantSearch, setApplicantSearch] = useState("");
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [hiddenColumnMessage, setHiddenColumnMessage] = useState<string | null>(null);
   const [addColumnOpen, setAddColumnOpen] = useState(false);
@@ -94,6 +95,7 @@ export default function DatabaseClient() {
   const dirtyCellList = Object.values(dirtyCells);
   const hasPendingChanges = dirtyCellList.length > 0;
   const showShimmerState = isLoading || Boolean(error) || isAdminMutationAnimating;
+  const showApplicantSearch = activeCategoryMeta?.source === "licenses";
 
   async function runWithAdminMutationShimmer(task: () => Promise<void>) {
     const minAnimationMs = 450;
@@ -157,9 +159,16 @@ export default function DatabaseClient() {
         return [];
       }
 
-      return acc.filter((row) =>
-        enabledValues.includes(String(row[group.field] ?? "").toLowerCase()),
-      );
+      return acc.filter((row) => {
+        const rawValue = String(row[group.field] ?? "");
+        if (group.field === "region") {
+          return rawValue
+            .split(",")
+            .map((value) => value.trim().toLowerCase())
+            .some((value) => enabledValues.includes(value));
+        }
+        return enabledValues.includes(rawValue.toLowerCase());
+      });
     }, rows);
   }
 
@@ -167,11 +176,26 @@ export default function DatabaseClient() {
     const sourceRows = data.tablesByCategory[activeCategory] ?? [];
     const editedRows = applyPendingEdits(sourceRows, activeCategory, dirtyCells);
     const activeGroups = filtersByCategory[activeCategory] ?? [];
-    return applyFilters(editedRows, activeGroups);
-  }, [activeCategory, data.tablesByCategory, dirtyCells, filtersByCategory]);
+    const filteredRows = applyFilters(editedRows, activeGroups);
+    const query = applicantSearch.trim().toLowerCase();
+    if (!showApplicantSearch || !query) {
+      return filteredRows;
+    }
+    return filteredRows.filter((row) =>
+      String(row.applicants ?? "").toLowerCase().includes(query),
+    );
+  }, [
+    activeCategory,
+    applicantSearch,
+    data.tablesByCategory,
+    dirtyCells,
+    filtersByCategory,
+    showApplicantSearch,
+  ]);
 
   const handleCategoryChange = useCallback((category: DatabaseCategory) => {
     setDirtyCells({});
+    setApplicantSearch("");
     setActiveCategory(category);
   }, []);
 
@@ -444,6 +468,9 @@ export default function DatabaseClient() {
           isSaving={isSaving}
           pendingChangeCount={dirtyCellList.length}
           onSaveChanges={handleSaveChanges}
+          showApplicantSearch={showApplicantSearch}
+          applicantSearch={applicantSearch}
+          onApplicantSearchChange={setApplicantSearch}
         />
 
         <Box sx={{ flex: 1, minWidth: 0 }}>

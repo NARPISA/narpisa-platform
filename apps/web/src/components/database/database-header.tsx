@@ -6,7 +6,7 @@ export default function DatabaseHeader() {
   return (
     <Box
       sx={{
-        height: 130,
+        height: 90,
         bgcolor: "common.white",
         px: { xs: 2, md: 4.5 },
         py: 2.5,

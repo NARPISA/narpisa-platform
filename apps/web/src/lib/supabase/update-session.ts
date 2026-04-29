@@ -18,7 +18,9 @@ export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
   const pathname = request.nextUrl.pathname;
   const isProtected =
-    pathname.startsWith("/database") || pathname.startsWith("/profile");
+    pathname.startsWith("/database") ||
+    pathname.startsWith("/map") ||
+    pathname.startsWith("/profile");
   const needsAuthCheck = isProtected || pathname.startsWith("/signin");
 
   if (!needsAuthCheck) {

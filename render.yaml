@@ -47,7 +47,7 @@ services:
     dockerContext: .
     plan: starter
     autoDeploy: true
-    dockerCommand: celery --app app.worker.celery_app worker --loglevel info --concurrency 1
+    dockerCommand: celery --app app.celery_main:celery_app worker --beat --loglevel info --concurrency 1
     envVars:
       - key: PDF_WORKER_LOG_LEVEL
         value: INFO

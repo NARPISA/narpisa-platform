@@ -14,6 +14,7 @@ import { DATABASE_METRIC_YEARS } from "@/app/database/database-types";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
+const PAGE_SIZE = 1000;
 
 const EMPTY_TABLES: Record<DatabaseCategory, DatabaseRow[]> = {
 };
@@ -289,6 +290,31 @@ function buildFilterGroup(
   return { title, field, options };
 }
 
+function buildMultiValueFilterGroup(
+  rows: DatabaseRow[],
+  title: string,
+  field: string,
+): DatabaseFilterGroup | null {
+  const options = Array.from(
+    new Set(
+      rows.flatMap((row) =>
+        String(row[field] ?? "")
+          .split(",")
+          .map((value) => value.trim())
+          .filter(Boolean),
+      ),
+    ),
+  )
+    .sort((left, right) => left.localeCompare(right))
+    .map((label) => ({ label, checked: true }));
+
+  if (options.length === 0) {
+    return null;
+  }
+
+  return { title, field, options };
+}
+
 function withGroups(
   rows: DatabaseRow[],
   groups: Array<DatabaseFilterGroup | null>,
@@ -391,6 +417,27 @@ function hiddenColumns(columns: DatabaseColumnMeta[]) {
   return columns.filter((column) => !column.visible);
 }
 
+async function fetchAllRows<T>(
+  buildQuery: (from: number, to: number) => PromiseLike<{
+    data: T[] | null;
+    error: { message: string } | null;
+  }>,
+) {
+  const rows: T[] = [];
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const to = from + PAGE_SIZE - 1;
+    const response = await buildQuery(from, to);
+    if (response.error) {
+      throw new Error(response.error.message);
+    }
+    const page = response.data ?? [];
+    rows.push(...page);
+    if (page.length < PAGE_SIZE) {
+      return rows;
+    }
+  }
+}
+
 export async function GET() {
   try {
     const supabase = await createClient();
@@ -405,7 +452,7 @@ export async function GET() {
       sitesResponse,
       commodityMetricsResponse,
       waterMetricsResponse,
-      licensesResponse,
+      licenseRowsResponse,
       siteFieldsResponse,
       licenseFieldsResponse,
       categoriesResponse,
@@ -454,15 +501,18 @@ export async function GET() {
           `,
         )
         .order("yr", { ascending: false }),
-      supabase
-        .from("licenses")
-        .select(
-          `
-            *,
-            country:countries(name)
-          `,
-        )
-        .order("application_date", { ascending: false }),
+      fetchAllRows<Record<string, unknown>>((from, to) =>
+        supabase
+          .from("licenses")
+          .select(
+            `
+              *,
+              country:countries(name)
+            `,
+          )
+          .order("application_date", { ascending: false })
+          .range(from, to),
+      ),
       supabase
         .from("site_data_fields")
         .select(
@@ -485,7 +535,6 @@ export async function GET() {
       sitesResponse.error,
       commodityMetricsResponse.error,
       waterMetricsResponse.error,
-      licensesResponse.error,
       siteFieldsResponse.error,
       licenseFieldsResponse.error,
       categoriesResponse.error,
@@ -708,7 +757,7 @@ export async function GET() {
       "water",
     );
 
-    const licenseRows: DatabaseRow[] = (licensesResponse.data ?? []).map((row) => {
+    const licenseRows: DatabaseRow[] = licenseRowsResponse.map((row) => {
       const baseRow: DatabaseRow = {
         id: numericValue(row.id) ?? 0,
         type: stringValue(row.type) ?? "",
@@ -772,6 +821,7 @@ export async function GET() {
         ]),
         [licensesCategory]: withGroups(licenseRows, [
           buildFilterGroup(licenseRows, "Country", "country"),
+          buildMultiValueFilterGroup(licenseRows, "Regions", "region"),
           buildFilterGroup(licenseRows, "Status", "status"),
           buildFilterGroup(licenseRows, "Type", "type"),
         ]),

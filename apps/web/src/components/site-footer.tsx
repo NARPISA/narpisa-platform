@@ -30,7 +30,8 @@ function resolveFooterBehavior(
 
   return pathname?.startsWith("/signin") ||
     pathname?.startsWith("/signup") ||
-    pathname?.startsWith("/forgot-password")
+    pathname?.startsWith("/forgot-password") ||
+    pathname?.startsWith("/map")
     ? "hidden"
     : "static";
 }

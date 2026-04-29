@@ -14,11 +14,13 @@ import NavUnderlineLink from "@/components/nav-underline-link";
 type DatabaseNavDrawerProps = {
   open: boolean;
   onClose: () => void;
+  activeLabel?: string;
 };
 
 export default function DatabaseNavDrawer({
   open,
   onClose,
+  activeLabel = "Database",
 }: DatabaseNavDrawerProps) {
   return (
     <Drawer
@@ -47,7 +49,7 @@ export default function DatabaseNavDrawer({
 
         <Stack spacing={2}>
           {DATABASE_DRAWER_LINKS.map((item) => {
-            const isActive = item.label === "Database";
+            const isActive = item.label === activeLabel;
             return (
               <Box key={item.href}>
                 <NavUnderlineLink
