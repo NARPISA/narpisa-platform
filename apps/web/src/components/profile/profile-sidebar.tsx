@@ -1,11 +1,15 @@
 "use client";
 
+import Divider from "@mui/material/Divider";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Paper from "@mui/material/Paper";
-import { usePathname } from "next/navigation";
+import * as React from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+
+import { createClient } from "@/lib/supabase/client";
 
 const NAV_ITEMS = [
   { href: "/profile", label: "Profile", prefixMatch: false },
@@ -26,7 +30,17 @@ type ProfileSidebarProps = {
 
 export default function ProfileSidebar({ isAdmin }: ProfileSidebarProps) {
   const pathname = usePathname() ?? "";
+  const router = useRouter();
+  const supabase = React.useMemo(() => createClient(), []);
+  const [isSigningOut, setIsSigningOut] = React.useState(false);
   const visibleNavItems = NAV_ITEMS.filter((item) => isAdmin || item.href !== "/profile/users");
+
+  async function handleSignOut() {
+    setIsSigningOut(true);
+    await supabase.auth.signOut();
+    router.refresh();
+    router.push("/");
+  }
 
   return (
     <Paper
@@ -74,6 +88,30 @@ export default function ProfileSidebar({ isAdmin }: ProfileSidebarProps) {
             </ListItemButton>
           );
         })}
+        <Divider sx={{ my: 0.5 }} />
+        <ListItemButton
+          disabled={isSigningOut}
+          onClick={() => {
+            void handleSignOut();
+          }}
+          sx={{
+            border: "1px solid transparent",
+            borderRadius: 1,
+            px: 2,
+            py: 1.35,
+            "&:hover, &.Mui-focusVisible": {
+              bgcolor: "error.light",
+              color: "black",
+            },
+          }}
+        >
+          <ListItemText
+            primary={isSigningOut ? "Signing out..." : "Sign out"}
+            primaryTypographyProps={{
+              sx: { color: "inherit", fontSize: "1.15rem", fontWeight: 600 },
+            }}
+          />
+        </ListItemButton>
       </List>
     </Paper>
   );
