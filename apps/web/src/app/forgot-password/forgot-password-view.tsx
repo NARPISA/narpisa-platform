@@ -117,7 +117,7 @@ export default function ForgotPasswordView() {
               spacing={2}
               sx={{ width: "100%", alignItems: "center" }}
             >
-              <Typography component="h1" sx={authTitleSx}>
+              <Typography component="h1" sx={compactTitleSx}>
                 Reset password
               </Typography>
 
@@ -147,7 +147,7 @@ export default function ForgotPasswordView() {
                 spacing={1.25}
                 sx={{ width: "100%", maxWidth: "40rem", pt: 1 }}
               >
-                <Typography sx={authLabelSx}>Email Address</Typography>
+                <Typography sx={compactLabelSx}>Email Address</Typography>
                 <TextField
                   placeholder="email"
                   type="email"
