@@ -4,6 +4,7 @@ import * as React from "react";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
+import PsychologyRoundedIcon from "@mui/icons-material/PsychologyRounded";
 import QueryStatsRoundedIcon from "@mui/icons-material/QueryStatsRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import Box from "@mui/material/Box";
@@ -20,10 +21,10 @@ const FEATURES = [
   },
   {
     id: "pdf-parsing",
-    title: "PDF Parsing",
+    title: "AI Feasibility Sourcing",
     description:
-      "Automatically extract and structure data from complex mining and geological reports.",
-    icon: <DescriptionRoundedIcon sx={{ fontSize: 64, color: "common.white" }} />,
+      "Use AI to parse and source information for you from feasibility studies across the globe.",
+    icon: <PsychologyRoundedIcon sx={{ fontSize: 64, color: "common.white" }} />,
   },
   {
     id: "data-visualization",
@@ -137,9 +138,11 @@ export default function HomeFeaturesPage() {
         justifyContent: "center",
         px: { xs: 1.25, md: 2.5 },
         py: { xs: 3, md: 4 },
-        bgcolor: "rgba(23,36,56,0.88)",
-        borderTop: "1px solid rgba(255,255,255,0.14)",
-        borderBottom: "1px solid rgba(255,255,255,0.14)",
+        bgcolor: "home.featuresSectionBg",
+        borderTop: "1px solid",
+        borderTopColor: "home.featuresSectionBorder",
+        borderBottom: "1px solid",
+        borderBottomColor: "home.featuresSectionBorder",
       }}
     >
       <Box sx={{ width: "100%", maxWidth: "1240px", mx: "auto" }}>
@@ -233,7 +236,7 @@ export default function HomeFeaturesPage() {
                 borderRadius: 1.2,
                 p: { xs: 2.4, md: 3 },
                 minHeight: { xs: 240, md: 320 },
-                bgcolor: "rgba(95,104,122,0.58)",
+                bgcolor: "home.featuresCardBg",
                 border: "none",
                 display: "flex",
                 flexDirection: "column",
@@ -243,7 +246,7 @@ export default function HomeFeaturesPage() {
                 transition: "transform 260ms ease, opacity 260ms ease",
               }}
             >
-              <Box sx={{ flex: 1, transform: "translateY(+40px)" }}>
+              <Box sx={{ flex: 1, transform: "translateY(+40px)", pointerEvents: "none" }}>
                 <Stack spacing={1.75} alignItems="center" sx={{ justifyContent: "center" }}>
                   <Box>{feature.icon}</Box>
                   <Typography sx={{ fontSize: "2.1rem", fontWeight: 700, textAlign: "center" }}>
@@ -254,7 +257,7 @@ export default function HomeFeaturesPage() {
                   <Typography
                     sx={{
                       fontSize: "1.15rem",
-                      color: "rgba(255,255,255,0.92)",
+                      color: "home.featuresCardSubtle",
                       textAlign: "center",
                     }}
                   >
@@ -264,12 +267,28 @@ export default function HomeFeaturesPage() {
               </Box>
 
               <Typography
+                component="a"
+                href="/about"
                 sx={{
                   mt: 2,
+                  display: "inline-flex",
+                  alignSelf: "center",
+                  position: "relative",
+                  zIndex: 2,
                   fontSize: "2rem",
                   fontWeight: 800,
                   color: "primary.main",
                   textAlign: "center",
+                  textDecoration: "none",
+                  cursor: "pointer",
+                  transition: "color 180ms ease, text-shadow 180ms ease, transform 180ms ease",
+                  "&:hover": {
+                    color: "#ffb26e",
+                    textDecoration: "underline",
+                    textUnderlineOffset: "0.2em",
+                    textShadow: "0 0 18px rgba(240,114,19,0.35)",
+                    transform: "translateY(-1px)",
+                  },
                 }}
               >
                 Learn More {"\u2192"}

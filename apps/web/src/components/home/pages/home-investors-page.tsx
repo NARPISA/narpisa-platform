@@ -45,7 +45,7 @@ export default function HomeInvestorsPage() {
         justifyContent: "center",
         px: 0,
         overflow: "hidden",
-        bgcolor: "#f4f4f6",
+        bgcolor: "home.investorsSectionBg",
       }}
     >
       <Box
@@ -62,7 +62,7 @@ export default function HomeInvestorsPage() {
           </Typography>
           <Typography
             sx={{
-              color: "rgba(15,18,28,0.95)",
+              color: "home.investorsHeading",
               fontWeight: 800,
               fontSize: { xs: "2.3rem", md: "3rem" },
               textAlign: "center",
@@ -75,7 +75,7 @@ export default function HomeInvestorsPage() {
               mt: 1,
               maxWidth: 780,
               textAlign: "center",
-              color: "rgba(30,35,45,0.9)",
+              color: "home.investorsBody",
               fontSize: { xs: "1.2rem", md: "1.6rem" },
               lineHeight: 1.35,
             }}
@@ -99,11 +99,12 @@ export default function HomeInvestorsPage() {
                 sx={{
                   borderRadius: 1.5,
                   height: { xs: 160, md: 220 },
-                  bgcolor: "#e4e4e7",
+                  bgcolor: "home.investorsTileBg",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  border: "1px solid rgba(33,43,56,0.08)",
+                  border: "1px solid",
+                  borderColor: "home.investorsTileBorder",
                 }}
               >
                 {feature.icon}
@@ -112,7 +113,7 @@ export default function HomeInvestorsPage() {
                 sx={{
                   mt: 1.2,
                   textAlign: "center",
-                  color: "rgba(15,18,28,0.95)",
+                  color: "home.investorsHeading",
                   fontWeight: 800,
                   fontSize: { xs: "1.05rem", md: "1.8rem" },
                 }}
@@ -130,8 +131,9 @@ export default function HomeInvestorsPage() {
             px: { xs: 2, md: 3.25 },
             py: { xs: 1.5, md: 1.75 },
             minHeight: { xs: 108, md: 124 },
-            bgcolor: "rgba(33,41,56,0.78)",
-            border: "1px solid rgba(255,255,255,0.16)",
+            bgcolor: "home.investorsBannerBg",
+            border: "1px solid",
+            borderColor: "home.investorsBannerBorder",
             backgroundImage:
               "linear-gradient(90deg, rgba(23,29,43,0.76) 0%, rgba(23,29,43,0.5) 55%, rgba(23,29,43,0.35) 100%), url('/landingimage.png')",
             backgroundSize: "cover",
@@ -181,8 +183,9 @@ export default function HomeInvestorsPage() {
                   px: 4,
                   fontSize: "1.9rem",
                   color: "common.white",
-                  bgcolor: "rgba(99, 57, 24, 0.56)",
-                  border: "1px solid rgba(255,255,255,0.24)",
+                  bgcolor: "home.glassButtonBg",
+                  border: "1px solid",
+                  borderColor: "home.glassButtonBorder",
                   backdropFilter: "blur(10px)",
                   transform: "translateY(15px)"
                 }}

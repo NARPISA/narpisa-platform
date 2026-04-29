@@ -69,7 +69,7 @@ export default function HomeLandingPage({
                 label="Southern Africa resource intelligence"
                 sx={{
                   mb: 2.25,
-                  bgcolor: "rgba(255,255,255,0.14)",
+                  bgcolor: "home.featuresSectionBorder",
                   color: "common.white",
                   fontSize: "1.2rem",
                   fontWeight: 700,
@@ -142,8 +142,9 @@ export default function HomeLandingPage({
                     fontSize: "1.45rem",
                     fontWeight: 600,
                     color: "common.white",
-                    bgcolor: "rgba(99, 57, 24, 0.56)",
-                    border: "1px solid rgba(255,255,255,0.12)",
+                    bgcolor: "home.glassButtonBg",
+                    border: "1px solid",
+                    borderColor: "home.glassButtonBorder",
                     backdropFilter: "blur(10px)",
                     "&:hover": {
                       backgroundColor: "primary.400",

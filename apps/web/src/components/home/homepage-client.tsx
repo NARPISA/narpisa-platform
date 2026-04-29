@@ -104,14 +104,13 @@ export default function HomepageClient() {
             content: '""',
             position: "absolute",
             inset: 0,
-            background:
-              "linear-gradient(90deg, rgba(28, 48, 146, 0.12) 0%, rgba(28, 48, 146, 0.08) 42%, rgba(28, 48, 146, 0.04) 100%)",
+            background: (theme) => theme.palette.home.heroGradient,
           },
           "&::after": {
             content: '""',
             position: "absolute",
             inset: 0,
-            background: "rgba(83,132,180,0.14)",
+            background: (theme) => theme.palette.home.heroTint,
           },
         }}
       />
