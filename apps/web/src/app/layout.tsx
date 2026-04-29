@@ -31,6 +31,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${manrope.variable} antialiased`}
+        suppressHydrationWarning
       >
         <ThemeRegistry>
           <Suspense fallback={null}>
