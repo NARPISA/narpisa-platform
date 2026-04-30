@@ -2,15 +2,11 @@ from typing import Annotated, Any, cast
 
 from fastapi import Depends, Header, HTTPException, status
 from postgrest.exceptions import APIError
-from supabase import Client, create_client
 from supabase_auth.errors import AuthApiError
 
 from app.core.config import Settings, get_settings
+from app.core.database import engine
 from app.data.database_admin.models import AdminUser, DirtyCellChange, SaveFailure
-
-
-def create_service_client(settings: Settings) -> Client:
-    return create_client(settings.supabase_url, settings.supabase_service_role_key)
 
 
 def extract_bearer_token(authorization: str | None) -> str:
@@ -34,10 +30,8 @@ def single_or_bad_request(rows: Any, message: str) -> dict[str, Any]:
 
 
 def require_admin_user_from_token(settings: Settings, token: str) -> AdminUser:
-    supabase = create_service_client(settings)
-
     try:
-        user_response = supabase.auth.get_user(token)
+        user_response = engine.auth.get_user(token)
     except AuthApiError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -57,7 +51,7 @@ def require_admin_user_from_token(settings: Settings, token: str) -> AdminUser:
         )
 
     profile_response = (
-        supabase.table("profiles")
+        engine.table("profiles")
         .select("id,tier:tiers(name)")
         .eq("id", user.id)
         .limit(1)
@@ -101,9 +95,9 @@ def coerce_value(value: Any, data_type: str) -> Any:
     return str(value)
 
 
-def category_by_label(supabase: Client, label: str) -> dict[str, Any]:
+def category_by_label(label: str) -> dict[str, Any]:
     response = (
-        supabase.table("database_categories")
+        engine.table("database_categories")
         .select(
             "label,source_key,editable_table,field_registry_table,row_key_column,"
             "can_add_columns,can_hide_columns,can_edit_cells"
@@ -115,9 +109,9 @@ def category_by_label(supabase: Client, label: str) -> dict[str, Any]:
     return single_or_bad_request(response.data, "Unknown database category.")
 
 
-def editable_categories(supabase: Client) -> dict[str, dict[str, Any]]:
+def editable_categories() -> dict[str, dict[str, Any]]:
     response = (
-        supabase.table("database_categories")
+        engine.table("database_categories")
         .select(
             "label,source_key,editable_table,field_registry_table,row_key_column,"
             "can_edit_cells"
@@ -133,7 +127,6 @@ def editable_categories(supabase: Client) -> dict[str, dict[str, Any]]:
 
 
 def field_mapping(
-    supabase: Client,
     category: dict[str, Any],
     field: str,
 ) -> dict[str, Any]:
@@ -142,7 +135,7 @@ def field_mapping(
         raise ValueError("This category does not use field registry metadata.")
 
     response = (
-        supabase.table(str(registry_table))
+        engine.table(str(registry_table))
         .select(
             "field_key,ui_field,table_target,column_name,data_type,relation_table,"
             "relation_label_column,row_key_column,is_admin_editable"
@@ -158,7 +151,6 @@ def field_mapping(
 
 
 def resolve_relation_value(
-    supabase: Client,
     mapping: dict[str, Any],
     value: Any,
 ) -> Any:
@@ -172,7 +164,7 @@ def resolve_relation_value(
         return None
 
     existing = (
-        supabase.table(str(relation_table))
+        engine.table(str(relation_table))
         .select("id")
         .eq(str(label_column), label)
         .limit(1)
@@ -183,29 +175,27 @@ def resolve_relation_value(
         return existing_row["id"]
 
     created = (
-        supabase.table(str(relation_table)).insert({str(label_column): label}).execute()
+        engine.table(str(relation_table)).insert({str(label_column): label}).execute()
     )
     return single_or_bad_request(created.data, "Unable to create related row.")["id"]
 
 
 def coerce_field_value(
-    supabase: Client,
     mapping: dict[str, Any],
     value: Any,
 ) -> Any:
     if mapping.get("data_type") == "foreign_key":
-        return resolve_relation_value(supabase, mapping, value)
+        return resolve_relation_value(mapping, value)
     return coerce_value(value, str(mapping["data_type"]))
 
 
 def write_audit(
-    supabase: Client,
     change: DirtyCellChange,
     user: AdminUser,
     table_name: str,
     old_value: Any,
 ) -> None:
-    supabase.table("admin_manual_edits").insert(
+    engine.table("admin_manual_edits").insert(
         {
             "category": change.category,
             "table_name": table_name,
@@ -225,21 +215,20 @@ def write_audit(
 
 
 def save_registered_field_change(
-    supabase: Client,
     category: dict[str, Any],
     change: DirtyCellChange,
     user: AdminUser,
 ) -> None:
-    mapping = field_mapping(supabase, category, change.field)
+    mapping = field_mapping(category, change.field)
     table_name = str(mapping["table_target"])
     column_name = str(mapping["column_name"])
     key_column = str(
         mapping.get("row_key_column") or category.get("row_key_column") or "id"
     )
-    value = coerce_field_value(supabase, mapping, change.value)
+    value = coerce_field_value(mapping, change.value)
 
     previous = (
-        supabase.table(table_name)
+        engine.table(table_name)
         .select(column_name)
         .eq(key_column, change.row_id)
         .limit(1)
@@ -249,19 +238,18 @@ def save_registered_field_change(
     old_value = previous_row.get(column_name) if previous_row else None
 
     if previous_row is None:
-        supabase.table(table_name).insert(
+        engine.table(table_name).insert(
             {key_column: change.row_id, column_name: value}
         ).execute()
     else:
-        supabase.table(table_name).update({column_name: value}).eq(
+        engine.table(table_name).update({column_name: value}).eq(
             key_column, change.row_id
         ).execute()
 
-    write_audit(supabase, change, user, table_name, old_value)
+    write_audit(change, user, table_name, old_value)
 
 
 def save_metric_change(
-    supabase: Client,
     category: dict[str, Any],
     change: DirtyCellChange,
     user: AdminUser,
@@ -277,7 +265,7 @@ def save_metric_change(
 
     value = coerce_value(change.value, "numeric")
     previous = (
-        supabase.table(str(table_name))
+        engine.table(str(table_name))
         .select("value_numeric,fact_id")
         .eq(key_column, change.metric_row_id)
         .limit(1)
@@ -287,12 +275,12 @@ def save_metric_change(
     old_value = previous_row.get("value_numeric")
     fact_id = previous_row.get("fact_id")
 
-    supabase.table(str(table_name)).update({"value_numeric": value}).eq(
+    engine.table(str(table_name)).update({"value_numeric": value}).eq(
         key_column, change.metric_row_id
     ).execute()
 
     if fact_id:
-        supabase.table("site_facts").update(
+        engine.table("site_facts").update(
             {
                 "value_numeric": value,
                 "provenance": {
@@ -303,27 +291,25 @@ def save_metric_change(
             }
         ).eq("id", fact_id).execute()
 
-    write_audit(supabase, change, user, str(table_name), old_value)
+    write_audit(change, user, str(table_name), old_value)
 
 
 def save_database_change(
-    supabase: Client,
     category: dict[str, Any],
     change: DirtyCellChange,
     user: AdminUser,
 ) -> None:
     if category.get("field_registry_table"):
-        save_registered_field_change(supabase, category, change, user)
+        save_registered_field_change(category, change, user)
     else:
-        save_metric_change(supabase, category, change, user)
+        save_metric_change(category, change, user)
 
 
 def save_database_changes(
-    supabase: Client,
     changes: list[DirtyCellChange],
     user: AdminUser,
 ) -> tuple[int, list[SaveFailure]]:
-    categories = editable_categories(supabase)
+    categories = editable_categories()
     saved = 0
     failed: list[SaveFailure] = []
 
@@ -332,7 +318,7 @@ def save_database_changes(
             category = categories.get(change.category)
             if category is None:
                 raise ValueError("This category is not editable.")
-            save_database_change(supabase, category, change, user)
+            save_database_change(category, change, user)
             saved += 1
         except (APIError, ValueError) as exc:
             failed.append(

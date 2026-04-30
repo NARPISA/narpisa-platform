@@ -35,8 +35,9 @@ class Settings(BaseSettings):
         validation_alias="NEXT_PUBLIC_APP_URL",
     )
     fetch_timeout_seconds: int = 20
-    fetch_max_bytes: int = 10 * 1024 * 1024
+    fetch_max_bytes: int = 50 * 1024 * 1024
     fetch_chunk_size_bytes: int = 1024 * 1024
+    fetch_verify_ssl: bool = True
     download_dir: str = "/tmp/narpisa-pdf-worker"
     keep_downloaded_pdfs: bool = Field(
         default=False,
@@ -57,6 +58,10 @@ class Settings(BaseSettings):
         default="test-service-role-key", validation_alias="SUPABASE_SERVICE_ROLE_KEY"
     )
     supabase_schema: str = Field(default="public", validation_alias="SUPABASE_SCHEMA")
+    gemini_api_key: str = Field(
+        default="test-gemini-api-key",
+        validation_alias="GEMINI_API_KEY",
+    )
     open_api_key: str = Field(
         default="",
         validation_alias=AliasChoices("OPEN_API_KEY", "OPENAI_API_KEY"),

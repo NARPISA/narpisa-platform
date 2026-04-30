@@ -4,8 +4,16 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.config import Settings, get_settings
-from app.data.pdf.models import ParsedDocument, QueuedSourceDocument, SourceParseRequest
-from app.data.pdf.services import PdfParser, document_queue
+from app.data.database_admin.models import AdminUser
+from app.data.database_admin.services import require_admin_user
+from app.data.pdf.models import (
+    ParsedDocument,
+    ParsedJobDetail,
+    ParserCommitResponse,
+    QueuedSourceDocument,
+    SourceParseRequest,
+)
+from app.data.pdf.services import document_queue, parse_pdf
 from app.data.pdf.tasks import process_queued_document
 from app.data.services import fetch_data_source
 
@@ -16,6 +24,7 @@ router = APIRouter()
 async def process_source(
     payload: SourceParseRequest,
     settings: Annotated[Settings, Depends(get_settings)],
+    _user: Annotated[AdminUser, Depends(require_admin_user)],
 ) -> ParsedDocument:
     download_path = settings.download_directory / "process-source-debug.pdf"
     download_path.parent.mkdir(parents=True, exist_ok=True)
@@ -26,10 +35,10 @@ async def process_source(
         timeout=settings.fetch_timeout_seconds,
         chunk_size=settings.fetch_chunk_size_bytes,
         max_size=settings.fetch_max_bytes,
+        verify_ssl=settings.fetch_verify_ssl,
     )
-    parser = PdfParser()
     try:
-        return parser.parse(payload, fetch_result)
+        return await parse_pdf(payload, fetch_result)
     finally:
         _cleanup_download(download_path)
 
@@ -40,7 +49,10 @@ async def process_source(
     status_code=status.HTTP_202_ACCEPTED,
     tags=["processing"],
 )
-async def queue_source(payload: SourceParseRequest) -> QueuedSourceDocument:
+async def queue_source(
+    payload: SourceParseRequest,
+    _user: Annotated[AdminUser, Depends(require_admin_user)],
+) -> QueuedSourceDocument:
     try:
         queued_document = await document_queue.enqueue(payload)
         process_queued_document.delay(queued_document.id)
@@ -57,8 +69,46 @@ async def queue_source(payload: SourceParseRequest) -> QueuedSourceDocument:
     response_model=list[QueuedSourceDocument],
     tags=["processing"],
 )
-async def list_queued_sources() -> list[QueuedSourceDocument]:
+async def list_queued_sources(
+    _user: Annotated[AdminUser, Depends(require_admin_user)],
+) -> list[QueuedSourceDocument]:
     return await document_queue.list_items()
+
+
+@router.get(
+    "/queue-source/{job_id}",
+    response_model=ParsedJobDetail,
+    tags=["processing"],
+)
+async def get_queued_source_detail(
+    job_id: str,
+    _user: Annotated[AdminUser, Depends(require_admin_user)],
+) -> ParsedJobDetail:
+    detail = await document_queue.parsed_detail(job_id)
+    if detail is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Queued source not found.",
+        )
+    return detail
+
+
+@router.post(
+    "/queue-source/{job_id}/commit",
+    response_model=ParserCommitResponse,
+    tags=["processing"],
+)
+async def commit_queued_source(
+    job_id: str,
+    _user: Annotated[AdminUser, Depends(require_admin_user)],
+) -> ParserCommitResponse:
+    result = await document_queue.commit_item(job_id)
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Queued source not found.",
+        )
+    return result
 
 
 @router.delete(
@@ -66,7 +116,10 @@ async def list_queued_sources() -> list[QueuedSourceDocument]:
     status_code=status.HTTP_204_NO_CONTENT,
     tags=["processing"],
 )
-async def delete_queued_source(job_id: str) -> None:
+async def delete_queued_source(
+    job_id: str,
+    _user: Annotated[AdminUser, Depends(require_admin_user)],
+) -> None:
     deleted = await document_queue.delete_item(job_id)
     if not deleted:
         raise HTTPException(

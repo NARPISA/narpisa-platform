@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "@toolpad/core/useSession";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import Box from "@mui/material/Box";
@@ -14,6 +14,7 @@ import Typography from "@mui/material/Typography";
 import { usePathname } from "next/navigation";
 
 import BrandHomeLink from "@/components/brand-home-link";
+import { createClient } from "@/lib/supabase/client";
 
 type MarketingHeaderProps = {
   transparent?: boolean;
@@ -98,10 +99,34 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
   const pathname = usePathname() ?? "";
   const session = useSession();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const profileLabel = session?.user ? getProfileLabel(session.user) : "Profile";
 
   const textColor = transparent ? "var(--marketing-header-fg, #ffffff)" : "text.primary";
   const transparentBorderColor = "var(--marketing-header-border, rgba(255,255,255,0.18))";
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAdminStatus() {
+      if (!session?.user) {
+        setIsAdmin(false);
+        return;
+      }
+
+      const supabase = createClient();
+      const { data, error } = await supabase.rpc("is_admin_user");
+      if (!cancelled) {
+        setIsAdmin(!error && data === true);
+      }
+    }
+
+    void loadAdminStatus();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.user]);
 
   return (
     <>
@@ -140,6 +165,23 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
             spacing={3.25}
             sx={{ display: { xs: "none", md: "flex" } }}
           >
+            {isAdmin ? (
+              <Button
+                href="/data_input"
+                variant="contained"
+                sx={{
+                  borderRadius: "999px",
+                  px: 2,
+                  py: 0.75,
+                  fontSize: "1.3rem",
+                  fontWeight: 800,
+                  textTransform: "none",
+                  boxShadow: "none",
+                }}
+              >
+                Upload
+              </Button>
+            ) : null}
             {NAV_LINKS.map((link) => (
               link.href === "/signin" && session?.user ? (
                 <Button
@@ -236,6 +278,23 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
               {link.label}
             </Button>
           ))}
+          {isAdmin ? (
+            <Button
+              href="/data_input"
+              onClick={() => setDrawerOpen(false)}
+              variant="contained"
+              sx={{
+                justifyContent: "flex-start",
+                borderRadius: 3,
+                py: 1,
+                fontSize: "1.6rem",
+                fontWeight: 800,
+                textTransform: "none",
+              }}
+            >
+              Upload
+            </Button>
+          ) : null}
           {session?.user ? (
             <Box sx={{ pt: 1 }}>
               <Button

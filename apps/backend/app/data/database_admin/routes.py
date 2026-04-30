@@ -2,7 +2,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.core.config import Settings, get_settings
+from app.core.database import engine
 from app.data.database_admin.models import (
     AddColumnRequest,
     AdminUser,
@@ -12,7 +12,6 @@ from app.data.database_admin.models import (
 )
 from app.data.database_admin.services import (
     category_by_label,
-    create_service_client,
     require_admin_user,
     save_database_changes,
 )
@@ -22,19 +21,16 @@ router = APIRouter(prefix="/database/admin", tags=["database-admin"])
 
 @router.post("/columns")
 async def add_column(
-    payload: AddColumnRequest,
-    user: Annotated[AdminUser, Depends(require_admin_user)],
-    settings: Annotated[Settings, Depends(get_settings)],
+    payload: AddColumnRequest, user: Annotated[AdminUser, Depends(require_admin_user)]
 ) -> dict[str, Any]:
-    supabase = create_service_client(settings)
-    category = category_by_label(supabase, payload.category)
+    category = category_by_label(payload.category)
     if not category.get("can_add_columns"):
         raise HTTPException(
             status_code=400,
             detail="Columns cannot be added to this category.",
         )
 
-    response = supabase.rpc(
+    response = engine.rpc(
         "admin_create_database_column",
         {
             "target_category": category["source_key"],
@@ -50,10 +46,8 @@ async def add_column(
 async def set_column_visibility(
     payload: ColumnVisibilityRequest,
     _user: Annotated[AdminUser, Depends(require_admin_user)],
-    settings: Annotated[Settings, Depends(get_settings)],
 ) -> dict[str, bool]:
-    supabase = create_service_client(settings)
-    category = category_by_label(supabase, payload.category)
+    category = category_by_label(payload.category)
     registry_table = category.get("field_registry_table")
     if not category.get("can_hide_columns") or not registry_table:
         raise HTTPException(
@@ -61,7 +55,7 @@ async def set_column_visibility(
             detail="Columns cannot be hidden on this category.",
         )
 
-    supabase.table(str(registry_table)).update({"is_visible": payload.visible}).or_(
+    engine.table(str(registry_table)).update({"is_visible": payload.visible}).or_(
         f"field_key.eq.{payload.field},ui_field.eq.{payload.field}"
     ).execute()
     return {"ok": True}
@@ -69,10 +63,7 @@ async def set_column_visibility(
 
 @router.patch("/rows", response_model=SaveRowsResponse)
 async def save_rows(
-    payload: SaveRowsRequest,
-    user: Annotated[AdminUser, Depends(require_admin_user)],
-    settings: Annotated[Settings, Depends(get_settings)],
+    payload: SaveRowsRequest, user: Annotated[AdminUser, Depends(require_admin_user)]
 ) -> SaveRowsResponse:
-    supabase = create_service_client(settings)
-    saved, failed = save_database_changes(supabase, payload.changes, user)
+    saved, failed = save_database_changes(payload.changes, user)
     return SaveRowsResponse(saved=saved, failed=failed)

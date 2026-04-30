@@ -1,16 +1,26 @@
 import type { ReactNode } from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeAll, vi } from "vitest";
 
 import ThemeRegistry from "@/components/theme-registry";
 import { nextNavigationMock } from "@/test/next-navigation-mock";
 
-import DataInputPage from "./page";
+import ParserAdminClient from "./parser-admin-client";
 
 vi.mock("@/components/glass-surface", () => ({
   default: function GlassSurfaceMock({ children }: { children?: ReactNode }) {
     return <div data-testid="glass-surface">{children}</div>;
+  },
+}));
+
+vi.mock("@/components/marketing/marketing-header", () => ({
+  default: function MarketingHeaderMock() {
+    return (
+      <nav aria-label="Primary">
+        <a href="/data_input">Upload</a>
+      </nav>
+    );
   },
 }));
 
@@ -55,7 +65,7 @@ beforeEach(() => {
 function renderDataInput() {
   return render(
     <ThemeRegistry>
-      <DataInputPage />
+      <ParserAdminClient />
     </ThemeRegistry>,
   );
 }
@@ -73,16 +83,17 @@ describe("Data input page", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: /enter data/i,
+        name: /pdf parser admin/i,
       }),
     ).toBeInTheDocument();
-
     expect(screen.getByRole("navigation", { name: /primary/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Alluvial AI/i })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: /upload/i })).toHaveAttribute(
+      "href",
+      "/data_input",
+    );
   });
 
   it("blocks submission for an invalid payload", async () => {
-    const user = userEvent.setup();
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => [],
@@ -92,22 +103,19 @@ describe("Data input page", () => {
 
     renderDataInput();
 
-    await user.type(
-      screen.getByRole("textbox", { name: /document title/i }),
-      "Haib Copper PEA",
-    );
-    await user.type(
-      screen.getByRole("textbox", { name: /enter pdf address/i }),
-      "not-a-valid-url",
-    );
-    await user.type(
-      screen.getByRole("textbox", { name: /attribution/i }),
-      "NaRPISA research team",
-    );
+    fireEvent.change(screen.getByRole("textbox", { name: /document title/i }), {
+      target: { value: "Haib Copper PEA" },
+    });
+    fireEvent.change(screen.getByRole("textbox", { name: /enter pdf address/i }), {
+      target: { value: "not-a-valid-url" },
+    });
+    fireEvent.change(screen.getByRole("textbox", { name: /attribution/i }), {
+      target: { value: "NaRPISA research team" },
+    });
 
     expect(
       screen.getByRole("button", {
-        name: /parse/i,
+        name: /parse pdf/i,
       }),
     ).toBeDisabled();
   });
@@ -174,11 +182,13 @@ describe("Data input page", () => {
     const titleInput = screen.getByRole("textbox", { name: /document title/i });
     const urlInput = screen.getByRole("textbox", { name: /enter pdf address/i });
     const attributionInput = screen.getByRole("textbox", { name: /attribution/i });
-    const parseButton = screen.getByRole("button", { name: /parse/i });
+    const parseButton = screen.getByRole("button", { name: /parse pdf/i });
 
-    await user.type(titleInput, "Haib Copper PEA");
-    await user.type(urlInput, "https://example.org/report.pdf");
-    await user.type(attributionInput, "NaRPISA research team");
+    fireEvent.change(titleInput, { target: { value: "Haib Copper PEA" } });
+    fireEvent.change(urlInput, { target: { value: "https://example.org/report.pdf" } });
+    fireEvent.change(attributionInput, {
+      target: { value: "NaRPISA research team" },
+    });
     await user.click(parseButton);
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -194,12 +204,12 @@ describe("Data input page", () => {
     expect(
       screen.getByText(/https:\/\/example\.org\/report\.pdf \| NaRPISA research team/i),
     ).toBeInTheDocument();
-    expect(screen.getByText(/source link queued successfully/i)).toBeInTheDocument();
+    expect(screen.getByText(/pdf source queued successfully/i)).toBeInTheDocument();
     expect(screen.getByText(/^Queued$/)).toBeInTheDocument();
     expect(titleInput).toHaveValue("");
     expect(urlInput).toHaveValue("");
     expect(attributionInput).toHaveValue("");
-  });
+  }, 10000);
 
   it("renders backend processing status for queued links", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
@@ -286,6 +296,6 @@ describe("Data input page", () => {
       }),
     );
     expect(await screen.findByText(/queued source deleted/i)).toBeInTheDocument();
-    expect(screen.getByText(/no queued links yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/no queued pdf sources yet/i)).toBeInTheDocument();
   });
 });

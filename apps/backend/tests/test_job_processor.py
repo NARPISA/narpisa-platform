@@ -5,11 +5,10 @@ import pytest
 from app.core.config import Settings
 from app.data.pdf.models import ParsedDocument, QueuedSourceDocument, SourceParseRequest
 from app.data.pdf.services import (
-    FetchResult,
     JobStore,
-    PdfParser,
     QueuedDocumentProcessor,
 )
+from app.data.services import FetchResult
 
 
 @pytest.mark.asyncio
@@ -58,12 +57,23 @@ async def test_job_processor_updates_status_and_cleans_up_download(
         content_hash: str,
         page_count: int,
         source_http_status: int,
+        extracted_excerpt: str | None = None,
     ) -> None:
         assert job_id == queued_job.id
         assert content_hash == "b" * 64
         assert page_count == 1
         assert source_http_status == 200
+        assert extracted_excerpt == ""
         status_updates.append("completed")
+
+    async def fake_persist_parsed_document(
+        self: JobStore,
+        job_id: str,
+        parsed_document: ParsedDocument,
+    ) -> int:
+        assert job_id == queued_job.id
+        assert parsed_document.content_hash == "b" * 64
+        return 1
 
     async def fake_fetch_data_source(
         source_url: str,
@@ -82,8 +92,7 @@ async def test_job_processor_updates_status_and_cleans_up_download(
             source_status=200,
         )
 
-    def fake_parse(
-        self: PdfParser,
+    async def fake_parse(
         request: SourceParseRequest,
         fetch_result: FetchResult,
     ) -> ParsedDocument:
@@ -106,10 +115,15 @@ async def test_job_processor_updates_status_and_cleans_up_download(
     monkeypatch.setattr(JobStore, "mark_parsing", fake_mark_parsing)
     monkeypatch.setattr(JobStore, "mark_completed", fake_mark_completed)
     monkeypatch.setattr(
+        JobStore,
+        "persist_parsed_document",
+        fake_persist_parsed_document,
+    )
+    monkeypatch.setattr(
         "app.data.pdf.services.fetch_data_source",
         fake_fetch_data_source,
     )
-    monkeypatch.setattr(PdfParser, "parse", fake_parse)
+    monkeypatch.setattr("app.data.pdf.services.parse_pdf", fake_parse)
 
     processor = QueuedDocumentProcessor()
     await processor.process(queued_job.id)
@@ -161,11 +175,22 @@ async def test_job_processor_keeps_download_when_debug_flag_is_enabled(
         content_hash: str,
         page_count: int,
         source_http_status: int,
+        extracted_excerpt: str | None = None,
     ) -> None:
         assert job_id == queued_job.id
         assert content_hash == "b" * 64
         assert page_count == 1
         assert source_http_status == 200
+        assert extracted_excerpt == ""
+
+    async def fake_persist_parsed_document(
+        self: JobStore,
+        job_id: str,
+        parsed_document: ParsedDocument,
+    ) -> int:
+        assert job_id == queued_job.id
+        assert parsed_document.content_hash == "b" * 64
+        return 1
 
     async def fake_fetch_data_source(
         source_url: str,
@@ -184,8 +209,7 @@ async def test_job_processor_keeps_download_when_debug_flag_is_enabled(
             source_status=200,
         )
 
-    def fake_parse(
-        self: PdfParser,
+    async def fake_parse(
         request: SourceParseRequest,
         fetch_result: FetchResult,
     ) -> ParsedDocument:
@@ -208,10 +232,15 @@ async def test_job_processor_keeps_download_when_debug_flag_is_enabled(
     monkeypatch.setattr(JobStore, "mark_parsing", fake_mark_parsing)
     monkeypatch.setattr(JobStore, "mark_completed", fake_mark_completed)
     monkeypatch.setattr(
+        JobStore,
+        "persist_parsed_document",
+        fake_persist_parsed_document,
+    )
+    monkeypatch.setattr(
         "app.data.pdf.services.fetch_data_source",
         fake_fetch_data_source,
     )
-    monkeypatch.setattr(PdfParser, "parse", fake_parse)
+    monkeypatch.setattr("app.data.pdf.services.parse_pdf", fake_parse)
 
     processor = QueuedDocumentProcessor()
     await processor.process(queued_job.id)
