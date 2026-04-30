@@ -18,8 +18,7 @@ dependencies = [
   "dbfread",
   "supabase>=2.28.3",
   "supabase-auth>=2.28.2",
-  "sqlalchemy",
-  "sqlmodel"
+  "google-genai"
 ]
 
 [project.optional-dependencies]

@@ -53,6 +53,7 @@ class Settings(BaseSettings):
         default="test-service-role-key", validation_alias="SUPABASE_SERVICE_ROLE_KEY"
     )
     supabase_schema: str = Field(default="public", validation_alias="SUPABASE_SCHEMA")
+    gemini_api_key : str = Field(default="test-gemini-api-key", validation_alias="GEMINI_API_KEY")
 
     model_config = SettingsConfigDict(
         env_prefix="PDF_WORKER_",

@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, date
-from json
+from enum import StrEnum
 from pathlib import Path
 from typing import Any, cast
 from urllib.parse import urlparse
 
 import httpx
 from fastapi import HTTPException
-from pydantic import BaseModel, create_model
-from pypdf import PdfReader
+from google import genai
+from google.genai import types
+from pydantic import BaseModel, Field, TypeAdapter, create_model
+import pypdf
 
 from app.core.config import Settings, get_settings
 from app.core.database import engine
@@ -17,14 +19,54 @@ from app.data.pdf.models import ParsedDocument, QueuedSourceDocument, SourcePars
 from app.data.services import FetchResult, fetch_data_source
 
 
-async def build_model(
+type JSONValue = str | int | float | bool | None | list["JSONValue"] | dict[str, "JSONValue"]
+
+
+def _dynamic_strenum(enum_name: str, values: list[str]) -> type[StrEnum]:
+    """Build a dedicated StrEnum subclass so JSON validation has a real enum type.
+
+    Annotating fields with the base StrEnum and mutating it with setattr breaks
+    Pydantic v2 JSON mode (needs_python_object). Each field gets its own enum type.
+    """
+    if not values:
+        raise ValueError(f"Cannot build enum {enum_name!r}: no allowed values.")
+    members: dict[str, str] = {}
+    seen_keys: set[str] = set()
+    for raw in values:
+        stem = "".join(ch if ch.isalnum() else "_" for ch in raw).strip("_").upper()
+        if not stem:
+            stem = "MEMBER"
+        if stem[0].isdigit():
+            stem = f"V_{stem}"
+        key = stem[:120]
+        suffix = 0
+        while key in seen_keys:
+            suffix += 1
+            key = f"{stem}_{suffix}"[:120]
+        seen_keys.add(key)
+        members[key] = raw
+    return StrEnum(enum_name, members)
+
+
+def build_model(
+    model_name : str,
     field_keys: list[str],
     labels : list[str],
     data_types : list[str],
-    table_targets : list[str]
+    enum_options : list[list[str]]
 ) -> type[BaseModel]:
     model_dict = {}
-    for field_key, label, data_type, table_target in field_keys, labels, data_types, table_targets:
+    for (
+        field_key,
+        label,
+        data_type,
+        enum_option
+    ) in zip(
+        field_keys,
+        labels,
+        data_types,
+        enum_options
+    ):
         model_field_type = None
         match data_type:
             case "text":
@@ -38,50 +80,197 @@ async def build_model(
             case "date":
                 model_field_type = date
             case "json":
-                
+                model_field_type = JSONValue
             case "enum":
+                enum_name = f"{model_name}_{field_key}_Enum"
+                model_field_type = _dynamic_strenum(enum_name, enum_option)
             case "foreign_key":
+                # Only works for countries table for now :|
+                response = engine.table("countries").select("name").execute()
+                enum_name = f"{model_name}_{field_key}_CountryEnum"
+                names = [str(row["name"]) for row in response.data]
+                model_field_type = _dynamic_strenum(enum_name, names)
+        model_dict[field_key] = (model_field_type | None, Field(description=label))
+    return create_model(model_name, **model_dict)
 
 
-async def get_site_fields():
+def fetch_fields(table_target : str) -> dict:
     response = (engine.table("site_data_fields")
         .select(
             "field_key",
             "label",
             "data_type",
-            "table_target"
+            "table_target",
+            "enum_options"
         )
-        .eq("table_target", "sites")
+        .eq("table_target", table_target)
         .execute()
     )
-    data = {k : [d[k] for d in response.data] for k in response.data[0]}
-    
+    data = (
+        {k : [d[k] for d in response.data] for k in response.data[0]} if len(response.data) != 0 
+        else {"field_key": [], "label": [], "data_type": [], "enum_options": []}
+    )
+    return data
 
 
 async def parse_pdf(request : SourceParseRequest, fetch_result : FetchResult) -> ParsedDocument:
-    pass
+    settings = get_settings()
 
+    reader = pypdf.PdfReader(fetch_result.path)
+    page_count = len(reader.pages)
 
-class PdfParser:
-    def parse(
-        self,
-        request: SourceParseRequest,
-        fetch_result: FetchResult,
-    ) -> ParsedDocument:
-        reader = PdfReader(str(fetch_result.path))
-        extracted_text = ""
-        excerpt = ""
+    client = genai.Client(api_key=settings.gemini_api_key)
+    pdf_file = client.files.upload(file=fetch_result.path)
 
-        return ParsedDocument(
-            title=request.title,
-            source_url=request.source_url,
-            source_domain=fetch_result.source_domain,
-            attribution=request.attribution,
-            content_hash=fetch_result.hash,
-            page_count=len(reader.pages),
-            extracted_text=extracted_text,
-            extracted_excerpt=excerpt,
-        )
+    data = fetch_fields("sites")
+    site_model = build_model(
+        "Site",
+        data["field_key"],
+        data["label"],
+        data["data_type"],
+        data["enum_options"]
+    )
+    
+    response = client.models.generate_content(
+        model="gemini-3.1-flash-lite-preview",
+        contents=[
+            "Extract a list of sites from the document.",
+            pdf_file
+        ],
+        config={
+            "response_mime_type": "application/json",
+            "response_json_schema": TypeAdapter(list[site_model]).json_schema()
+        }
+    )
+    site_result = TypeAdapter(list[site_model]).validate_json(response.text)
+
+    data = fetch_fields("site_data")
+    site_data_model = build_model(
+        "SiteData",
+        data["field_key"],
+        data["label"],
+        data["data_type"],
+        data["enum_options"]
+    )
+
+    response = client.models.generate_content(
+        model="gemini-3.1-flash-lite-preview",
+        contents=[
+            "Extract a list of site_data from the document.",
+            pdf_file
+        ],
+        config={
+            "response_mime_type": "application/json",
+            "response_json_schema": TypeAdapter(list[site_data_model]).json_schema()
+        }
+    )
+    site_data_result = TypeAdapter(list[site_data_model]).validate_json(response.text)
+
+    data = fetch_fields("underground_sites")
+    underground_site_model = build_model(
+        "UndergroundSite",
+        data["field_key"],
+        data["label"],
+        data["data_type"],
+        data["enum_options"]
+    )
+
+    response = client.models.generate_content(
+        model="gemini-3.1-flash-lite-preview",
+        contents=[
+            "Extract a list of underground_sites from the document.",
+            pdf_file
+        ],
+        config={
+            "response_mime_type": "application/json",
+            "response_json_schema": TypeAdapter(list[underground_site_model]).json_schema()
+        }
+    )
+    underground_site_result = TypeAdapter(list[underground_site_model]).validate_json(response.text)
+
+    data = fetch_fields("open_air_sites")
+    open_air_site_model = build_model(
+        "OpenAirSite",
+        data["field_key"],
+        data["label"],
+        data["data_type"],
+        data["enum_options"]
+    )
+
+    response = client.models.generate_content(
+        model="gemini-3.1-flash-lite-preview",
+        contents=[
+            "Extract a list of open_air_sites from the document.",
+            pdf_file
+        ],
+        config={
+            "response_mime_type": "application/json",
+            "response_json_schema": TypeAdapter(list[open_air_site_model]).json_schema()
+        }
+    )
+    open_air_site_result = TypeAdapter(list[open_air_site_model]).validate_json(response.text)
+
+    data = fetch_fields("site_water_metrics")
+    site_water_metric_model = build_model(
+        "SiteWaterMetric",
+        data["field_key"],
+        data["label"],
+        data["data_type"],
+        data["enum_options"]
+    )
+
+    response = client.models.generate_content(
+        model="gemini-3.1-flash-lite-preview",
+        contents=[
+            "Extract a list of site_water_metrics from the document.",
+            pdf_file
+        ],
+        config={
+            "response_mime_type": "application/json",
+            "response_json_schema": TypeAdapter(list[site_water_metric_model]).json_schema()
+        }
+    )
+    site_water_metric_result = TypeAdapter(list[site_water_metric_model]).validate_json(response.text)
+
+    data = fetch_fields("site_commodity_metrics")
+    site_commodity_metric_model = build_model(
+        "SiteCommodityMetric",
+        data["field_key"],
+        data["label"],
+        data["data_type"],
+        data["enum_options"]
+    )
+
+    response = client.models.generate_content(
+        model="gemini-3.1-flash-lite-preview",
+        contents=[
+            "Extract a list of site_commodity_metrics from the document.",
+            pdf_file
+        ],
+        config={
+            "response_mime_type": "application/json",
+            "response_json_schema": TypeAdapter(list[site_commodity_metric_model]).json_schema()
+        }
+    )
+    site_commodity_metric_result = TypeAdapter(list[site_commodity_metric_model]).validate_json(response.text)
+    
+    print(site_result)
+    print(site_data_result)
+    print(underground_site_result)
+    print(open_air_site_result)
+    print(site_water_metric_result)
+    print(site_commodity_metric_result)
+
+    return ParsedDocument(
+        title=request.title,
+        source_url=request.source_url,
+        source_domain=fetch_result.source_domain,
+        attribution=request.attribution,
+        content_hash=fetch_result.hash,
+        page_count=page_count,
+        extracted_text=response.text,
+        extracted_excerpt=response.text
+    )
 
 
 class JobStore:
@@ -272,6 +461,7 @@ class JobStore:
         error_message: str,
         source_http_status: int | None = None,
     ) -> None:
+        print(f"Job failed: {error_message}, {source_http_status}")
         now = datetime.now(UTC).isoformat()
         job = await self.get_job(job_id)
         if job is None:
@@ -339,7 +529,7 @@ class JobStore:
     ) -> QueuedSourceDocument:
         return QueuedSourceDocument(
             id=job_row["id"],
-            document_id=document_row["id"],
+            document_id=str(document_row["id"]),
             title=document_row["title"],
             source_url=document_row["source_url"],
             source_domain=document_row["source_domain"],
@@ -406,7 +596,6 @@ class QueuedDocumentProcessor:
             return
 
         download_path = settings.download_directory / f"{queued_job.id}.pdf"
-        parser = PdfParser()
 
         try:
             await job_store.mark_fetching(job_id)
@@ -424,9 +613,9 @@ class QueuedDocumentProcessor:
                 source_http_status=fetch_result.source_status,
             )
 
-            parsed_document = parser.parse(
+            parsed_document = await parse_pdf(
                 self._build_parse_request(queued_job),
-                fetch_result,
+                fetch_result
             )
 
             await job_store.mark_completed(
