@@ -9,7 +9,7 @@ import {
 describe("toolpad-oauth", () => {
   it("maps supported Toolpad ids to Supabase providers", () => {
     expect(toolpadOAuthIdToSupabase("google")).toBe("google");
-    expect(toolpadOAuthIdToSupabase("linkedin")).toBe("linkedin");
+    expect(toolpadOAuthIdToSupabase("linkedin")).toBe("linkedin_oidc");
   });
 
   it("returns null for unsupported ids", () => {

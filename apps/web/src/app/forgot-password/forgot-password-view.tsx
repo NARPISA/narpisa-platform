@@ -129,7 +129,11 @@ export default function ForgotPasswordView() {
               {error ? (
                 <Alert
                   severity="error"
-                  sx={{ width: "100%", maxWidth: "40rem" }}
+                  sx={{
+                    width: "100%",
+                    maxWidth: "40rem",
+                    "& .MuiAlert-message": { fontSize: "0.9rem" },
+                  }}
                 >
                   {error}
                 </Alert>
@@ -137,7 +141,11 @@ export default function ForgotPasswordView() {
               {message ? (
                 <Alert
                   severity="info"
-                  sx={{ width: "100%", maxWidth: "40rem" }}
+                  sx={{
+                    width: "100%",
+                    maxWidth: "40rem",
+                    "& .MuiAlert-message": { fontSize: "0.9rem" },
+                  }}
                 >
                   {message}
                 </Alert>

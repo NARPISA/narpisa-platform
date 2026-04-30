@@ -109,8 +109,8 @@ export const authPrimaryButtonSx = {
 
 export const authHeroButtonSx = {
   ...authPrimaryButtonSx,
-  typography: "authAction",
-  fontWeight: 400,
+  typography: "authBody",
+  fontWeight: 600,
 } satisfies SxProps<Theme>;
 
 export const authSecondaryButtonSx = {

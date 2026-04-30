@@ -13,6 +13,7 @@ import { createClient } from "@/lib/supabase/client";
 
 const NAV_ITEMS = [
   { href: "/profile", label: "Profile", prefixMatch: false },
+  { href: "/network", label: "Network", prefixMatch: true },
   { href: "/profile/password", label: "Security", prefixMatch: true },
   { href: "/profile/users", label: "Users", prefixMatch: true },
 ] as const;

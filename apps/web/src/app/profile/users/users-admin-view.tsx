@@ -158,19 +158,28 @@ export default function UsersAdminView({
       </Backdrop>
       <Stack spacing={2.5}>
       {errorMessage ? (
-        <Alert severity="error" sx={{ "& .MuiAlert-message": { ...bodySx } }}>
+        <Alert
+          severity="error"
+          sx={{ "& .MuiAlert-message": { ...bodySx, fontSize: "0.9rem" } }}
+        >
           {errorMessage}
         </Alert>
       ) : null}
 
       {!isAdmin ? (
-        <Alert severity="info" sx={{ "& .MuiAlert-message": { ...bodySx } }}>
+        <Alert
+          severity="info"
+          sx={{ "& .MuiAlert-message": { ...bodySx, fontSize: "0.9rem" } }}
+        >
           Only administrators can edit tiers or profile names. You can still browse registered users.
         </Alert>
       ) : null}
 
       {banner ? (
-        <Alert severity={banner.severity} sx={{ "& .MuiAlert-message": { ...bodySx } }}>
+        <Alert
+          severity={banner.severity}
+          sx={{ "& .MuiAlert-message": { ...bodySx, fontSize: "0.9rem" } }}
+        >
           {banner.message}
         </Alert>
       ) : null}
