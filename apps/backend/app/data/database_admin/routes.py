@@ -2,7 +2,6 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.core.config import Settings, get_settings
 from app.core.database import engine
 from app.data.database_admin.models import (
     AddColumnRequest,
@@ -22,8 +21,7 @@ router = APIRouter(prefix="/database/admin", tags=["database-admin"])
 
 @router.post("/columns")
 async def add_column(
-    payload: AddColumnRequest,
-    user: Annotated[AdminUser, Depends(require_admin_user)]
+    payload: AddColumnRequest, user: Annotated[AdminUser, Depends(require_admin_user)]
 ) -> dict[str, Any]:
     category = category_by_label(payload.category)
     if not category.get("can_add_columns"):
@@ -46,7 +44,8 @@ async def add_column(
 
 @router.patch("/columns/visibility")
 async def set_column_visibility(
-    payload: ColumnVisibilityRequest
+    payload: ColumnVisibilityRequest,
+    _user: Annotated[AdminUser, Depends(require_admin_user)],
 ) -> dict[str, bool]:
     category = category_by_label(payload.category)
     registry_table = category.get("field_registry_table")
@@ -64,8 +63,7 @@ async def set_column_visibility(
 
 @router.patch("/rows", response_model=SaveRowsResponse)
 async def save_rows(
-    payload: SaveRowsRequest,
-    user: Annotated[AdminUser, Depends(require_admin_user)]
+    payload: SaveRowsRequest, user: Annotated[AdminUser, Depends(require_admin_user)]
 ) -> SaveRowsResponse:
     saved, failed = save_database_changes(payload.changes, user)
     return SaveRowsResponse(saved=saved, failed=failed)

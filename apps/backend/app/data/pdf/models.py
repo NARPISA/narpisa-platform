@@ -26,13 +26,33 @@ class ParsedDocument(BaseModel):
     extracted_excerpt: str
     status: ProcessingStatus = "completed"
     extracted_at: datetime = datetime.now(UTC)
-    # Payloads aligned with site_data_fields.table_target; JSON-ready for downstream DB writes.
+    # Payloads aligned with site_data_fields.table_target for downstream DB writes.
     sites_rows: list[dict[str, Any]] = Field(default_factory=list)
     site_data_rows: list[dict[str, Any]] = Field(default_factory=list)
     underground_sites_rows: list[dict[str, Any]] = Field(default_factory=list)
     open_air_sites_rows: list[dict[str, Any]] = Field(default_factory=list)
     site_water_metrics_rows: list[dict[str, Any]] = Field(default_factory=list)
     site_commodity_metrics_rows: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class ParsedRecord(BaseModel):
+    id: str
+    document_id: int
+    job_id: str | None = None
+    record_type: str
+    payload: dict[str, Any]
+    created_at: datetime | None = None
+
+
+class ParsedJobDetail(BaseModel):
+    job: "QueuedSourceDocument"
+    records: list[ParsedRecord] = Field(default_factory=list)
+
+
+class ParserCommitResponse(BaseModel):
+    job_id: str
+    records_committed: int = 0
+    facts_accepted: int = 0
 
 
 class QueuedSourceDocument(BaseModel):

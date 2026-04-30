@@ -30,7 +30,7 @@ export const createSourceDocumentInputSchema = z.object({
 
 export const queuedSourceDocumentSchema = z.object({
   id: z.string().uuid(),
-  documentId: z.string().uuid(),
+  documentId: z.union([z.string(), z.number().int()]),
   title: z.string(),
   sourceUrl: z.url(),
   sourceDomain: z.string(),
@@ -48,9 +48,32 @@ export const queuedSourceDocumentSchema = z.object({
   updatedAt: z.string().nullable(),
 });
 
+export const parsedRecordSchema = z.object({
+  id: z.string().uuid(),
+  documentId: z.number().int(),
+  jobId: z.string().uuid().nullable(),
+  recordType: z.string(),
+  payload: z.record(z.string(), z.unknown()),
+  createdAt: z.string().nullable(),
+});
+
+export const parsedJobDetailSchema = z.object({
+  job: queuedSourceDocumentSchema,
+  records: parsedRecordSchema.array(),
+});
+
+export const parserCommitResponseSchema = z.object({
+  jobId: z.string().uuid(),
+  recordsCommitted: z.number().int(),
+  factsAccepted: z.number().int(),
+});
+
 export type ProcessingJobStatus = z.infer<typeof processingJobStatusSchema>;
 export type SourceDocument = z.infer<typeof sourceDocumentSchema>;
 export type CreateSourceDocumentInput = z.infer<
   typeof createSourceDocumentInputSchema
 >;
 export type QueuedSourceDocument = z.infer<typeof queuedSourceDocumentSchema>;
+export type ParsedRecord = z.infer<typeof parsedRecordSchema>;
+export type ParsedJobDetail = z.infer<typeof parsedJobDetailSchema>;
+export type ParserCommitResponse = z.infer<typeof parserCommitResponseSchema>;

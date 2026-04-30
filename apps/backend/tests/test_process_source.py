@@ -2,6 +2,7 @@ from pathlib import Path
 
 from httpx import ASGITransport, AsyncClient
 
+from app.data.pdf.models import ParsedDocument, SourceParseRequest
 from app.data.services import FetchResult
 from app.main import app
 
@@ -31,6 +32,24 @@ async def test_process_source_returns_parsed_metadata(
         fake_fetch_data_source,
     )
 
+    async def fake_parse_pdf(
+        request: SourceParseRequest,
+        fetch_result: FetchResult,
+    ) -> ParsedDocument:
+        return ParsedDocument(
+            title=request.title,
+            source_url=request.source_url,
+            source_domain=fetch_result.source_domain,
+            attribution=request.attribution,
+            content_hash=fetch_result.hash,
+            page_count=1,
+            extracted_text="[]",
+            extracted_excerpt="[]",
+            sites_rows=[{"mine": "Sample Mine"}],
+        )
+
+    monkeypatch.setattr("app.data.pdf.routes.parse_pdf", fake_parse_pdf)
+
     payload = {
         "title": "Sample Source",
         "source_url": "https://documents.example.org/sample.pdf",
@@ -50,3 +69,4 @@ async def test_process_source_returns_parsed_metadata(
     assert body["status"] == "completed"
     assert body["page_count"] == 1
     assert len(body["content_hash"]) == 64
+    assert body["sites_rows"] == [{"mine": "Sample Mine"}]

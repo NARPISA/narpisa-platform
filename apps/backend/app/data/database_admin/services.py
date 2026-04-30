@@ -4,8 +4,8 @@ from fastapi import Depends, Header, HTTPException, status
 from postgrest.exceptions import APIError
 from supabase_auth.errors import AuthApiError
 
-from app.core.database import engine
 from app.core.config import Settings, get_settings
+from app.core.database import engine
 from app.data.database_admin.models import AdminUser, DirtyCellChange, SaveFailure
 
 
@@ -185,7 +185,7 @@ def coerce_field_value(
     value: Any,
 ) -> Any:
     if mapping.get("data_type") == "foreign_key":
-        return resolve_relation_value(engine, mapping, value)
+        return resolve_relation_value(mapping, value)
     return coerce_value(value, str(mapping["data_type"]))
 
 
@@ -219,13 +219,13 @@ def save_registered_field_change(
     change: DirtyCellChange,
     user: AdminUser,
 ) -> None:
-    mapping = field_mapping(engine, category, change.field)
+    mapping = field_mapping(category, change.field)
     table_name = str(mapping["table_target"])
     column_name = str(mapping["column_name"])
     key_column = str(
         mapping.get("row_key_column") or category.get("row_key_column") or "id"
     )
-    value = coerce_field_value(engine, mapping, change.value)
+    value = coerce_field_value(mapping, change.value)
 
     previous = (
         engine.table(table_name)
@@ -246,7 +246,7 @@ def save_registered_field_change(
             key_column, change.row_id
         ).execute()
 
-    write_audit(engine, change, user, table_name, old_value)
+    write_audit(change, user, table_name, old_value)
 
 
 def save_metric_change(
@@ -291,7 +291,7 @@ def save_metric_change(
             }
         ).eq("id", fact_id).execute()
 
-    write_audit(engine, change, user, str(table_name), old_value)
+    write_audit(change, user, str(table_name), old_value)
 
 
 def save_database_change(
@@ -300,16 +300,16 @@ def save_database_change(
     user: AdminUser,
 ) -> None:
     if category.get("field_registry_table"):
-        save_registered_field_change(engine, category, change, user)
+        save_registered_field_change(category, change, user)
     else:
-        save_metric_change(engine, category, change, user)
+        save_metric_change(category, change, user)
 
 
 def save_database_changes(
     changes: list[DirtyCellChange],
     user: AdminUser,
 ) -> tuple[int, list[SaveFailure]]:
-    categories = editable_categories(engine)
+    categories = editable_categories()
     saved = 0
     failed: list[SaveFailure] = []
 
@@ -318,7 +318,7 @@ def save_database_changes(
             category = categories.get(change.category)
             if category is None:
                 raise ValueError("This category is not editable.")
-            save_database_change(engine, category, change, user)
+            save_database_change(category, change, user)
             saved += 1
         except (APIError, ValueError) as exc:
             failed.append(
