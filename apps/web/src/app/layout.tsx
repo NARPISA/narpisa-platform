@@ -21,6 +21,11 @@ export const metadata: Metadata = {
   title: "Alluvial AI, a NaRPISA Platform",
   description:
     "Source-led intelligence platform for mineral value addition, document parsing, and trading workflows.",
+  icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
 };
 
 export default function RootLayout({

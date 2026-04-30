@@ -15,6 +15,25 @@ type ExtendedColorScale = {
   700: string;
 };
 
+type HomePalette = {
+  heroOverlay: string;
+  heroTint: string;
+  heroGradient: string;
+  featuresSectionBg: string;
+  featuresSectionBorder: string;
+  featuresCardBg: string;
+  featuresCardSubtle: string;
+  investorsSectionBg: string;
+  investorsHeading: string;
+  investorsBody: string;
+  investorsTileBg: string;
+  investorsTileBorder: string;
+  investorsBannerBg: string;
+  investorsBannerBorder: string;
+  glassButtonBg: string;
+  glassButtonBorder: string;
+};
+
 declare module "@mui/material/styles" {
   interface TypeBackground {
     100: string;
@@ -29,10 +48,12 @@ declare module "@mui/material/styles" {
 
   interface Palette {
     tertiary: ExtendedColorScale;
+    home: HomePalette;
   }
 
   interface PaletteOptions {
     tertiary?: ExtendedColorScale;
+    home?: HomePalette;
   }
 
   interface TypographyVariants {
@@ -97,6 +118,25 @@ const theme = createTheme({
       500: "#4560c8",
       600: "#3248af",
       700: "#1C3092",
+    },
+    home: {
+      heroOverlay: "rgba(28, 48, 146, 0.12)",
+      heroTint: "rgba(83,132,180,0.14)",
+      heroGradient:
+        "linear-gradient(90deg, rgba(28, 48, 146, 0.12) 0%, rgba(28, 48, 146, 0.08) 42%, rgba(28, 48, 146, 0.04) 100%)",
+      featuresSectionBg: "rgba(23,36,56,0.88)",
+      featuresSectionBorder: "rgba(255,255,255,0.14)",
+      featuresCardBg: "rgba(95,104,122,0.58)",
+      featuresCardSubtle: "rgba(255,255,255,0.92)",
+      investorsSectionBg: "#f4f4f6",
+      investorsHeading: "rgba(15,18,28,0.95)",
+      investorsBody: "rgba(30,35,45,0.9)",
+      investorsTileBg: "#e4e4e7",
+      investorsTileBorder: "rgba(33,43,56,0.08)",
+      investorsBannerBg: "rgba(33,41,56,0.78)",
+      investorsBannerBorder: "rgba(255,255,255,0.16)",
+      glassButtonBg: "rgba(99, 57, 24, 0.56)",
+      glassButtonBorder: "rgba(255,255,255,0.12)",
     },
     background: {
       default: "#F6F6F6",

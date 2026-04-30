@@ -77,14 +77,17 @@ describe("Home page", () => {
   it("keeps the primary calls to action wired correctly", () => {
     renderHome();
 
-    expect(screen.getByRole("link", { name: /get started/i })).toHaveAttribute(
-      "href",
-      "/signin",
-    );
-    expect(screen.getByRole("link", { name: /view databases/i })).toHaveAttribute(
-      "href",
-      "/database",
-    );
+    const getStarted = screen.getAllByRole("link", { name: /get started/i });
+    expect(getStarted.length).toBeGreaterThan(0);
+    for (const link of getStarted) {
+      expect(link).toHaveAttribute("href", "/signup");
+    }
+
+    const viewDatabases = screen.getAllByRole("link", { name: /view databases/i });
+    expect(viewDatabases.length).toBeGreaterThan(0);
+    for (const link of viewDatabases) {
+      expect(link).toHaveAttribute("href", "/database");
+    }
   });
 
   it("shows the three promoted feature routes", () => {

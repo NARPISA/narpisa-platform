@@ -27,6 +27,7 @@ type MarketingNavLink = {
 const NAV_LINKS: MarketingNavLink[] = [
   { label: "Database", href: "/database" },
   { label: "Map", href: "/map" },
+  { label: "Pricing", href: "/pricing" },
   { label: "About", href: "/about" },
   { label: "Login", href: "/signin" },
 ];
@@ -96,9 +97,10 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
   const pathname = usePathname() ?? "";
   const session = useSession();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const profileLabel = session?.user ? getProfileLabel(session.user) : "Profile";
 
-  const textColor = transparent ? "common.white" : "text.primary";
-  const profileLabel = session?.user ? getProfileLabel(session.user) : null;
+  const textColor = transparent ? "var(--marketing-header-fg, #ffffff)" : "text.primary";
+  const transparentBorderColor = "var(--marketing-header-border, rgba(255,255,255,0.18))";
 
   return (
     <>
@@ -194,7 +196,7 @@ export default function MarketingHeader({ transparent = false }: MarketingHeader
               display: { xs: "inline-flex", md: "none" },
               color: textColor,
               border: "1px solid",
-              borderColor: transparent ? "rgba(255,255,255,0.18)" : "rgba(83,132,180,0.18)",
+              borderColor: transparent ? transparentBorderColor : "rgba(83,132,180,0.18)",
             }}
           >
             <MenuRoundedIcon />
