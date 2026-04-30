@@ -8,6 +8,7 @@ import ThemeRegistry from "@/components/theme-registry";
 import ToolpadProviders from "@/components/toolpad-providers";
 
 import "./globals.css";
+import "maplibre-gl/dist/maplibre-gl.css";
 
 const manrope = Manrope({
   variable: "--font-manrope",

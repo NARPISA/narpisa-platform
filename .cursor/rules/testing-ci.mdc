@@ -11,3 +11,4 @@ alwaysApply: false
 - When contracts change, update both app tests and workflow expectations.
 - Do not weaken CI by skipping lint, typecheck, or test gates without explicit approval.
 - Document any new env vars or external services required by CI.
+- Use `npx supabase ...` for any supabase commands
