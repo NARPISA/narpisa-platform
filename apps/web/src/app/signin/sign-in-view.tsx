@@ -150,7 +150,7 @@ export default function SignInView() {
                     onClick={() => setIsSsoExpanded((value) => !value)}
                     sx={authHeroButtonSx}
                   >
-                    {isSsoExpanded ? "sign in with email" : "SSO"}
+                    {isSsoExpanded ? "Sign in with email" : "SSO"}
                   </Button>
                   <Collapse
                     in={isSsoExpanded}
