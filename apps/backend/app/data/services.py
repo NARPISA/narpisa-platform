@@ -24,13 +24,14 @@ async def fetch_data_source(
     timeout: int = 20,
     chunk_size: int = 1024 * 1024,
     max_size: int = 10 * 1024 * 1024,
+    verify_ssl: bool = True,
 ) -> FetchResult:
     source_url = str(source)
     request_timeout = Timeout(timeout)
     hasher = sha256()
     size = 0
     destination.parent.mkdir(parents=True, exist_ok=True)
-    async with AsyncClient(timeout=request_timeout) as local_client:
+    async with AsyncClient(timeout=request_timeout, verify=verify_ssl) as local_client:
         client = client or local_client
         try:
             async with client.stream("GET", source_url) as response:

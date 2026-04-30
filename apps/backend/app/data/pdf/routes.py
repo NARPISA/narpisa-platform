@@ -35,6 +35,7 @@ async def process_source(
         timeout=settings.fetch_timeout_seconds,
         chunk_size=settings.fetch_chunk_size_bytes,
         max_size=settings.fetch_max_bytes,
+        verify_ssl=settings.fetch_verify_ssl,
     )
     try:
         return await parse_pdf(payload, fetch_result)

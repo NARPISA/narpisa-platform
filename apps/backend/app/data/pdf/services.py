@@ -251,6 +251,26 @@ def _generate_rows(
     return _model_rows(parsed), raw_text
 
 
+def _generate_extraction(
+    client: Any,
+    *,
+    model_cls: type[BaseModel],
+    prompt: str,
+    pdf_file: Any,
+) -> tuple[BaseModel, str]:
+    response = client.models.generate_content(
+        model=PARSER_MODEL,
+        contents=[prompt, pdf_file],
+        config={
+            "response_mime_type": "application/json",
+            "response_json_schema": model_cls.model_json_schema(),
+        },
+    )
+    raw_text = response.text or "{}"
+    parsed = model_cls.model_validate_json(raw_text)
+    return parsed, raw_text
+
+
 async def parse_pdf(
     request: SourceParseRequest,
     fetch_result: FetchResult,
@@ -265,7 +285,7 @@ async def parse_pdf(
     pdf_file = client.files.upload(file=fetch_result.path)
 
     raw_outputs: list[str] = []
-    extracted_rows: dict[str, list[dict[str, Any]]] = {}
+    extraction_models: dict[str, type[BaseModel]] = {}
 
     for target, model_name in [
         ("sites", "Site"),
@@ -276,61 +296,82 @@ async def parse_pdf(
         data = fetch_fields(target)
         model_cls = build_model(
             model_name,
-            data["field_key"],
-            data["label"],
-            data["data_type"],
+        data["field_key"],
+        data["label"],
+        data["data_type"],
             data["enum_options"],
             include_site_name=target != "sites",
         )
-        rows, raw_text = _generate_rows(
-            client,
-            model_cls=model_cls,
-            prompt=(
-                f"Extract a list of {target} from the document. "
-                "Return only facts explicitly supported by the source. "
-                "For non-site rows include site_name so each row can be linked back "
-                "to the mine or project."
-            ),
-            pdf_file=pdf_file,
-        )
-        extracted_rows[target] = rows
-        raw_outputs.append(raw_text)
+        extraction_models[target] = model_cls
 
     water_model = build_metric_model(
         "SiteWaterMetric",
         fetch_metric_definitions("water"),
         commodity_scoped=False,
     )
-    rows, raw_text = _generate_rows(
-        client,
-        model_cls=water_model,
-        prompt=(
-            "Extract a list of site_water_metrics from the document. Each row must "
-            "include site_name, metric_key, yr, value_numeric, unit, and project_label "
-            "when available."
-        ),
-        pdf_file=pdf_file,
-    )
-    extracted_rows["site_water_metrics"] = rows
-    raw_outputs.append(raw_text)
+    extraction_models["site_water_metrics"] = water_model
 
     commodity_model = build_metric_model(
         "SiteCommodityMetric",
         fetch_metric_definitions("commodity"),
         commodity_scoped=True,
     )
-    rows, raw_text = _generate_rows(
+    extraction_models["site_commodity_metrics"] = commodity_model
+
+    extraction_model = create_model(
+        "PdfExtraction",
+        sites=(
+            list[extraction_models["sites"]],
+            Field(default_factory=list, description="Sites found in the document."),
+        ),
+        site_data=(
+            list[extraction_models["site_data"]],
+            Field(default_factory=list, description="General site data rows."),
+        ),
+        underground_sites=(
+            list[extraction_models["underground_sites"]],
+            Field(default_factory=list, description="Underground site rows."),
+        ),
+        open_air_sites=(
+            list[extraction_models["open_air_sites"]],
+            Field(default_factory=list, description="Open-air site rows."),
+        ),
+        site_water_metrics=(
+            list[extraction_models["site_water_metrics"]],
+            Field(default_factory=list, description="Water metric rows."),
+        ),
+        site_commodity_metrics=(
+            list[extraction_models["site_commodity_metrics"]],
+            Field(default_factory=list, description="Commodity metric rows."),
+        ),
+    )
+
+    extraction, raw_text = _generate_extraction(
         client,
-        model_cls=commodity_model,
+        model_cls=extraction_model,
         prompt=(
-            "Extract a list of site_commodity_metrics from the document. Each row "
-            "must include site_name, commodity_name when available, metric_key, yr, "
-            "value_numeric, unit, and project_label when available."
+            "Extract all supported mining data from this PDF in one pass. "
+            "Return one JSON object with these array keys: sites, site_data, "
+            "underground_sites, open_air_sites, site_water_metrics, and "
+            "site_commodity_metrics. Return only facts explicitly supported by the "
+            "source. For every non-site row, include site_name so rows can be linked "
+            "back to a mine or project. For water metrics include site_name, "
+            "metric_key, yr, value_numeric, unit, and project_label when available. "
+            "For commodity metrics include site_name, commodity_name when available, "
+            "metric_key, yr, value_numeric, unit, and project_label when available. "
+            "Use empty arrays for categories with no supported rows."
         ),
         pdf_file=pdf_file,
     )
-    extracted_rows["site_commodity_metrics"] = rows
     raw_outputs.append(raw_text)
+    extracted_rows = {
+        "sites": _model_rows(extraction.sites),
+        "site_data": _model_rows(extraction.site_data),
+        "underground_sites": _model_rows(extraction.underground_sites),
+        "open_air_sites": _model_rows(extraction.open_air_sites),
+        "site_water_metrics": _model_rows(extraction.site_water_metrics),
+        "site_commodity_metrics": _model_rows(extraction.site_commodity_metrics),
+    }
 
     extracted_text = "\n\n".join(raw_outputs)
     excerpt = extracted_text[:2000]
@@ -1136,6 +1177,7 @@ class QueuedDocumentProcessor:
                 timeout=settings.fetch_timeout_seconds,
                 chunk_size=settings.fetch_chunk_size_bytes,
                 max_size=settings.fetch_max_bytes,
+                verify_ssl=settings.fetch_verify_ssl,
             )
 
             await job_store.mark_parsing(

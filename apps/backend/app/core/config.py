@@ -35,8 +35,9 @@ class Settings(BaseSettings):
         validation_alias="NEXT_PUBLIC_APP_URL",
     )
     fetch_timeout_seconds: int = 20
-    fetch_max_bytes: int = 10 * 1024 * 1024
+    fetch_max_bytes: int = 50 * 1024 * 1024
     fetch_chunk_size_bytes: int = 1024 * 1024
+    fetch_verify_ssl: bool = True
     download_dir: str = "/tmp/narpisa-pdf-worker"
     keep_downloaded_pdfs: bool = Field(
         default=False,
