@@ -153,8 +153,16 @@ export default function ChangePasswordView() {
           </Stack>
 
           <Stack spacing={1.25} sx={{ py: 1.35 }}>
-            {error ? <Alert severity="error">{error}</Alert> : null}
-            {success ? <Alert severity="success">{success}</Alert> : null}
+            {error ? (
+              <Alert severity="error" sx={{ "& .MuiAlert-message": { fontSize: "0.9rem" } }}>
+                {error}
+              </Alert>
+            ) : null}
+            {success ? (
+              <Alert severity="success" sx={{ "& .MuiAlert-message": { fontSize: "0.9rem" } }}>
+                {success}
+              </Alert>
+            ) : null}
             <Box>
               <Button
                 type="submit"

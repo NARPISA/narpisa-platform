@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
 from app.core.routes import router as core_router
 from app.data.database_admin.routes import router as database_admin_router
+from app.data.network.routes import router as network_router
 from app.data.pdf.routes import router as pdf_adaptor_router
 from app.data.routes import router as adaptor_router
 
@@ -18,6 +19,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        settings.frontend_app_url,
         "http://localhost:3000",
         "http://127.0.0.1:3000",
     ],
@@ -29,3 +31,4 @@ app.include_router(core_router, prefix="/api/v1")
 app.include_router(adaptor_router, prefix="/api/v1")
 app.include_router(pdf_adaptor_router, prefix="/api/v1")
 app.include_router(database_admin_router, prefix="/api/v1")
+app.include_router(network_router, prefix="/api/v1")

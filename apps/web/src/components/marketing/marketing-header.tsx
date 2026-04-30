@@ -26,6 +26,7 @@ type MarketingNavLink = {
 
 const NAV_LINKS: MarketingNavLink[] = [
   { label: "Database", href: "/database" },
+  { label: "Network", href: "/network" },
   { label: "Map", href: "/map" },
   { label: "Pricing", href: "/pricing" },
   { label: "About", href: "/about" },

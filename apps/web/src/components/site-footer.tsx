@@ -16,6 +16,7 @@ type SiteFooterProps = {
 
 const FOOTER_LINKS = [
   { label: "Database", href: "/database" },
+  { label: "Network", href: "/network" },
   { label: "About", href: "/about" },
   { label: "Upload", href: "/data_input" },
 ];

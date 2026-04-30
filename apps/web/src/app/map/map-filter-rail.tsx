@@ -212,7 +212,10 @@ export default function MapFilterRail({
         ) : null}
 
         {error ? (
-          <Alert severity={accessDenied ? "warning" : "error"}>
+          <Alert
+            severity={accessDenied ? "warning" : "error"}
+            sx={{ "& .MuiAlert-message": { fontSize: "0.9rem" } }}
+          >
             {accessDenied
               ? "Map access is available to Gold, Platinum, and Admin users."
               : error}

@@ -133,7 +133,11 @@ export default function SignInView() {
               {error ? (
                 <Alert
                   severity="error"
-                  sx={{ width: "100%", maxWidth: "40rem" }}
+                  sx={{
+                    width: "100%",
+                    maxWidth: "40rem",
+                    "& .MuiAlert-message": { fontSize: "0.9rem" },
+                  }}
                 >
                   {error}
                 </Alert>
