@@ -62,7 +62,7 @@ describe("Home page", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: /unlock southern africa's natural resources all in one place/i,
+        name: /natural resource intelligence for smarter investment/i,
       }),
     ).toBeInTheDocument();
   });
@@ -70,21 +70,24 @@ describe("Home page", () => {
   it("renders the new marketing header brand link", () => {
     renderHome();
 
-    const brand = screen.getByRole("link", { name: /MineralDB/i });
+    const brand = screen.getByRole("link", { name: /Alluvial AI/i });
     expect(brand).toHaveAttribute("href", "/");
   });
 
   it("keeps the primary calls to action wired correctly", () => {
     renderHome();
 
-    expect(screen.getByRole("link", { name: /get started/i })).toHaveAttribute(
-      "href",
-      "/data_input",
-    );
-    expect(screen.getByRole("link", { name: /view databases/i })).toHaveAttribute(
-      "href",
-      "/database",
-    );
+    const getStarted = screen.getAllByRole("link", { name: /get started/i });
+    expect(getStarted.length).toBeGreaterThan(0);
+    for (const link of getStarted) {
+      expect(link).toHaveAttribute("href", "/signup");
+    }
+
+    const viewDatabases = screen.getAllByRole("link", { name: /view databases/i });
+    expect(viewDatabases.length).toBeGreaterThan(0);
+    for (const link of viewDatabases) {
+      expect(link).toHaveAttribute("href", "/database");
+    }
   });
 
   it("shows the three promoted feature routes", () => {

@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 
 import BrandHomeLink from "@/components/brand-home-link";
 
-type SiteFooterBehavior = "auto" | "hidden" | "static" | "sticky";
+type SiteFooterBehavior = "auto" | "hidden" | "static";
 
 type SiteFooterProps = {
   behavior?: SiteFooterBehavior;
@@ -16,6 +16,7 @@ type SiteFooterProps = {
 
 const FOOTER_LINKS = [
   { label: "Database", href: "/database" },
+  { label: "Network", href: "/network" },
   { label: "About", href: "/about" },
   { label: "Upload", href: "/data_input" },
 ];
@@ -30,9 +31,10 @@ function resolveFooterBehavior(
 
   return pathname?.startsWith("/signin") ||
     pathname?.startsWith("/signup") ||
-    pathname?.startsWith("/forgot-password")
+    pathname?.startsWith("/forgot-password") ||
+    pathname?.startsWith("/map")
     ? "hidden"
-    : "sticky";
+    : "static";
 }
 
 export default function SiteFooter({ behavior = "auto" }: SiteFooterProps) {
@@ -47,9 +49,7 @@ export default function SiteFooter({ behavior = "auto" }: SiteFooterProps) {
     <Box
       component="footer"
       sx={{
-        position: resolvedBehavior === "sticky" ? "sticky" : "static",
-        bottom: resolvedBehavior === "sticky" ? 0 : "auto",
-        zIndex: resolvedBehavior === "sticky" ? 0 : "auto",
+        position: "static",
         bgcolor: "#AF5428",
         color: "common.white",
         px: { xs: 2, md: 4 },

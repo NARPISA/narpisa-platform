@@ -27,8 +27,8 @@ type HomePreviewCardProps = {
 };
 
 const MotionBox = motion.create(Box);
-const PREVIEW_HEIGHT = 470;
-const PREVIEW_WIDTH = 480;
+const PREVIEW_HEIGHT = 390;
+const PREVIEW_WIDTH = 640;
 
 export default function HomePreviewCard({
   activeSlideId,
@@ -42,10 +42,10 @@ export default function HomePreviewCard({
       sx={{
         position: "relative",
         width: 1,
-        maxWidth: 540,
+        maxWidth: 700,
         mx: "auto",
         overflow: "hidden",
-        borderRadius: "36px",
+        borderRadius: "30px",
         border: "1px solid rgba(255,255,255,0.25)",
         bgcolor: "rgba(255,255,255,0.13)",
         p: { xs: 1.75, md: 2.5 },
@@ -66,48 +66,62 @@ export default function HomePreviewCard({
 
       <Stack spacing={1.5} sx={{ position: "relative", zIndex: 1 }}>
         <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
-          <Stack direction="row" spacing={0.85} flexWrap="wrap">
-            {slides.map((slide) => {
-              const active = slide.id === activeSlide.id;
-              return (
-                <Box
-                  key={slide.id}
-                  component="button"
-                  type="button"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    onSelect(slide.id);
-                  }}
-                  sx={{
-                    minWidth: { xs: 88, md: 104 },
-                    px: 1.2,
-                    py: 0.65,
-                    borderRadius: "999px",
-                    cursor: "pointer",
-                    border: "1px solid",
-                    borderColor: active ? "transparent" : "rgba(255,255,255,0.24)",
-                    color: active ? "common.white" : "tertiary.main",
-                    bgcolor: active ? "tertiary.main" : "rgba(255,255,255,0.18)",
-                    backdropFilter: active ? "none" : "blur(10px)",
-                    boxShadow: active
-                      ? `0 0 0 1px ${alpha("#FFFFFF", 0.35)}`
-                      : `0 10px 24px ${alpha("#0d1943", 0.12)}`,
-                    fontSize: "1.05rem",
-                    fontWeight: 800,
-                    lineHeight: 1.1,
-                    transition:
-                      "background-color 180ms ease, color 180ms ease, border-color 180ms ease",
-                    "&:hover": {
-                      bgcolor: active ? "tertiary.main" : "rgba(255,255,255,0.24)",
-                    },
-                  }}
-                >
-                  {slide.label}
-                </Box>
-              );
-            })}
-          </Stack>
+          <Box
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              overflowX: "auto",
+              overflowY: "hidden",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              "&::-webkit-scrollbar": { display: "none" },
+            }}
+          >
+            <Stack direction="row" spacing={0.85} sx={{ flexWrap: "nowrap", width: "max-content", pb: 0.25 }}>
+              {slides.map((slide) => {
+                const active = slide.id === activeSlide.id;
+                return (
+                  <Box
+                    key={slide.id}
+                    component="button"
+                    type="button"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      onSelect(slide.id);
+                    }}
+                    sx={{
+                      flex: "0 0 auto",
+                      minWidth: { xs: 88, md: 104 },
+                      px: 1.2,
+                      py: 0.65,
+                      borderRadius: "999px",
+                      cursor: "pointer",
+                      border: "1px solid",
+                      borderColor: active ? "transparent" : "rgba(255,255,255,0.24)",
+                      color: active ? "common.white" : "tertiary.main",
+                      bgcolor: active ? "tertiary.main" : "rgba(255,255,255,0.18)",
+                      backdropFilter: active ? "none" : "blur(10px)",
+                      boxShadow: active
+                        ? `0 0 0 1px ${alpha("#FFFFFF", 0.35)}`
+                        : `0 10px 24px ${alpha("#0d1943", 0.12)}`,
+                      fontSize: "1.05rem",
+                      fontWeight: 800,
+                      lineHeight: 1.1,
+                      whiteSpace: "nowrap",
+                      transition:
+                        "background-color 180ms ease, color 180ms ease, border-color 180ms ease",
+                      "&:hover": {
+                        bgcolor: active ? "tertiary.main" : "rgba(255,255,255,0.24)",
+                      },
+                    }}
+                  >
+                    {slide.label}
+                  </Box>
+                );
+              })}
+            </Stack>
+          </Box>
           <Stack direction="row" spacing={0.75} alignItems="center">
             <Link
               href={activeSlide.href}
@@ -158,7 +172,7 @@ export default function HomePreviewCard({
               "& img": {
                 display: "block",
                 width: "100%",
-                height: `clamp(300px, 45vw, ${PREVIEW_HEIGHT}px)`,
+                height: `clamp(250px, 33vw, ${PREVIEW_HEIGHT}px)`,
                 objectFit: "cover",
                 objectPosition: "center top",
                 opacity: 0.96,

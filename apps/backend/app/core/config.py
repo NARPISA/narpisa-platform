@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     app_env: str = "development"
     log_level: str = "INFO"
     port: int = 8000
+    frontend_app_url: str = Field(
+        default="http://localhost:3000",
+        validation_alias="NEXT_PUBLIC_APP_URL",
+    )
     fetch_timeout_seconds: int = 20
     fetch_max_bytes: int = 10 * 1024 * 1024
     fetch_chunk_size_bytes: int = 1024 * 1024
@@ -53,6 +57,14 @@ class Settings(BaseSettings):
         default="test-service-role-key", validation_alias="SUPABASE_SERVICE_ROLE_KEY"
     )
     supabase_schema: str = Field(default="public", validation_alias="SUPABASE_SCHEMA")
+    open_api_key: str = Field(
+        default="",
+        validation_alias=AliasChoices("OPEN_API_KEY", "OPENAI_API_KEY"),
+    )
+    openai_embedding_model: str = Field(
+        default="text-embedding-3-small",
+        validation_alias="OPENAI_EMBEDDING_MODEL",
+    )
 
     model_config = SettingsConfigDict(
         env_prefix="PDF_WORKER_",

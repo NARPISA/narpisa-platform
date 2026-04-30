@@ -1,7 +1,9 @@
 /** Toolpad `SignInPage` OAuth ids mapped to Supabase `signInWithOAuth` provider names. */
 const TOOLPAD_TO_SUPABASE: Record<string, string> = {
   google: "google",
-  linkedin: "linkedin",
+  // Supabase replaced the legacy LinkedIn provider with the OIDC variant.
+  // Docs: https://supabase.com/docs/guides/auth/social-login/auth-linkedin
+  linkedin: "linkedin_oidc",
 };
 
 export const OAUTH_DISPLAY_NAMES: Record<string, string> = {

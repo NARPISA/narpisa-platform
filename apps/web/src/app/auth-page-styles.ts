@@ -17,8 +17,8 @@ export const authPageSx = {
 } satisfies SxProps<Theme>;
 
 export const authPaperSx = {
-  width: "min(100%, 70rem)",
-  minHeight: { xs: "auto", md: "52rem" },
+  width: "min(100%, 65rem)",
+  minHeight: { xs: "auto", md: "40rem" },
   borderRadius: 0,
   px: { xs: 3, sm: 7 },
   py: { xs: 4, md: 5 },
@@ -109,8 +109,8 @@ export const authPrimaryButtonSx = {
 
 export const authHeroButtonSx = {
   ...authPrimaryButtonSx,
-  typography: "authAction",
-  fontWeight: 400,
+  typography: "authBody",
+  fontWeight: 600,
 } satisfies SxProps<Theme>;
 
 export const authSecondaryButtonSx = {

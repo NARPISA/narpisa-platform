@@ -251,8 +251,16 @@ export default function DataInputPage() {
           </Box>
         </Stack>
 
-        {errorMessage ? <Alert severity="warning">{errorMessage}</Alert> : null}
-        {successMessage ? <Alert severity="success">{successMessage}</Alert> : null}
+        {errorMessage ? (
+          <Alert severity="warning" sx={{ "& .MuiAlert-message": { fontSize: "0.9rem" } }}>
+            {errorMessage}
+          </Alert>
+        ) : null}
+        {successMessage ? (
+          <Alert severity="success" sx={{ "& .MuiAlert-message": { fontSize: "0.9rem" } }}>
+            {successMessage}
+          </Alert>
+        ) : null}
 
         <Stack spacing={1.5} sx={{ width: 1 }}>
           <Typography variant="h6" color="secondary">

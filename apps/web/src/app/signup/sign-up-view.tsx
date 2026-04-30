@@ -98,7 +98,11 @@ export default function SignUpView() {
               {error ? (
                 <Alert
                   severity="error"
-                  sx={{ width: "100%", maxWidth: "40rem" }}
+                  sx={{
+                    width: "100%",
+                    maxWidth: "40rem",
+                    "& .MuiAlert-message": { fontSize: "0.9rem" },
+                  }}
                 >
                   {error}
                 </Alert>
@@ -106,7 +110,11 @@ export default function SignUpView() {
               {message ? (
                 <Alert
                   severity="success"
-                  sx={{ width: "100%", maxWidth: "40rem" }}
+                  sx={{
+                    width: "100%",
+                    maxWidth: "40rem",
+                    "& .MuiAlert-message": { fontSize: "0.9rem" },
+                  }}
                 >
                   {message}
                 </Alert>

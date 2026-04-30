@@ -33,6 +33,9 @@ type DatabaseFilterRailProps = {
   isSaving: boolean;
   pendingChangeCount: number;
   onSaveChanges: () => void;
+  showApplicantSearch?: boolean;
+  applicantSearch?: string;
+  onApplicantSearchChange?: (value: string) => void;
 };
 
 type SearchableFilterOption = DatabaseFilterGroup["options"][number] & {
@@ -58,6 +61,9 @@ export default function DatabaseFilterRail({
   isSaving,
   pendingChangeCount,
   onSaveChanges,
+  showApplicantSearch = false,
+  applicantSearch = "",
+  onApplicantSearchChange,
 }: DatabaseFilterRailProps) {
   const [optionSearch, setOptionSearch] = useState("");
   const filteredGroups: SearchableFilterGroup[] = useMemo(() => {
@@ -96,7 +102,7 @@ export default function DatabaseFilterRail({
     >
       <Stack spacing={2.5}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <BrandHomeLink size={70} color="background.700" title="MineralDB" subtitle="" />
+          <BrandHomeLink size={70} color="background.700" title="Alluvial AI" subtitle="" />
           <DatabaseHamburgerButton open={menuOpen} onClick={onOpenMenu} />
         </Stack>
 
@@ -139,6 +145,44 @@ export default function DatabaseFilterRail({
             },
           }}
         />
+
+        {showApplicantSearch ? (
+          <TextField
+            size="small"
+            placeholder="Search applicants"
+            value={applicantSearch}
+            onChange={(event) => onApplicantSearchChange?.(event.target.value)}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                height: 30,
+                borderRadius: "10px",
+                bgcolor: "background.default",
+                color: "background.700",
+                "& fieldset": { borderColor: "transparent" },
+              },
+              "& .MuiInputBase-input": {
+                py: 0.5,
+                fontSize: "0.75rem",
+                lineHeight: 1.2,
+              },
+              "& .MuiInputBase-input::placeholder": {
+                color: "background.500",
+                opacity: 1,
+                fontSize: "0.72rem",
+                fontWeight: 600,
+              },
+            }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchRoundedIcon fontSize="small" sx={{ color: "background.500" }} />
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+        ) : null}
 
         {filteredGroups.length === 0 ? (
           <Typography sx={{ fontSize: "0.78rem", color: "background.500" }}>

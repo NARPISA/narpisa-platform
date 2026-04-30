@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "@toolpad/core/useSession";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
@@ -14,12 +15,19 @@ import NavUnderlineLink from "@/components/nav-underline-link";
 type DatabaseNavDrawerProps = {
   open: boolean;
   onClose: () => void;
+  activeLabel?: string;
 };
 
 export default function DatabaseNavDrawer({
   open,
   onClose,
+  activeLabel = "Database",
 }: DatabaseNavDrawerProps) {
+  const session = useSession();
+  const drawerLinks = DATABASE_DRAWER_LINKS.filter(
+    (item) => !(item.href === "/signin" && session?.user),
+  );
+
   return (
     <Drawer
       anchor="left"
@@ -37,7 +45,7 @@ export default function DatabaseNavDrawer({
     >
       <Stack spacing={3}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <BrandHomeLink size={56} title="MineralDB" color="common.white" />
+          <BrandHomeLink size={56} title="Alluvial AI" color="common.white" />
           <IconButton onClick={onClose} sx={{ color: "common.white" }}>
             <CloseRoundedIcon />
           </IconButton>
@@ -46,8 +54,8 @@ export default function DatabaseNavDrawer({
         <Divider sx={{ borderColor: "rgba(255,255,255,0.35)" }} />
 
         <Stack spacing={2}>
-          {DATABASE_DRAWER_LINKS.map((item) => {
-            const isActive = item.label === "Database";
+          {drawerLinks.map((item) => {
+            const isActive = item.label === activeLabel;
             return (
               <Box key={item.href}>
                 <NavUnderlineLink

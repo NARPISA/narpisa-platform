@@ -8,6 +8,7 @@ import ThemeRegistry from "@/components/theme-registry";
 import ToolpadProviders from "@/components/toolpad-providers";
 
 import "./globals.css";
+import "maplibre-gl/dist/maplibre-gl.css";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -17,9 +18,14 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "NaRPISA Platform",
+  title: "Alluvial AI, a NaRPISA Platform",
   description:
     "Source-led intelligence platform for mineral value addition, document parsing, and trading workflows.",
+  icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
@@ -31,6 +37,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${manrope.variable} antialiased`}
+        suppressHydrationWarning
       >
         <ThemeRegistry>
           <Suspense fallback={null}>
@@ -42,7 +49,13 @@ export default function RootLayout({
                   flexDirection: "column",
                 }}
               >
-                <Box sx={{ position: "relative", zIndex: 1, flex: 1 }}>
+                <Box
+                  sx={{
+                    position: "relative",
+                    zIndex: 1,
+                    flex: 1,
+                  }}
+                >
                   {children}
                 </Box>
                 <SiteFooter />
