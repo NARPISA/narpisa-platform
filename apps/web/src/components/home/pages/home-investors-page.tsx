@@ -162,7 +162,7 @@ export default function HomeInvestorsPage() {
             </Typography>
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
               <Button
-                href="/data_input"
+                href="/signup"
                 variant="contained"
                 sx={{
                   borderRadius: "999px",

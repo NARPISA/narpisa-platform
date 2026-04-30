@@ -119,7 +119,7 @@ export default function HomeLandingPage({
                 sx={{ mt: 4 }}
               >
                 <Button
-                  href="/data_input"
+                  href="/signup"
                   variant="contained"
                   endIcon={<ArrowOutwardRoundedIcon />}
                   sx={{

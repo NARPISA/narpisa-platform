@@ -21,7 +21,9 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/database") ||
     pathname.startsWith("/map") ||
     pathname.startsWith("/profile");
-  const needsAuthCheck = isProtected || pathname.startsWith("/signin");
+  const isAuthPage =
+    pathname.startsWith("/signin") || pathname.startsWith("/signup");
+  const needsAuthCheck = isProtected || isAuthPage;
 
   if (!needsAuthCheck) {
     return response;
@@ -55,8 +57,10 @@ export async function updateSession(request: NextRequest) {
     return copyAuthCookies(response, NextResponse.redirect(url));
   }
 
-  if (isSignedIn && pathname.startsWith("/signin")) {
-    const dest = getSafeInternalRedirect(request.nextUrl.searchParams.get("callbackUrl"));
+  if (isSignedIn && isAuthPage) {
+    const dest = pathname.startsWith("/signin")
+      ? getSafeInternalRedirect(request.nextUrl.searchParams.get("callbackUrl"))
+      : "/profile";
     const url = new URL(dest, request.url);
     return copyAuthCookies(response, NextResponse.redirect(url));
   }
