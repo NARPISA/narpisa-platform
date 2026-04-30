@@ -7,4 +7,4 @@ router = APIRouter()
 
 @router.post("/update-data")
 async def update_data() -> None:
-    namibiamme_tasks.update.delay()
+	pass

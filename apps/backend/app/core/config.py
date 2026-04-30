@@ -57,6 +57,7 @@ class Settings(BaseSettings):
         default="test-service-role-key", validation_alias="SUPABASE_SERVICE_ROLE_KEY"
     )
     supabase_schema: str = Field(default="public", validation_alias="SUPABASE_SCHEMA")
+    gemini_api_key : str = Field(default="test-gemini-api-key", validation_alias="GEMINI_API_KEY")
     open_api_key: str = Field(
         default="",
         validation_alias=AliasChoices("OPEN_API_KEY", "OPENAI_API_KEY"),

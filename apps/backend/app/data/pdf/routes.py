@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.config import Settings, get_settings
 from app.data.pdf.models import ParsedDocument, QueuedSourceDocument, SourceParseRequest
-from app.data.pdf.services import PdfParser, document_queue
+from app.data.pdf.services import document_queue, parse_pdf
 from app.data.pdf.tasks import process_queued_document
 from app.data.services import fetch_data_source
 
@@ -27,9 +27,8 @@ async def process_source(
         chunk_size=settings.fetch_chunk_size_bytes,
         max_size=settings.fetch_max_bytes,
     )
-    parser = PdfParser()
     try:
-        return parser.parse(payload, fetch_result)
+        return await parse_pdf(payload, fetch_result)
     finally:
         _cleanup_download(download_path)
 
